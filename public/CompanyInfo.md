@@ -4,7 +4,7 @@ dashboardName: "DohDash"
 adminContact:
   email: "kdohmann@gmail.com"
   phone: "+1 (780) 555-0142"
-logo: "/company-logo.svg"
+logo: "/company-logo.png"
 styleGuide:
   colors:
     bg: "#ffffff"
