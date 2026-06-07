@@ -1,0 +1,94 @@
+/* Base values are CompanyInfo-driven CSS custom properties, written at runtime
+   by applyCompanyTheme() (src/company/companyInfo.ts). The values below are
+   fallbacks so the app isn't unstyled before CompanyInfo.md loads.
+
+   Light/dark works the same way DohDocs's theme.ts does: a `data-theme`
+   attribute on <html> (see src/theme.ts), with the dark-* company colors
+   swapped in as the active palette. Components only ever reference the
+   un-prefixed custom properties (--bg, --text, --accent, ...). */
+
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f7f8fa;
+  --border: #e2e4e8;
+  --text: #1f2328;
+  --muted: #5f6368;
+  --accent: #2563eb;
+  --accent-soft: #e8f0fe;
+
+  --dark-bg: #1e1f22;
+  --dark-bg-alt: #16171a;
+  --dark-border: #34363b;
+  --dark-text: #e6e7e9;
+  --dark-muted: #9aa0a6;
+  --dark-accent: #6ea8ff;
+  --dark-accent-soft: #2a3550;
+
+  --font-display: "Comfortaa", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-weight-display: 700;
+  --font-heading: "Comfortaa", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-weight-heading: 700;
+  --font-body: "Comfortaa", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-weight-body: 400;
+
+  --rounded-sm: 4px;
+  --rounded-md: 6px;
+  --rounded-lg: 8px;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 32px;
+
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
+  color: var(--text);
+  color-scheme: light dark;
+}
+
+[data-theme="dark"] {
+  --bg: var(--dark-bg);
+  --bg-alt: var(--dark-bg-alt);
+  --border: var(--dark-border);
+  --text: var(--dark-text);
+  --muted: var(--dark-muted);
+  --accent: var(--dark-accent);
+  --accent-soft: var(--dark-accent-soft);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg-alt);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
+select,
+input {
+  font: inherit;
+  color: var(--text);
+}

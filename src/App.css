@@ -1,0 +1,47 @@
+.boot-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+
+.boot-status--err {
+  color: var(--accent);
+}
+
+.checkpoint {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.checkpoint h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+}
+
+.checkpoint a {
+  color: var(--accent);
+}
+
+.checkpoint .muted {
+  color: var(--muted);
+}
+
+.theme-toggle {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.theme-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}

@@ -1,0 +1,32 @@
+.app-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  background: var(--bg);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.app-tile:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.app-tile-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.app-tile-name {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+}
+
+.app-tile-description {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
