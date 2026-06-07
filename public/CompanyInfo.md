@@ -2,7 +2,7 @@
 companyName: "Doh Built Inc."
 dashboardName: "DohDash"
 adminContact:
-  email: "admin@dohbuilt.com"
+  email: "kdohmann@gmail.com"
   phone: "+1 (780) 555-0142"
 logo: "/company-logo.svg"
 styleGuide:
