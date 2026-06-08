@@ -166,3 +166,141 @@ export async function provisionUserByEmail(email: string, role: Role): Promise<v
   const { error } = await supabase.rpc("admin_provision_user", { p_email: email, p_role: role });
   if (error) throw error;
 }
+
+// ---- notes & folders (the "DohDocs" app — app_id "tasks" in app_access; see migration 0004_notes) ----
+
+export interface DocMeta {
+  id: string;
+  title: string;
+  updatedAt: number;
+  folderId: string | null;
+  ownerId: string | null;
+}
+
+export interface DohDoc extends DocMeta {
+  markdown: string;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt: number;
+}
+
+interface NoteRow {
+  id: string;
+  title: string;
+  markdown: string;
+  updated_at: number;
+  folder_id: string | null;
+  owner_id: string | null;
+}
+
+interface FolderRow {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  created_at: number;
+  owner_id?: string | null;
+}
+
+function noteRowToMeta(row: NoteRow): DocMeta {
+  return { id: row.id, title: row.title, updatedAt: row.updated_at, folderId: row.folder_id, ownerId: row.owner_id };
+}
+
+function noteRowToDoc(row: NoteRow): DohDoc {
+  return { id: row.id, title: row.title, markdown: row.markdown, updatedAt: row.updated_at, folderId: row.folder_id, ownerId: row.owner_id };
+}
+
+function docToNoteRow(doc: DohDoc): NoteRow {
+  return { id: doc.id, title: doc.title, markdown: doc.markdown, updated_at: doc.updatedAt, folder_id: doc.folderId, owner_id: doc.ownerId };
+}
+
+function folderRowToFolder(row: FolderRow): Folder {
+  return { id: row.id, name: row.name, parentId: row.parent_id, createdAt: row.created_at };
+}
+
+export async function listDocs(query = ""): Promise<DocMeta[]> {
+  const q = query.trim();
+  let req = supabase
+    .from("notes")
+    .select("id, title, updated_at, folder_id, owner_id")
+    .order("updated_at", { ascending: false });
+
+  if (q) {
+    req = req.or(`title.ilike.%${q}%,markdown.ilike.%${q}%`);
+  }
+
+  const { data, error } = await req;
+  if (error) throw error;
+  return (data as NoteRow[]).map(noteRowToMeta);
+}
+
+/** Convert an image file to a base64 data URL so it can be embedded inline. */
+export function uploadImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function getDoc(id: string): Promise<DohDoc | undefined> {
+  const { data, error } = await supabase.from("notes").select("*").eq("id", id).single();
+  if (error) return undefined;
+  return noteRowToDoc(data as NoteRow);
+}
+
+export async function saveDoc(doc: DohDoc): Promise<void> {
+  const { error } = await supabase.from("notes").upsert(docToNoteRow(doc));
+  if (error) throw error;
+}
+
+export async function deleteDoc(id: string): Promise<void> {
+  const { error } = await supabase.from("notes").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function createDoc(folderId: string | null = null, ownerId: string | null = null): Promise<DohDoc> {
+  const doc: DohDoc = {
+    id: crypto.randomUUID(),
+    title: "Untitled",
+    markdown: "",
+    updatedAt: Date.now(),
+    folderId,
+    ownerId,
+  };
+  const { error } = await supabase.from("notes").insert(docToNoteRow(doc));
+  if (error) throw error;
+  return doc;
+}
+
+export async function moveDoc(id: string, folderId: string | null): Promise<void> {
+  const { error } = await supabase.from("notes").update({ folder_id: folderId }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function listFolders(): Promise<Folder[]> {
+  const { data, error } = await supabase.from("folders").select("*").order("name", { ascending: true });
+  if (error) throw error;
+  return (data as FolderRow[]).map(folderRowToFolder);
+}
+
+export async function createFolder(name: string, parentId: string | null = null, ownerId: string | null = null): Promise<Folder> {
+  const folder: Folder = { id: crypto.randomUUID(), name, parentId, createdAt: Date.now() };
+  const { error } = await supabase.from("folders").insert({ id: folder.id, name: folder.name, parent_id: folder.parentId, created_at: folder.createdAt, owner_id: ownerId });
+  if (error) throw error;
+  return folder;
+}
+
+export async function renameFolder(id: string, name: string): Promise<void> {
+  const { error } = await supabase.from("folders").update({ name }).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteFolder(id: string): Promise<void> {
+  const { error } = await supabase.from("folders").delete().eq("id", id);
+  if (error) throw error;
+}

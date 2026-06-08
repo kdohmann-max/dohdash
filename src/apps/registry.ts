@@ -3,6 +3,8 @@
 // AppStubPage looks entries up by :appId route param. Not a DB table:
 // v1 apps aren't dynamic, so there's nothing to gain from persisting this.
 
+import type { CompanyInfo } from "../company/types";
+
 export interface AppDef {
   id: string;
   name: string;
@@ -65,4 +67,9 @@ export const APP_REGISTRY: AppDef[] = [
 
 export function getAppDef(appId: string): AppDef | undefined {
   return APP_REGISTRY.find((app) => app.id === appId);
+}
+
+/** Display name for an app — CompanyInfo.md's `appNames` map can override the registry default per-deployment (e.g. renaming "Tasks" to "DohDocs"). */
+export function resolveAppName(app: AppDef, companyInfo: CompanyInfo | null): string {
+  return companyInfo?.appNames?.[app.id] ?? app.name;
 }

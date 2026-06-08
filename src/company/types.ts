@@ -41,4 +41,6 @@ export interface CompanyInfo {
   logo: string;
   styleGuide: StyleGuide;
   about: string;
+  /** Optional display-name overrides keyed by APP_REGISTRY id, e.g. { tasks: "DohDocs" }. */
+  appNames?: Record<string, string>;
 }

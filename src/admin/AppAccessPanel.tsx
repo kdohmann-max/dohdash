@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { APP_REGISTRY } from "../apps/registry";
+import { APP_REGISTRY, resolveAppName } from "../apps/registry";
+import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { listAppAccessForUser, grantAppAccess, revokeAppAccess, type Profile } from "../storage/db";
 import "./AppAccessPanel.css";
 
@@ -14,6 +15,7 @@ export function AppAccessPanel({
   profiles: Profile[];
   currentUserId: string | null;
 }) {
+  const { companyInfo } = useCompanyInfo();
   const [selectedUserId, setSelectedUserId] = useState(profiles[0]?.id ?? "");
   const [grantedIds, setGrantedIds] = useState<Set<string> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +106,7 @@ export function AppAccessPanel({
                   <span className="app-access-icon" aria-hidden="true">
                     {app.icon}
                   </span>
-                  <span>{app.name}</span>
+                  <span>{resolveAppName(app, companyInfo)}</span>
                 </label>
               </li>
             );
