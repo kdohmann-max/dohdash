@@ -413,7 +413,7 @@
 .tasks-app .ribbon {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   padding: 8px var(--spacing-md);
 }

@@ -1,0 +1,17 @@
+.blueprint-renderer {
+  width: 100%;
+}
+
+.blueprint-svg {
+  width: 100%;
+  height: auto;
+  border-radius: var(--rounded-md);
+  background: var(--bg-alt);
+  display: block;
+}
+
+.blueprint-warning {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0 0 var(--spacing-xs);
+}
