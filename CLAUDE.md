@@ -63,3 +63,9 @@ This file and `PRODUCT.md` are **not** part of that swap. They travel with the s
 - Auth: Google OAuth — the redirect URL must be registered in **both** the Google Cloud Console and the Supabase Auth provider settings, for every environment (`http://localhost:5173` in dev, the Netlify domain in production)
 - Migrations are source-controlled in `supabase/migrations/*.sql`, applied via `supabase db push`
 - RLS is enabled on `profiles`, `app_access`, and `pending_profiles`; `is_admin()` is a `SECURITY DEFINER` helper function that avoids the self-referential-policy recursion you'd get from a plain `exists (select ... from profiles where role = 'admin')` policy on `profiles` itself
+
+## App-level context
+
+@.claude/context/dohdash.md
+@.claude/context/tasks.md
+@.claude/context/chicken-scratch.md
