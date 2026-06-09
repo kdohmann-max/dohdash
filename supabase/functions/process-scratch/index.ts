@@ -1,4 +1,5 @@
 import Anthropic from "npm:@anthropic-ai/sdk";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,6 +36,38 @@ Deno.serve(async (req) => {
       });
     }
 
+    const SUPPORTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!SUPPORTED_TYPES.includes(mimeType)) {
+      return new Response(
+        JSON.stringify({ error: `Unsupported image format "${mimeType}". Please use a JPEG, PNG, GIF, or WebP image.` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const hashBytes = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(image),
+    );
+    const imageHash = Array.from(new Uint8Array(hashBytes))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const { data: hit } = await sb
+      .from("scratch_cache")
+      .select("result")
+      .eq("image_hash", imageHash)
+      .maybeSingle();
+    if (hit) {
+      return new Response(JSON.stringify(hit.result), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY secret not set");
 
@@ -60,8 +93,11 @@ Deno.serve(async (req) => {
       }],
     });
 
-    const text = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    const raw = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    const text = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "");
     const result = JSON.parse(text);
+
+    await sb.from("scratch_cache").insert({ image_hash: imageHash, result });
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

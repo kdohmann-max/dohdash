@@ -26,7 +26,19 @@ export function ChickenScratchApp() {
           "process-scratch",
           { body: { image: base64, mimeType } },
         );
-        if (error) throw error;
+        if (error) {
+          // FunctionsHttpError wraps the real message in .context (a Response)
+          const ctx = (error as unknown as { context?: Response }).context;
+          if (ctx instanceof Response) {
+            try {
+              const body = await ctx.json() as { error?: string };
+              if (body?.error) throw new Error(body.error);
+            } catch (inner) {
+              if (inner instanceof Error && inner !== error) throw inner;
+            }
+          }
+          throw error;
+        }
         setAppState({ status: "done", fileName, result: data as ProcessResult });
       } catch (err) {
         setAppState({
