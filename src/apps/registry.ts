@@ -63,6 +63,13 @@ export const APP_REGISTRY: AppDef[] = [
     description: "Coordinate cleaning schedules and checklists.",
     route: "/dashboard/app/clean-up",
   },
+  {
+    id: "chicken-scratch",
+    name: "Chicken Scratch",
+    icon: "✍️",
+    description: "Convert handwriting and sketches into clean digital text and diagrams.",
+    route: "/dashboard/app/chicken-scratch",
+  },
 ];
 
 export function getAppDef(appId: string): AppDef | undefined {

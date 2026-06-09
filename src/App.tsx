@@ -7,6 +7,7 @@ import { LandingPage } from "./components/LandingPage";
 import { Launcher } from "./launcher/Launcher";
 import { AppStubPage } from "./apps/AppStubPage";
 import { TasksApp } from "./apps/tasks/TasksApp";
+import { ChickenScratchApp } from "./apps/chicken-scratch/ChickenScratchApp";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import "./App.css";
 
@@ -23,6 +24,7 @@ function AdminRoute() {
 function AppRoute() {
   const { appId } = useParams<{ appId: string }>();
   if (appId === "tasks") return <TasksApp />;
+  if (appId === "chicken-scratch") return <ChickenScratchApp />;
   return <AppStubPage />;
 }
 

@@ -1,0 +1,10 @@
+.chicken-scratch {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--spacing-lg);
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
