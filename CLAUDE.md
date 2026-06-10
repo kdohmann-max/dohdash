@@ -37,7 +37,7 @@ DohDash is a "company OS" dashboard: a portal employees sign into (Google OAuth 
 ### Porting to a new company
 
 1. Replace `public/CompanyInfo.md` (same YAML-frontmatter-plus-Markdown-body shape: `companyName`, `dashboardName`, `adminContact`, `logo`, `styleGuide`) and whatever file `logo` points to (default `public/company-logo.svg`).
-2. Point credentials at a different Supabase project: `.env.local` locally, Netlify site env vars when deployed (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`).
+2. Point credentials at a different Supabase project: `.env.local` locally, Vercel site env vars when deployed (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`).
 3. Apply `supabase/migrations/*.sql` to that project (`supabase db push`).
 4. Done — no source edits, no rebuild for the branding swap; it's fetched at runtime.
 
