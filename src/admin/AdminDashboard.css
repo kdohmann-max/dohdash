@@ -183,3 +183,47 @@
   color: var(--muted);
   cursor: default;
 }
+
+.admin-request-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+}
+
+.admin-request-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-accept-button,
+.admin-reject-button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  cursor: pointer;
+  background: var(--bg);
+}
+
+.admin-accept-button {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.admin-accept-button:hover {
+  background: var(--accent-soft);
+}
+
+.admin-reject-button {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.admin-reject-button:hover {
+  background: var(--accent-soft);
+}
+
