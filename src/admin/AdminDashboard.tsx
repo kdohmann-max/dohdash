@@ -6,8 +6,12 @@ import {
   listPendingProfiles,
   revokePendingProfile,
   provisionUserByEmail,
+  listAccessRequests,
+  acceptAccessRequest,
+  rejectAccessRequest,
   type Profile,
   type PendingProfile,
+  type AccessRequest,
   type Role,
 } from "../storage/db";
 import { AppAccessPanel } from "./AppAccessPanel";
@@ -24,6 +28,7 @@ export function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("users");
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const [pending, setPending] = useState<PendingProfile[] | null>(null);
+  const [accessRequests, setAccessRequests] = useState<AccessRequest[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -33,11 +38,12 @@ export function AdminDashboard() {
   useEffect(() => {
     let cancelled = false;
     setError(null);
-    Promise.all([listProfiles(), listPendingProfiles()])
-      .then(([loadedProfiles, loadedPending]) => {
+    Promise.all([listProfiles(), listPendingProfiles(), listAccessRequests()])
+      .then(([loadedProfiles, loadedPending, loadedAccessRequests]) => {
         if (cancelled) return;
         setProfiles(loadedProfiles);
         setPending(loadedPending);
+        setAccessRequests(loadedAccessRequests);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -67,6 +73,24 @@ export function AdminDashboard() {
     }
   }
 
+  async function handleAcceptRequest(id: string) {
+    try {
+      await acceptAccessRequest(id);
+      reload();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+
+  async function handleRejectRequest(id: string) {
+    try {
+      await rejectAccessRequest(id);
+      reload();
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }
+
   return (
     <div className="admin-dashboard">
       <h1>Admin</h1>
@@ -87,15 +111,18 @@ export function AdminDashboard() {
 
       {error ? <p className="admin-error">{error}</p> : null}
 
-      {profiles === null || pending === null ? (
+      {profiles === null || pending === null || accessRequests === null ? (
         <p className="admin-status">Loading…</p>
       ) : tab === "users" ? (
         <UsersTab
           profiles={profiles}
           pending={pending}
+          accessRequests={accessRequests}
           currentUserId={currentUserId}
           onRoleToggle={(p) => void handleRoleToggle(p)}
           onCancelPending={(email) => void handleCancelPending(email)}
+          onAcceptRequest={(id) => void handleAcceptRequest(id)}
+          onRejectRequest={(id) => void handleRejectRequest(id)}
           onProvisioned={reload}
         />
       ) : (
@@ -108,16 +135,22 @@ export function AdminDashboard() {
 function UsersTab({
   profiles,
   pending,
+  accessRequests,
   currentUserId,
   onRoleToggle,
   onCancelPending,
+  onAcceptRequest,
+  onRejectRequest,
   onProvisioned,
 }: {
   profiles: Profile[];
   pending: PendingProfile[];
+  accessRequests: AccessRequest[];
   currentUserId: string | null;
   onRoleToggle: (profile: Profile) => void;
   onCancelPending: (email: string) => void;
+  onAcceptRequest: (id: string) => void;
+  onRejectRequest: (id: string) => void;
   onProvisioned: () => void;
 }) {
   const [email, setEmail] = useState("");
@@ -170,6 +203,37 @@ function UsersTab({
           first sign in with Google.
         </p>
       </section>
+
+      {accessRequests.length > 0 ? (
+        <section className="admin-section">
+          <h2>Access requests</h2>
+          <ul className="admin-pending-list">
+            {accessRequests.map((req) => (
+              <li key={req.id} className="admin-request-row">
+                {req.avatarUrl ? (
+                  <img className="admin-avatar" src={req.avatarUrl} alt="" />
+                ) : (
+                  <span className="admin-avatar admin-avatar--placeholder" aria-hidden="true">
+                    {(req.displayName ?? req.email).slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+                <div className="admin-request-info">
+                  <span>{req.displayName ?? req.email}</span>
+                  <span className="admin-hint">
+                    {req.email} · requested {new Date(req.requestedAt).toLocaleString()}
+                  </span>
+                </div>
+                <button className="admin-accept-button" onClick={() => onAcceptRequest(req.id)}>
+                  Accept
+                </button>
+                <button className="admin-reject-button" onClick={() => onRejectRequest(req.id)}>
+                  Reject
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {pending.length > 0 ? (
         <section className="admin-section">
