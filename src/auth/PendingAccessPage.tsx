@@ -1,11 +1,27 @@
+import { useEffect } from "react";
 import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { useAuth } from "./AuthContext";
+import { createAccessRequest } from "../storage/db";
 import "./auth.css";
 
 export function PendingAccessPage() {
   const { companyInfo } = useCompanyInfo();
-  const { signOut } = useAuth();
+  const { state, signOut } = useAuth();
   const adminContact = companyInfo?.adminContact;
+
+  useEffect(() => {
+    if (state.status !== "pending-access") return;
+    const { id, email, user_metadata } = state.session.user;
+    void createAccessRequest({
+      id,
+      email: email ?? "",
+      displayName: (user_metadata?.full_name as string | undefined) ?? null,
+      avatarUrl: (user_metadata?.avatar_url as string | undefined) ?? null,
+    }).catch(() => {
+      // Best-effort: the page already shows the "contact admin" fallback
+      // regardless of whether the request row was recorded.
+    });
+  }, [state]);
 
   return (
     <div className="auth-screen">
