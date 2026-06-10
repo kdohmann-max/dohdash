@@ -66,6 +66,8 @@ This file and `PRODUCT.md` are **not** part of that swap. They travel with the s
 
 ## App-level context
 
+@public/CompanyInfo.md
+@.claude/context/styleguide.md
 @.claude/context/dohdash.md
 @.claude/context/tasks.md
 @.claude/context/chicken-scratch.md
