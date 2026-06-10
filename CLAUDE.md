@@ -10,7 +10,7 @@ DohDash is a "company OS" dashboard: a portal employees sign into (Google OAuth 
 - `react-router-dom` 7 — `BrowserRouter`, nested routes, `AuthGate` as a layout route guarding `/dashboard/*`
 - `@supabase/supabase-js` — Postgres + Auth (Google OAuth) + Row Level Security
 - `gray-matter` — parses `CompanyInfo.md`'s YAML frontmatter
-- Netlify — static hosting, GitHub auto-deploy, SPA fallback via `public/_redirects`
+- Vercel — static hosting, GitHub auto-deploy, SPA fallback via `vercel.json` rewrites
 
 ## Key architecture
 
@@ -51,16 +51,16 @@ This file and `PRODUCT.md` are **not** part of that swap. They travel with the s
 
 ## Deploy workflow
 
-**NEVER run `git commit` or `git push` without explicit user approval for that specific deploy.** Always stop and ask first — a push triggers a Netlify auto-deploy and goes live immediately, with no further confirmation.
+**NEVER run `git commit` or `git push` without explicit user approval for that specific deploy.** Always stop and ask first — a push triggers a Vercel auto-deploy and goes live immediately, with no further confirmation.
 
-- `netlify.toml`: `npm run build` → publish `dist/`
-- `public/_redirects` (`/* /index.html 200`) is required — without it, refreshing a deep link like `/dashboard/admin` 404s
-- Netlify site env vars must mirror `.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- `vercel.json` rewrites all routes to `/index.html` — without it, refreshing a deep link like `/dashboard/admin` 404s
+- Build command and output directory (`dist`) are auto-detected by Vercel's Vite framework preset
+- Vercel project env vars (Project Settings → Environment Variables) must mirror `.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 
 ## Supabase
 
 - Project URL: `https://awytndrcppmevaguyikg.supabase.co`
-- Auth: Google OAuth — the redirect URL must be registered in **both** the Google Cloud Console and the Supabase Auth provider settings, for every environment (`http://localhost:5173` in dev, the Netlify domain in production)
+- Auth: Google OAuth — the redirect URL must be registered in **both** the Google Cloud Console and the Supabase Auth provider settings, for every environment (`http://localhost:5173` in dev, the Vercel domain in production)
 - Migrations are source-controlled in `supabase/migrations/*.sql`, applied via `supabase db push`
 - RLS is enabled on `profiles`, `app_access`, and `pending_profiles`; `is_admin()` is a `SECURITY DEFINER` helper function that avoids the self-referential-policy recursion you'd get from a plain `exists (select ... from profiles where role = 'admin')` policy on `profiles` itself
 
