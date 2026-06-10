@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Vercel CLI local project link (org/project IDs)
+.vercel
+
 # Supabase CLI local cache (project ref, pooler URL, version pins)
 supabase/.temp
 
