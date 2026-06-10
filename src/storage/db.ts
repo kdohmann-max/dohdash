@@ -167,6 +167,79 @@ export async function provisionUserByEmail(email: string, role: Role): Promise<v
   if (error) throw error;
 }
 
+// ---- access requests (self-service onboarding; see migration 0006_access_requests) ----
+
+export interface AccessRequest {
+  id: string;
+  email: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  requestedAt: number;
+}
+
+interface AccessRequestRow {
+  id: string;
+  email: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  requested_at: number;
+}
+
+function accessRequestRowToAccessRequest(row: AccessRequestRow): AccessRequest {
+  return {
+    id: row.id,
+    email: row.email,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    requestedAt: row.requested_at,
+  };
+}
+
+/**
+ * Called from PendingAccessPage when a user lands on the pending-access gate.
+ * Upserts so repeat sign-ins (or re-renders) don't create duplicate rows or
+ * throw on the existing primary key.
+ */
+export async function createAccessRequest(req: {
+  id: string;
+  email: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("access_requests")
+    .upsert(
+      {
+        id: req.id,
+        email: req.email,
+        display_name: req.displayName,
+        avatar_url: req.avatarUrl,
+        requested_at: Date.now(),
+      },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+  if (error) throw error;
+}
+
+export async function listAccessRequests(): Promise<AccessRequest[]> {
+  const { data, error } = await supabase
+    .from("access_requests")
+    .select("*")
+    .order("requested_at", { ascending: true });
+  if (error) throw error;
+  return (data as AccessRequestRow[]).map(accessRequestRowToAccessRequest);
+}
+
+export async function acceptAccessRequest(userId: string): Promise<void> {
+  const { error } = await supabase.rpc("admin_accept_access_request", { p_user_id: userId });
+  if (error) throw error;
+}
+
+export async function rejectAccessRequest(userId: string): Promise<void> {
+  const { error } = await supabase.from("access_requests").delete().eq("id", userId);
+  if (error) throw error;
+}
+
 // ---- notes & folders (the "DohDocs" app — app_id "tasks" in app_access; see migration 0004_notes) ----
 
 export interface DocMeta {
