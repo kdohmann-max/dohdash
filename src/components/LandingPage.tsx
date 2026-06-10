@@ -12,9 +12,7 @@ export function LandingPage() {
   return (
     <div className="landing">
       <div className="landing-hero">
-        {companyInfo?.logo ? <img src={companyInfo.logo} alt="" className="landing-logo" /> : null}
         <h1>{companyInfo?.dashboardName}</h1>
-        <p className="landing-tagline">{companyInfo?.companyName}</p>
         <Link to="/dashboard" className="landing-cta">
           {ctaLabel}
         </Link>

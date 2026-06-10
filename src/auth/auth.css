@@ -4,6 +4,7 @@
   justify-content: center;
   min-height: 100vh;
   padding: var(--spacing-lg);
+  background: #2b2c2f;
 }
 
 .auth-card {
