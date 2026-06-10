@@ -263,7 +263,7 @@
 .tasks-app .doc-menu button:hover { background: var(--bg-alt); }
 
 .tasks-app .folder-menu-delete,
-.tasks-app .doc-menu-delete { color: #e05555 !important; }
+.tasks-app .doc-menu-delete { color: var(--error) !important; }
 
 .tasks-app .folder-menu-label,
 .tasks-app .doc-menu-label {

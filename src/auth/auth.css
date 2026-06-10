@@ -20,6 +20,13 @@
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
   margin-bottom: var(--spacing-sm);
+  font-variant: small-caps;
+}
+
+.auth-gmark {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .auth-card .muted {
@@ -34,6 +41,9 @@
 }
 
 .auth-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-lg);
   border: 1px solid var(--border);
   border-radius: var(--rounded-md);

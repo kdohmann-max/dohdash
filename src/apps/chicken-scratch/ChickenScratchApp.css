@@ -48,8 +48,11 @@
 }
 
 .cs-error button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   background: var(--accent);
-  color: #fff;
+  color: var(--bg);
   border: none;
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm) var(--spacing-md);

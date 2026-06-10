@@ -21,6 +21,8 @@ export interface ColorPalette {
   darkMuted: string;
   darkAccent: string;
   darkAccentSoft: string;
+  darkError: string;
+  error: string;
 }
 
 export interface StyleGuide {

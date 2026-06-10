@@ -17,7 +17,9 @@
 }
 
 .app-tile-icon {
-  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
   line-height: 1;
 }
 

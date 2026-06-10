@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { CameraIcon, PaperclipIcon, PencilIcon } from "../../../icons";
 import "./UploadPanel.css";
 
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -30,14 +31,14 @@ export function UploadPanel({ onImage }: Props) {
   return (
     <div className="upload-panel">
       <div className="upload-zone">
-        <span className="upload-icon" aria-hidden="true">✍️</span>
+        <span className="upload-icon" aria-hidden="true"><PencilIcon size={40} /></span>
         <p>Take a photo or attach an image of handwriting or a sketch</p>
         <div className="upload-buttons">
           <button className="btn-camera" onClick={() => cameraRef.current?.click()}>
-            📷 Camera
+            <CameraIcon size={16} /> Camera
           </button>
           <button className="btn-file" onClick={() => fileRef.current?.click()}>
-            📎 Attach File
+            <PaperclipIcon size={16} /> Attach File
           </button>
         </div>
       </div>

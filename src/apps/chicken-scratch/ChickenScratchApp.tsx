@@ -3,6 +3,7 @@ import { UploadPanel } from "./components/UploadPanel";
 import { ResultPanel } from "./components/ResultPanel";
 import { useAuth } from "../../auth/AuthContext";
 import { supabase } from "../../storage/db";
+import { RefreshIcon } from "../../icons";
 import type { ProcessResult } from "./types";
 import "./ChickenScratchApp.css";
 
@@ -78,7 +79,9 @@ export function ChickenScratchApp() {
       {appState.status === "error" && (
         <div className="cs-error">
           <p>{appState.message}</p>
-          <button onClick={handleNew}>↺ Try Again</button>
+          <button onClick={handleNew}>
+            <RefreshIcon size={16} /> Try Again
+          </button>
         </div>
       )}
     </div>

@@ -16,6 +16,7 @@ styleGuide:
     muted: "#5f6368"
     accent: "#2563eb"
     accentSoft: "#e8f0fe"
+    error: "#dc2626"
     darkBg: "#1e1f22"
     darkBgAlt: "#16171a"
     darkBorder: "#34363b"
@@ -23,6 +24,7 @@ styleGuide:
     darkMuted: "#9aa0a6"
     darkAccent: "#6ea8ff"
     darkAccentSoft: "#2a3550"
+    darkError: "#f07070"
   typography:
     display:
       fontFamily: "Comfortaa, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"

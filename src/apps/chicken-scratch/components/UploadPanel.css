@@ -15,7 +15,8 @@
 }
 
 .upload-icon {
-  font-size: 2.5rem;
+  display: flex;
+  color: var(--muted);
 }
 
 .upload-zone p {
@@ -33,9 +34,13 @@
 }
 
 .btn-camera {
-  background: var(--accent);
-  color: #fff;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 0.9rem;
@@ -44,6 +49,10 @@
 }
 
 .btn-file {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
   background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);

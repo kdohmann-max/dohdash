@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { BlueprintRenderer, serializeSvg } from "./BlueprintRenderer";
 import { createDoc, saveDoc } from "../../../storage/db";
 import type { ProcessResult } from "../types";
+import { ArrowRightIcon, CopyIcon, DownloadIcon, RefreshIcon } from "../../../icons";
 import "./ResultPanel.css";
 
 interface Props {
@@ -88,7 +89,9 @@ export function ResultPanel({ result, fileName, ownerId, onNew }: Props) {
           <span className="result-file-name">{fileName}</span>
           <span className="result-detected">Detected: {detectedLabel}</span>
         </div>
-        <button className="btn-new" onClick={onNew}>↺ New</button>
+        <button className="btn-new" onClick={onNew}>
+          <RefreshIcon size={14} /> New
+        </button>
       </div>
 
       <div className="result-content">
@@ -108,10 +111,14 @@ export function ResultPanel({ result, fileName, ownerId, onNew }: Props) {
       </div>
 
       <div className="result-actions">
-        <button className="btn-action" onClick={handleCopy}>📋 Copy</button>
-        <button className="btn-action" onClick={handleDownload}>⬇️ Download</button>
+        <button className="btn-action" onClick={handleCopy}>
+          <CopyIcon size={16} /> Copy
+        </button>
+        <button className="btn-action" onClick={handleDownload}>
+          <DownloadIcon size={16} /> Download
+        </button>
         <button className="btn-action btn-dohdocs" onClick={() => void handleSendToDohDocs()}>
-          → DohDocs
+          <ArrowRightIcon size={16} /> DohDocs
         </button>
       </div>
     </div>

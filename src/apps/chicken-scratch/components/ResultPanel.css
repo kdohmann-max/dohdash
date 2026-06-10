@@ -19,7 +19,7 @@
 .result-file-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--spacing-xs);
   min-width: 0;
 }
 
@@ -38,11 +38,14 @@
 }
 
 .btn-new {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
   border-radius: var(--rounded-sm);
-  padding: 4px 10px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   font-size: 0.8rem;
   cursor: pointer;
   white-space: nowrap;
@@ -85,6 +88,10 @@
 
 .btn-action {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
   background: var(--bg-alt);
   color: var(--text);
   border: 1px solid var(--border);
