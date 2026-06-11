@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { marked } from "marked";
-import { BlueprintRenderer, serializeSvg } from "./BlueprintRenderer";
+import { BlueprintRenderer, canvasToBlob, canvasToDataUrl } from "./BlueprintRenderer";
 import { createDoc, saveDoc } from "../../../storage/db";
 import type { ProcessResult } from "../types";
 import { ArrowRightIcon, CopyIcon, DownloadIcon, RefreshIcon } from "../../../icons";
@@ -22,32 +22,35 @@ function deriveTitle(result: ProcessResult, fileName: string): string {
 }
 
 export function ResultPanel({ result, fileName, ownerId, onNew }: Props) {
-  const svgRef = useRef<SVGSVGElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const detectedLabel =
     result.type === "handwriting" ? "handwriting ✓" : "blueprint sketch ✓";
 
-  function handleCopy() {
+  async function handleCopy() {
     if (result.type === "handwriting") {
       void navigator.clipboard.writeText(result.markdown);
-    } else if (svgRef.current) {
-      void navigator.clipboard.writeText(
-        new XMLSerializer().serializeToString(svgRef.current),
-      );
+      return;
+    }
+    if (!canvasRef.current) return;
+    try {
+      const blob = await canvasToBlob(canvasRef.current);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    } catch {
+      await handleDownload();
     }
   }
 
-  function handleDownload() {
+  async function handleDownload() {
     let blob: Blob;
     let name: string;
     if (result.type === "handwriting") {
       blob = new Blob([result.markdown], { type: "text/markdown" });
       name = fileName.replace(/\.[^.]+$/, "") + ".md";
     } else {
-      blob = svgRef.current
-        ? serializeSvg(svgRef.current)
-        : new Blob([""], { type: "image/svg+xml" });
-      name = fileName.replace(/\.[^.]+$/, "") + ".svg";
+      if (!canvasRef.current) return;
+      blob = await canvasToBlob(canvasRef.current);
+      name = fileName.replace(/\.[^.]+$/, "") + ".png";
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -64,11 +67,9 @@ export function ResultPanel({ result, fileName, ownerId, onNew }: Props) {
       if (result.type === "handwriting") {
         markdown = result.markdown;
       } else {
-        const svgString = svgRef.current
-          ? new XMLSerializer().serializeToString(svgRef.current)
-          : "";
+        const dataUrl = canvasRef.current ? canvasToDataUrl(canvasRef.current) : "";
         const dimensionLines = result.labels.map((l) => `- ${l.text}`).join("\n");
-        markdown = `# ${title}\n\n\`\`\`svg\n${svgString}\n\`\`\`\n\n## Dimensions\n\n${dimensionLines}`;
+        markdown = `# ${title}\n\n![Blueprint](${dataUrl})\n\n## Dimensions\n\n${dimensionLines}`;
       }
       const doc = await createDoc(null, ownerId);
       await saveDoc({ ...doc, title, markdown, updatedAt: Date.now() });
@@ -105,16 +106,16 @@ export function ResultPanel({ result, fileName, ownerId, onNew }: Props) {
           <BlueprintRenderer
             elements={result.elements}
             labels={result.labels}
-            svgRef={svgRef}
+            canvasRef={canvasRef}
           />
         )}
       </div>
 
       <div className="result-actions">
-        <button className="btn-action" onClick={handleCopy}>
+        <button className="btn-action" onClick={() => void handleCopy()}>
           <CopyIcon size={16} /> Copy
         </button>
-        <button className="btn-action" onClick={handleDownload}>
+        <button className="btn-action" onClick={() => void handleDownload()}>
           <DownloadIcon size={16} /> Download
         </button>
         <button className="btn-action btn-dohdocs" onClick={() => void handleSendToDohDocs()}>

@@ -2,7 +2,7 @@
   width: 100%;
 }
 
-.blueprint-svg {
+.blueprint-canvas {
   width: 100%;
   height: auto;
   border-radius: var(--rounded-md);
