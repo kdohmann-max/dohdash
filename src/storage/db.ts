@@ -240,6 +240,92 @@ export async function rejectAccessRequest(userId: string): Promise<void> {
   if (error) throw error;
 }
 
+// ---- admin: user removal, activity, audit log (see migration 0008_admin_user_management) ----
+
+/**
+ * Full offboarding: deletes the auth.users row, cascading to profiles,
+ * app_access, and access_requests. Documents survive (owner_id set to null).
+ * The RPC rejects self-removal, so at least one admin always remains.
+ */
+export async function removeUser(userId: string): Promise<void> {
+  const { error } = await supabase.rpc("admin_remove_user", { p_user_id: userId });
+  if (error) throw error;
+}
+
+/** Map of userId -> last sign-in time in ms (null if never recorded). Admin-only. */
+export async function listUserActivity(): Promise<Map<string, number | null>> {
+  const { data, error } = await supabase.rpc("admin_list_user_activity");
+  if (error) throw error;
+  const rows = (data ?? []) as { user_id: string; last_sign_in_at: number | null }[];
+  return new Map(rows.map((row) => [row.user_id, row.last_sign_in_at]));
+}
+
+export type AuditAction =
+  | "provision_user"
+  | "accept_request"
+  | "reject_request"
+  | "cancel_pending"
+  | "remove_user"
+  | "grant_app_access"
+  | "revoke_app_access"
+  | "change_role";
+
+export interface AuditEntry {
+  id: string;
+  actorId: string | null;
+  action: AuditAction;
+  target: string;
+  detail: Record<string, unknown> | null;
+  createdAt: number;
+}
+
+interface AuditRow {
+  id: string;
+  actor_id: string | null;
+  action: AuditAction;
+  target: string;
+  detail: Record<string, unknown> | null;
+  created_at: number;
+}
+
+/**
+ * Client-side audit writes for the admin actions that are direct table
+ * writes (grant/revoke app access, role toggle, reject, cancel pending).
+ * RPC-backed actions (provision, accept, remove) log inside SQL instead.
+ */
+export async function logAdminAction(
+  actorId: string,
+  action: AuditAction,
+  target: string,
+  detail?: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await supabase.from("admin_audit_log").insert({
+    actor_id: actorId,
+    action,
+    target,
+    detail: detail ?? null,
+    created_at: Date.now(),
+  });
+  if (error) throw error;
+}
+
+export async function listAuditLog(limit = 200): Promise<AuditEntry[]> {
+  const { data, error } = await supabase
+    .from("admin_audit_log")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return ((data ?? []) as AuditRow[]).map((row) => ({
+    id: row.id,
+    actorId: row.actor_id,
+    action: row.action,
+    target: row.target,
+    detail: row.detail,
+    createdAt: row.created_at,
+  }));
+}
+
 // ---- notes & folders (the "DohDocs" app — app_id "tasks" in app_access; see migration 0004_notes) ----
 
 export interface DocMeta {
@@ -377,3 +463,4 @@ export async function deleteFolder(id: string): Promise<void> {
   const { error } = await supabase.from("folders").delete().eq("id", id);
   if (error) throw error;
 }
+

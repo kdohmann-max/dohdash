@@ -227,3 +227,51 @@
   background: var(--accent-soft);
 }
 
+.admin-last-signin {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.admin-row-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.admin-link-button--danger {
+  color: var(--error);
+}
+
+.admin-link-button--danger:disabled {
+  color: var(--muted);
+}
+
+.admin-confirm-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--error);
+  border-radius: var(--rounded-md);
+  background: var(--bg-alt);
+}
+
+.admin-confirm-card p {
+  margin: 0;
+}
+
+.admin-confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.admin-confirm-remove {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: none;
+  border-radius: var(--rounded-sm);
+  background: var(--error);
+  color: var(--bg);
+  cursor: pointer;
+}
+

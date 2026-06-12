@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { APP_REGISTRY, resolveAppName } from "../apps/registry";
 import { useCompanyInfo } from "../company/CompanyInfoContext";
-import { listAppAccessForUser, grantAppAccess, revokeAppAccess, type Profile } from "../storage/db";
+import { listAppAccessForUser, grantAppAccess, revokeAppAccess, logAdminAction, type Profile } from "../storage/db";
 import "./AppAccessPanel.css";
 
 function errorMessage(err: unknown): string {
@@ -50,10 +50,13 @@ export function AppAccessPanel({
     setPendingAppId(appId);
     setError(null);
     try {
+      const targetEmail = profiles.find((p) => p.id === selectedUserId)?.email ?? selectedUserId;
       if (granted) {
         await revokeAppAccess(selectedUserId, appId);
+        void logAdminAction(currentUserId, "revoke_app_access", targetEmail, { app_id: appId }).catch(() => {});
       } else {
         await grantAppAccess(selectedUserId, appId, currentUserId);
+        void logAdminAction(currentUserId, "grant_app_access", targetEmail, { app_id: appId }).catch(() => {});
       }
       setGrantedIds((prev) => {
         if (!prev) return prev;

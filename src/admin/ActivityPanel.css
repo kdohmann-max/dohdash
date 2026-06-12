@@ -1,0 +1,20 @@
+.activity-panel .activity-when {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.activity-panel .activity-action {
+  display: inline-block;
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--rounded-sm);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-heading);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.activity-panel .activity-detail {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
