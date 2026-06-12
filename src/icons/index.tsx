@@ -32,6 +32,14 @@ export function TasksIcon({ size }: { size?: number } = {}) {
   );
 }
 
+export function CommentIcon({ size }: { size?: number } = {}) {
+  return (
+    <svg {...svgProps(size)}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
 export function CalendarIcon({ size }: { size?: number } = {}) {
   return (
     <svg {...svgProps(size)}>

@@ -11,14 +11,16 @@ import {
 import { evaluateMath } from "../editor/math";
 import { archiveDone } from "../editor/archive";
 import { uploadImage } from "../../../storage/db";
+import { CommentIcon } from "../../../icons";
 
 interface Props {
   editor: Editor | null;
+  onAddComment?: () => void;
 }
 
 const HEADING_LEVELS = [1, 2, 3, 4] as const;
 
-export function Toolbar({ editor }: Props) {
+export function Toolbar({ editor, onAddComment }: Props) {
   const [showFormat, setShowFormat] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -124,6 +126,11 @@ export function Toolbar({ editor }: Props) {
               <svg width="16" height="16" aria-hidden="true"><use href="/icons.svg#paperclip-icon" /></svg>
             </button>
             <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPickImage} />
+            {onAddComment ? (
+              <button className="image-btn" onClick={onAddComment} title="Comment on selection" aria-label="Comment on selection">
+                <CommentIcon size={16} />
+              </button>
+            ) : null}
             <button className="archive-btn" onClick={() => archiveDone(editor)}>Archive Done</button>
           </div>
 

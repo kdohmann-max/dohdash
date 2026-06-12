@@ -6,6 +6,7 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "tiptap-markdown";
 import { FormatSelector } from "./FormatSelector";
+import { DocCommentMark } from "./CommentMark";
 import { ArchiveDecorations } from "./archive";
 import { AutoTask } from "./autoTask";
 import { HeadingFormat } from "./headingFormat";
@@ -20,6 +21,7 @@ export function buildExtensions() {
     Highlight,
     Image.configure({ inline: true, allowBase64: true }),
     FormatSelector,
+    DocCommentMark,
     AutoTask,
     HeadingFormat,
     ArchiveDecorations,

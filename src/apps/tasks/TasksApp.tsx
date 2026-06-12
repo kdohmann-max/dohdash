@@ -17,8 +17,10 @@ import {
   deleteFolder,
   moveDoc,
 } from "../../storage/db";
+import { subscribeDocsList, notifyDocsListChanged } from "../../storage/realtime";
 import "./TasksApp.css";
 import "./styles/formatting-selectors.css";
+import "./styles/comments.css";
 
 const EXAMPLE_NOTE = `# DohDocs Formatting Guide
 
@@ -100,8 +102,13 @@ export function TasksApp() {
   const [sort, setSort] = useState<SortMode>(
     () => (localStorage.getItem("dohdash-tasks-sort") as SortMode) || "edited"
   );
+  const [remoteDeleted, setRemoteDeleted] = useState(false);
   const initialized = useRef(false);
   const loadSeq = useRef(0);
+  const activeRef = useRef(active);
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
 
   const loadDocs = useCallback(async (q = search) => {
     const seq = ++loadSeq.current;
@@ -135,6 +142,27 @@ export function TasksApp() {
     return () => clearTimeout(t);
   }, [search, loadDocs]);
 
+  // Live sidebar refresh: another client saved/created/deleted something.
+  // Routed through a ref so the once-per-mount subscription always sees
+  // current state. Doc *content* updates are handled inside Editor via its
+  // own per-doc channel; this also catches the active doc being deleted
+  // elsewhere (keeping the editor open would resurrect it via upsert).
+  const onListChangedRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    onListChangedRef.current = () => {
+      void (async () => {
+        await loadDocs();
+        setFolders(await listFolders());
+        const current = activeRef.current;
+        if (current && !(await getDoc(current.id))) setRemoteDeleted(true);
+      })();
+    };
+  });
+
+  useEffect(() => {
+    return subscribeDocsList(() => onListChangedRef.current());
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("dohdash-tasks-sort", sort);
   }, [sort]);
@@ -151,34 +179,41 @@ export function TasksApp() {
 
   async function handleSelect(id: string) {
     setActive((await getDoc(id)) ?? null);
+    setRemoteDeleted(false);
     setSidebarOpen(false);
   }
 
   async function handleCreateInFolder(folderId: string | null) {
     const doc = await createDoc(folderId, ownerId);
     setActive(doc);
+    setRemoteDeleted(false);
     await loadDocs();
+    notifyDocsListChanged();
   }
 
   async function handleCreateFolder(name: string, parentId: string | null) {
     await createFolder(name, parentId, ownerId);
     setFolders(await listFolders());
+    notifyDocsListChanged();
   }
 
   async function handleRenameFolder(id: string, name: string) {
     await renameFolder(id, name);
     setFolders(await listFolders());
+    notifyDocsListChanged();
   }
 
   async function handleDeleteFolder(id: string) {
     await deleteFolder(id);
     setFolders(await listFolders());
     await loadDocs();
+    notifyDocsListChanged();
   }
 
   async function handleMoveDoc(docId: string, folderId: string | null) {
     await moveDoc(docId, folderId);
     await loadDocs();
+    notifyDocsListChanged();
   }
 
   async function handleDelete(id: string) {
@@ -188,7 +223,23 @@ export function TasksApp() {
     setDocs(list);
     if (active?.id === id) {
       setActive(list.length ? (await getDoc(list[0].id)) ?? null : null);
+      setRemoteDeleted(false);
     }
+    notifyDocsListChanged();
+  }
+
+  // A collaborator's save was applied silently inside the Editor — keep the
+  // active doc state in sync without re-saving.
+  const handleRemoteUpdate = useCallback((markdown: string, updatedAt: number) => {
+    setActive((cur) => (cur ? { ...cur, markdown, title: deriveTitle(markdown), updatedAt } : cur));
+  }, []);
+
+  async function openMostRecent() {
+    setRemoteDeleted(false);
+    const list = await listDocs(search);
+    loadSeq.current++;
+    setDocs(list);
+    setActive(list.length ? (await getDoc(list[0].id)) ?? null : null);
   }
 
   const handleChange = useCallback(
@@ -205,6 +256,7 @@ export function TasksApp() {
       const list = await listDocs(search);
       loadSeq.current++;
       setDocs(list);
+      notifyDocsListChanged();
     },
     [active, search]
   );
@@ -231,8 +283,19 @@ export function TasksApp() {
         onClose={() => setSidebarOpen(false)}
       />
       <main className="main">
-        {active ? (
-          <Editor key={active.id} note={active} onChange={handleChange} onOpenSidebar={() => setSidebarOpen(true)} />
+        {active && remoteDeleted ? (
+          <div className="doc-deleted-banner">
+            <span>This document was deleted by someone else.</span>
+            <button onClick={() => void openMostRecent()}>Open most recent</button>
+          </div>
+        ) : active ? (
+          <Editor
+            key={active.id}
+            note={active}
+            onChange={handleChange}
+            onRemoteUpdate={handleRemoteUpdate}
+            onOpenSidebar={() => setSidebarOpen(true)}
+          />
         ) : (
           <div className="empty-main">Create a document to get started.</div>
         )}

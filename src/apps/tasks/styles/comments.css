@@ -1,0 +1,81 @@
+/* Comment anchors inside the document (docComment mark), the editor-body
+   row layout that hosts the comments panel, and the collaboration banners.
+   Imported by TasksApp.tsx alongside formatting-selectors.css. */
+
+.tasks-app .editor-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.tasks-app .editor-content-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-app .editor-content-wrap .editor-surface {
+  flex: 1;
+}
+
+.tasks-app .doc-comment {
+  background: var(--accent-soft);
+  border-bottom: 2px solid var(--accent);
+  cursor: pointer;
+}
+
+.tasks-app .doc-comment--resolved {
+  background: transparent;
+  border-bottom: 2px dotted var(--muted);
+}
+
+@keyframes doc-comment-flash {
+  0% { background: var(--accent); }
+  100% { background: var(--accent-soft); }
+}
+
+.tasks-app .doc-comment--flash {
+  animation: doc-comment-flash 1.2s ease-out;
+}
+
+.tasks-app .editor-remote-banner,
+.tasks-app .doc-deleted-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.tasks-app .doc-deleted-banner {
+  margin: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-lg);
+}
+
+.tasks-app .editor-remote-banner button,
+.tasks-app .doc-deleted-banner button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--accent);
+  border-radius: var(--rounded-sm);
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.tasks-app .editor-remote-banner button.banner-dismiss {
+  background: transparent;
+  color: var(--accent);
+}
+
+.tasks-app .comments-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}

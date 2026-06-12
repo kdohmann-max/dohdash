@@ -1,0 +1,44 @@
+.presence-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+}
+
+.presence-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.presence-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bg);
+  box-sizing: content-box;
+}
+
+.presence-avatar + .presence-avatar {
+  margin-left: calc(-1 * var(--spacing-xs));
+}
+
+.presence-avatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-heading);
+}
+
+.presence-avatar--editing {
+  border-color: var(--accent);
+}
+
+.presence-editing {
+  color: var(--muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}

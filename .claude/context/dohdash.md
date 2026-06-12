@@ -49,8 +49,8 @@ CSS vars written to `:root`: `--bg`, `--bg-alt`, `--border`, `--text`, `--muted`
 
 ## Storage constraint
 
-**All Supabase DB calls must go through `src/storage/db.ts` only.** Two permitted exceptions: `supabase.auth` in `useAuthState.ts`, and `supabase.functions.invoke` in Chicken Scratch. Never add direct Supabase calls in other components.
+**All Supabase DB calls must go through `src/storage/db.ts` only.** Permitted exceptions: `supabase.auth` in `useAuthState.ts`, `supabase.functions.invoke` in Chicken Scratch, and `src/storage/realtime.ts` (Realtime channels for DohDocs presence/live-refresh — shares db.ts's client; components use its typed subscribe helpers, never supabase directly). Never add direct Supabase calls in other components.
 
-Tables: `profiles`, `app_access`, `pending_profiles`, `notes`, `folders`.
+Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`.
 
 `app_id` is a code-defined string key into `APP_REGISTRY` (`src/apps/registry.ts`) — apps are not DB rows.
