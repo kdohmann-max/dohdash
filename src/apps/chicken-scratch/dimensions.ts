@@ -5,8 +5,9 @@ const MATCH_THRESHOLD = 80;
 
 export interface DimensionMatch {
   labelIndex: number;
-  rectIndex: number;
-  edge: "width" | "height";
+  shapeIndex: number;
+  kind: "rect" | "line";
+  edge: "width" | "height" | "length";
   /** Parsed real-world length in inches, or null if the label text isn't a measurement. */
   value: number | null;
 }
@@ -64,9 +65,16 @@ function pointToSegmentDistance(
   return Math.hypot(px - cx, py - cy);
 }
 
+function median(numbers: number[]): number {
+  const sorted = [...numbers].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
 /**
- * Matches each dimension label to the nearest rect edge (top edge = width,
- * left edge = height) within MATCH_THRESHOLD, parsing the label's real-world value.
+ * Matches each dimension label to the nearest shape edge — a rect's top edge
+ * (width) or left edge (height), or a line's full segment (length) — within
+ * MATCH_THRESHOLD, parsing the label's real-world value.
  */
 export function matchDimensionLabels(elements: Shape[], labels: DimensionLabel[]): DimensionMatch[] {
   const matches: DimensionMatch[] = [];
@@ -75,21 +83,30 @@ export function matchDimensionLabels(elements: Shape[], labels: DimensionLabel[]
     let bestMatch: DimensionMatch | null = null;
     let bestDist = Infinity;
 
-    elements.forEach((el, rectIndex) => {
-      if (el.kind !== "rect") return;
-      const w = el.width ?? 0;
-      const h = el.height ?? 0;
+    elements.forEach((el, shapeIndex) => {
+      if (el.kind === "rect") {
+        const w = el.width ?? 0;
+        const h = el.height ?? 0;
 
-      const topDist = pointToSegmentDistance(lbl.x, lbl.y, el.x, el.y, el.x + w, el.y);
-      if (topDist < bestDist) {
-        bestDist = topDist;
-        bestMatch = { labelIndex, rectIndex, edge: "width", value: parseDimension(lbl.text) };
-      }
+        const topDist = pointToSegmentDistance(lbl.x, lbl.y, el.x, el.y, el.x + w, el.y);
+        if (topDist < bestDist) {
+          bestDist = topDist;
+          bestMatch = { labelIndex, shapeIndex, kind: "rect", edge: "width", value: parseDimension(lbl.text) };
+        }
 
-      const leftDist = pointToSegmentDistance(lbl.x, lbl.y, el.x, el.y, el.x, el.y + h);
-      if (leftDist < bestDist) {
-        bestDist = leftDist;
-        bestMatch = { labelIndex, rectIndex, edge: "height", value: parseDimension(lbl.text) };
+        const leftDist = pointToSegmentDistance(lbl.x, lbl.y, el.x, el.y, el.x, el.y + h);
+        if (leftDist < bestDist) {
+          bestDist = leftDist;
+          bestMatch = { labelIndex, shapeIndex, kind: "rect", edge: "height", value: parseDimension(lbl.text) };
+        }
+      } else {
+        const x2 = el.x2 ?? el.x;
+        const y2 = el.y2 ?? el.y;
+        const dist = pointToSegmentDistance(lbl.x, lbl.y, el.x, el.y, x2, y2);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestMatch = { labelIndex, shapeIndex, kind: "line", edge: "length", value: parseDimension(lbl.text) };
+        }
       }
     });
 
@@ -102,29 +119,94 @@ export function matchDimensionLabels(elements: Shape[], labels: DimensionLabel[]
 }
 
 /**
- * Corrects each rect's aspect ratio to match its labeled real-world dimensions
- * (when both its width and height edges have a parsed measurement), keeping the
- * rect's drawn width and origin fixed and recomputing height from the real ratio.
+ * Corrects shapes' proportions to match their labeled real-world dimensions, in three passes:
+ *
+ * 1. Rects with BOTH width and height matched (non-null values) get their aspect ratio
+ *    corrected directly — drawn width and origin stay fixed, height is recomputed from
+ *    the real-world ratio.
+ * 2. A global scale (sketch-units per real-world inch) is derived as the median of
+ *    per-match scale samples from every shape with a parsed measurement.
+ * 3. Shapes with exactly one matched dimension (a rect with only width or height, or a
+ *    dimensioned line) have their unmatched dimension/length derived from the global scale.
  */
 export function adjustShapeProportions(elements: Shape[], matches: DimensionMatch[]): Shape[] {
-  return elements.map((el, rectIndex) => {
+  const phase1Adjusted = new Set<number>();
+
+  let result = elements.map((el, shapeIndex) => {
     if (el.kind !== "rect") return el;
     const w = el.width ?? 0;
     const h = el.height ?? 0;
     if (w <= 0 || h <= 0) return el;
 
-    const widthMatch = matches.find((m) => m.rectIndex === rectIndex && m.edge === "width" && m.value != null);
-    const heightMatch = matches.find((m) => m.rectIndex === rectIndex && m.edge === "height" && m.value != null);
+    const widthMatch = matches.find((m) => m.shapeIndex === shapeIndex && m.kind === "rect" && m.edge === "width" && m.value != null);
+    const heightMatch = matches.find((m) => m.shapeIndex === shapeIndex && m.kind === "rect" && m.edge === "height" && m.value != null);
     if (!widthMatch || !heightMatch) return el;
 
+    phase1Adjusted.add(shapeIndex);
     const targetAspect = heightMatch.value! / widthMatch.value!;
     return { ...el, height: w * targetAspect };
   });
+
+  const samples: number[] = [];
+  for (const m of matches) {
+    if (m.value == null || m.value <= 0) continue;
+    const el = result[m.shapeIndex];
+    if (!el) continue;
+
+    if (m.kind === "rect") {
+      if (phase1Adjusted.has(m.shapeIndex)) {
+        if (m.edge === "width") samples.push((el.width ?? 0) / m.value);
+      } else if (m.edge === "width") {
+        samples.push((el.width ?? 0) / m.value);
+      } else if (m.edge === "height") {
+        samples.push((el.height ?? 0) / m.value);
+      }
+    } else {
+      const x2 = el.x2 ?? el.x;
+      const y2 = el.y2 ?? el.y;
+      const length = Math.hypot(x2 - el.x, y2 - el.y);
+      samples.push(length / m.value);
+    }
+  }
+
+  const globalScale = samples.length > 0 ? median(samples) : null;
+  if (globalScale == null) return result;
+
+  result = result.map((el, shapeIndex) => {
+    if (el.kind === "rect") {
+      if (phase1Adjusted.has(shapeIndex)) return el;
+      const w = el.width ?? 0;
+      const h = el.height ?? 0;
+      if (w <= 0 || h <= 0) return el;
+
+      const widthMatch = matches.find((m) => m.shapeIndex === shapeIndex && m.kind === "rect" && m.edge === "width" && m.value != null);
+      const heightMatch = matches.find((m) => m.shapeIndex === shapeIndex && m.kind === "rect" && m.edge === "height" && m.value != null);
+
+      if (widthMatch && !heightMatch) return { ...el, height: widthMatch.value! * globalScale };
+      if (heightMatch && !widthMatch) return { ...el, width: heightMatch.value! * globalScale };
+      return el;
+    }
+
+    const lengthMatch = matches.find((m) => m.shapeIndex === shapeIndex && m.kind === "line" && m.edge === "length" && m.value != null);
+    if (!lengthMatch) return el;
+
+    const x2 = el.x2 ?? el.x;
+    const y2 = el.y2 ?? el.y;
+    const dx = x2 - el.x;
+    const dy = y2 - el.y;
+    const currentLength = Math.hypot(dx, dy);
+    if (currentLength <= 0) return el;
+
+    const scaleFactor = (lengthMatch.value! * globalScale) / currentLength;
+    return { ...el, x2: el.x + dx * scaleFactor, y2: el.y + dy * scaleFactor };
+  });
+
+  return result;
 }
 
 export interface DimensionAnnotation {
   orientation: "horizontal" | "vertical";
-  /** The rect edge being measured, in sketch (0-1000) coordinates. */
+  /** The measured edge/segment, in sketch (0-1000) coordinates. */
   x1: number;
   y1: number;
   x2: number;
@@ -146,17 +228,32 @@ export function buildDimensionAnnotations(
   const matchedLabelIndices = new Set<number>();
 
   for (const m of matches) {
-    const el = elements[m.rectIndex];
-    if (!el || el.kind !== "rect") continue;
-    const w = el.width ?? 0;
-    const h = el.height ?? 0;
+    const el = elements[m.shapeIndex];
+    if (!el) continue;
     const text = labels[m.labelIndex].text;
 
-    if (m.edge === "width") {
-      annotations.push({ orientation: "horizontal", x1: el.x, y1: el.y, x2: el.x + w, y2: el.y, text });
+    if (el.kind === "rect") {
+      const w = el.width ?? 0;
+      const h = el.height ?? 0;
+      if (m.edge === "width") {
+        annotations.push({ orientation: "horizontal", x1: el.x, y1: el.y, x2: el.x + w, y2: el.y, text });
+      } else if (m.edge === "height") {
+        annotations.push({ orientation: "vertical", x1: el.x, y1: el.y, x2: el.x, y2: el.y + h, text });
+      } else {
+        continue;
+      }
     } else {
-      annotations.push({ orientation: "vertical", x1: el.x, y1: el.y, x2: el.x, y2: el.y + h, text });
+      const x2 = el.x2 ?? el.x;
+      const y2 = el.y2 ?? el.y;
+      const dx = x2 - el.x;
+      const dy = y2 - el.y;
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        annotations.push({ orientation: "horizontal", x1: el.x, y1: el.y, x2, y2: el.y, text });
+      } else {
+        annotations.push({ orientation: "vertical", x1: el.x, y1: el.y, x2: el.x, y2, text });
+      }
     }
+
     matchedLabelIndices.add(m.labelIndex);
   }
 

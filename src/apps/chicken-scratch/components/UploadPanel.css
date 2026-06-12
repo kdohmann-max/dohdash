@@ -2,6 +2,44 @@
   width: 100%;
 }
 
+.upload-panel .cs-control {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--spacing-md);
+  max-width: 220px;
+}
+
+.upload-panel .cs-control-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  line-height: 1;
+  font-weight: 500;
+}
+
+.upload-panel .cs-control select {
+  height: 30px;
+  padding: 0 var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+}
+
+.upload-panel .cs-control select:hover { border-color: var(--muted); }
+
+.upload-panel .cs-control select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
 .upload-zone {
   display: flex;
   flex-direction: column;

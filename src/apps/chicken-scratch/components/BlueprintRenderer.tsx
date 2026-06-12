@@ -18,14 +18,7 @@ export function BlueprintRenderer({ elements, labels, canvasRef }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const draw = () => renderBlueprint(canvas, validElements, labels);
-    draw();
-
-    // Redraw if the user toggles light/dark theme so colors stay correct.
-    const observer = new MutationObserver(draw);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => observer.disconnect();
+    renderBlueprint(canvas, validElements, labels);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elements, labels, canvasRef]);
 

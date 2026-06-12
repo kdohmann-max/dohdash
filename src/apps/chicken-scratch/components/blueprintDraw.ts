@@ -6,34 +6,31 @@ import {
   type DimensionAnnotation,
 } from "../dimensions";
 
-/** Logical drawing space — matches the 0-1000 grid the model returns coordinates in. */
-export const CANVAS_SIZE = 1000;
+/** The model's native 0-1000 coordinate space — unchanged regardless of canvas layout. */
+export const MODEL_SIZE = 1000;
 /** Output resolution multiplier for a crisp raster export. */
 export const RENDER_SCALE = 2;
+
+const PADDING = 70;
+const BORDER_WIDTH = 1.5;
+const OUTER_MARGIN = 20;
+
+/** Logical drawing space, including the border/padding margin around the model's 0-1000 grid. */
+export const CANVAS_SIZE = MODEL_SIZE + 2 * (PADDING + BORDER_WIDTH + OUTER_MARGIN);
+const CONTENT_OFFSET = PADDING + BORDER_WIDTH + OUTER_MARGIN;
+
+const PALETTE = {
+  background: "#ffffff",
+  ink: "#1a1a1a",
+  dimension: "#6b6b6b",
+  dimensionLabelBg: "#ffffff",
+} as const;
+
+const DRAW_FONT = "Helvetica, Arial, sans-serif";
 
 const DIM_OFFSET = 28;
 const EXT_OVERSHOOT = 8;
 const TICK_LEN = 10;
-
-interface Theme {
-  bgAlt: string;
-  accent: string;
-  text: string;
-  muted: string;
-  fontBody: string;
-}
-
-function readTheme(): Theme {
-  const styles = getComputedStyle(document.documentElement);
-  const read = (name: string, fallback: string) => styles.getPropertyValue(name).trim() || fallback;
-  return {
-    bgAlt: read("--bg-alt", "#f7f8fa"),
-    accent: read("--accent", "#00bd65"),
-    text: read("--text", "#1f2328"),
-    muted: read("--muted", "#5f6368"),
-    fontBody: read("--font-body", "sans-serif"),
-  };
-}
 
 /** Renders the blueprint to the canvas's full pixel size. Caller sets `canvas.width/height`. */
 export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], labels: DimensionLabel[]): void {
@@ -41,13 +38,19 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   if (!ctx) return;
 
   const scale = canvas.width / CANVAS_SIZE;
-  const theme = readTheme();
 
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.scale(scale, scale);
-  ctx.fillStyle = theme.bgAlt;
+
+  ctx.fillStyle = PALETTE.background;
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = BORDER_WIDTH;
+  ctx.strokeRect(OUTER_MARGIN, OUTER_MARGIN, CANVAS_SIZE - 2 * OUTER_MARGIN, CANVAS_SIZE - 2 * OUTER_MARGIN);
+
+  ctx.translate(CONTENT_OFFSET, CONTENT_OFFSET);
 
   const matches = matchDimensionLabels(elements, labels);
   const adjusted = adjustShapeProportions(elements, matches);
@@ -57,19 +60,19 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
     if (el.kind === "rect") {
       const w = el.width ?? 0;
       const h = el.height ?? 0;
-      ctx.strokeStyle = theme.accent;
+      ctx.strokeStyle = PALETTE.ink;
       ctx.lineWidth = 4;
       ctx.strokeRect(el.x, el.y, w, h);
 
       if (el.label) {
-        ctx.fillStyle = theme.muted;
-        ctx.font = `24px ${theme.fontBody}`;
+        ctx.fillStyle = PALETTE.ink;
+        ctx.font = `24px ${DRAW_FONT}`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(el.label, el.x + w / 2, el.y + h / 2);
       }
     } else {
-      ctx.strokeStyle = theme.accent;
+      ctx.strokeStyle = PALETTE.ink;
       ctx.lineWidth = 6;
       ctx.beginPath();
       ctx.moveTo(el.x, el.y);
@@ -79,12 +82,12 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   }
 
   for (const ann of annotations) {
-    drawDimensionAnnotation(ctx, ann, theme);
+    drawDimensionAnnotation(ctx, ann);
   }
 
   for (const lbl of unmatched) {
-    ctx.fillStyle = theme.text;
-    ctx.font = `20px ${theme.fontBody}`;
+    ctx.fillStyle = PALETTE.ink;
+    ctx.font = `20px ${DRAW_FONT}`;
     ctx.textAlign = lbl.anchor === "middle" ? "center" : lbl.anchor;
     ctx.textBaseline = "alphabetic";
     ctx.fillText(lbl.text, lbl.x, lbl.y);
@@ -93,9 +96,8 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   ctx.restore();
 }
 
-function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAnnotation, theme: Theme): void {
-  ctx.strokeStyle = theme.muted;
-  ctx.fillStyle = theme.text;
+function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAnnotation): void {
+  ctx.strokeStyle = PALETTE.dimension;
   ctx.lineWidth = 1;
 
   if (ann.orientation === "horizontal") {
@@ -110,7 +112,7 @@ function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAn
     drawTick(ctx, ann.x1, dimY);
     drawTick(ctx, ann.x2, dimY);
 
-    drawLabel(ctx, ann.text, (ann.x1 + ann.x2) / 2, dimY - 6, theme, "center");
+    drawLabel(ctx, ann.text, (ann.x1 + ann.x2) / 2, dimY - 6, "center");
   } else {
     const dimX = ann.x1 - DIM_OFFSET;
 
@@ -123,7 +125,7 @@ function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAn
     drawTick(ctx, dimX, ann.y1);
     drawTick(ctx, dimX, ann.y2);
 
-    drawRotatedLabel(ctx, ann.text, dimX - 6, (ann.y1 + ann.y2) / 2, theme);
+    drawRotatedLabel(ctx, ann.text, dimX - 6, (ann.y1 + ann.y2) / 2);
   }
 }
 
@@ -145,29 +147,28 @@ function drawLabel(
   text: string,
   x: number,
   y: number,
-  theme: Theme,
   align: CanvasTextAlign,
 ): void {
-  ctx.font = `18px ${theme.fontBody}`;
+  ctx.font = `18px ${DRAW_FONT}`;
   ctx.textAlign = align;
   ctx.textBaseline = "alphabetic";
 
   const metrics = ctx.measureText(text);
   const padding = 4;
-  ctx.fillStyle = theme.bgAlt;
+  ctx.fillStyle = PALETTE.dimensionLabelBg;
   let boxX = x;
   if (align === "center") boxX = x - metrics.width / 2;
   else if (align === "end") boxX = x - metrics.width;
   ctx.fillRect(boxX - padding, y - 14, metrics.width + padding * 2, 18);
 
-  ctx.fillStyle = theme.text;
+  ctx.fillStyle = PALETTE.dimension;
   ctx.fillText(text, x, y);
 }
 
-function drawRotatedLabel(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, theme: Theme): void {
+function drawRotatedLabel(ctx: CanvasRenderingContext2D, text: string, x: number, y: number): void {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(-Math.PI / 2);
-  drawLabel(ctx, text, 0, 0, theme, "center");
+  drawLabel(ctx, text, 0, 0, "center");
   ctx.restore();
 }

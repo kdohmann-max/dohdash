@@ -1,16 +1,18 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { CameraIcon, PaperclipIcon, PencilIcon } from "../../../icons";
+import { DEFAULT_MODEL, MODEL_OPTIONS } from "../models";
 import "./UploadPanel.css";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
 interface Props {
-  onImage: (base64: string, mimeType: string, fileName: string) => void;
+  onImage: (base64: string, mimeType: string, fileName: string, model: string) => void;
 }
 
 export function UploadPanel({ onImage }: Props) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [model, setModel] = useState(DEFAULT_MODEL);
 
   function handleFile(file: File) {
     if (file.size > MAX_BYTES) {
@@ -23,13 +25,21 @@ export function UploadPanel({ onImage }: Props) {
       const comma = dataUrl.indexOf(",");
       const base64 = dataUrl.slice(comma + 1);
       const mimeType = dataUrl.slice(5, dataUrl.indexOf(";"));
-      onImage(base64, mimeType, file.name);
+      onImage(base64, mimeType, file.name, model);
     };
     reader.readAsDataURL(file);
   }
 
   return (
     <div className="upload-panel">
+      <div className="cs-control">
+        <label className="cs-control-label" htmlFor="cs-model">Model</label>
+        <select id="cs-model" value={model} onChange={(e) => setModel(e.target.value)}>
+          {MODEL_OPTIONS.map((opt) => (
+            <option key={opt.id} value={opt.id}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
       <div className="upload-zone">
         <span className="upload-icon" aria-hidden="true"><PencilIcon size={40} /></span>
         <p>Take a photo or attach an image of handwriting or a sketch</p>

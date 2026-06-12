@@ -20,12 +20,12 @@ export function ChickenScratchApp() {
   const [appState, setAppState] = useState<AppState>({ status: "idle" });
 
   const handleImage = useCallback(
-    async (base64: string, mimeType: string, fileName: string) => {
+    async (base64: string, mimeType: string, fileName: string, model: string) => {
       setAppState({ status: "processing", fileName });
       try {
         const { data, error } = await supabase.functions.invoke(
           "process-scratch",
-          { body: { image: base64, mimeType } },
+          { body: { image: base64, mimeType, model } },
         );
         if (error) {
           // FunctionsHttpError wraps the real message in .context (a Response)
