@@ -100,32 +100,35 @@ function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAn
   ctx.strokeStyle = PALETTE.dimension;
   ctx.lineWidth = 1;
 
-  if (ann.orientation === "horizontal") {
-    const dimY = ann.y1 - DIM_OFFSET;
+  // Bottom/right edges (flip) get their dimension line below/right of the shape.
+  const dir = ann.flip ? 1 : -1;
 
-    // Extension lines from the rect corners up past the dimension line.
-    drawLine(ctx, ann.x1, ann.y1, ann.x1, dimY - EXT_OVERSHOOT);
-    drawLine(ctx, ann.x2, ann.y1, ann.x2, dimY - EXT_OVERSHOOT);
+  if (ann.orientation === "horizontal") {
+    const dimY = ann.y1 + dir * DIM_OFFSET;
+
+    // Extension lines from the rect corners past the dimension line.
+    drawLine(ctx, ann.x1, ann.y1, ann.x1, dimY + dir * EXT_OVERSHOOT);
+    drawLine(ctx, ann.x2, ann.y1, ann.x2, dimY + dir * EXT_OVERSHOOT);
 
     // Dimension line with tick marks at each end.
     drawLine(ctx, ann.x1, dimY, ann.x2, dimY);
     drawTick(ctx, ann.x1, dimY);
     drawTick(ctx, ann.x2, dimY);
 
-    drawLabel(ctx, ann.text, (ann.x1 + ann.x2) / 2, dimY - 6, "center");
+    drawLabel(ctx, ann.text, (ann.x1 + ann.x2) / 2, ann.flip ? dimY + 20 : dimY - 6, "center");
   } else {
-    const dimX = ann.x1 - DIM_OFFSET;
+    const dimX = ann.x1 + dir * DIM_OFFSET;
 
-    // Extension lines from the rect corners left past the dimension line.
-    drawLine(ctx, ann.x1, ann.y1, dimX - EXT_OVERSHOOT, ann.y1);
-    drawLine(ctx, ann.x1, ann.y2, dimX - EXT_OVERSHOOT, ann.y2);
+    // Extension lines from the rect corners past the dimension line.
+    drawLine(ctx, ann.x1, ann.y1, dimX + dir * EXT_OVERSHOOT, ann.y1);
+    drawLine(ctx, ann.x1, ann.y2, dimX + dir * EXT_OVERSHOOT, ann.y2);
 
     // Dimension line with tick marks at each end.
     drawLine(ctx, dimX, ann.y1, dimX, ann.y2);
     drawTick(ctx, dimX, ann.y1);
     drawTick(ctx, dimX, ann.y2);
 
-    drawRotatedLabel(ctx, ann.text, dimX - 6, (ann.y1 + ann.y2) / 2);
+    drawRotatedLabel(ctx, ann.text, ann.flip ? dimX + 20 : dimX - 6, (ann.y1 + ann.y2) / 2);
   }
 }
 
