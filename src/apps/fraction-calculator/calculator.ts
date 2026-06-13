@@ -16,7 +16,11 @@ export type Accuracy = 64 | 32 | 16 | 8;
 
 const OPERATOR_SYMBOLS: Record<Operator, string> = { "+": "+", "-": "−", "*": "×", "/": "÷" };
 
-/** `den === null` means the user hasn't started entering a fraction part yet. */
+/**
+ * `den === null` means the user hasn't started entering a fraction part yet.
+ * `den === 0` means the user has advanced into the denominator field but hasn't
+ * typed a digit yet — operator/equals treat this as a pending divide-by-zero.
+ */
 export interface EntryValue {
   feet: number;
   whole: number;
@@ -86,7 +90,7 @@ function entryToRational(entry: EntryValue, unitsMode: boolean): Rational {
   return add(fromInt(whole), fraction);
 }
 
-/** Throws if the entry's denominator field is non-zero (i.e. user typed into it). */
+/** True if the user has advanced into the denominator field but not yet typed a digit (den === 0, distinct from den === null = "no fraction part started"). Operator/equals treat this as a pending divide-by-zero and set error. */
 function entryHasZeroDenominator(entry: EntryValue): boolean {
   return entry.den === 0;
 }

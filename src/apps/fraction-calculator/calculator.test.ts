@@ -36,6 +36,18 @@ describe("digit entry", () => {
     s = dispatch(s, { type: "fieldAdvance" });
     expect(s.activeField).toBe("whole");
   });
+
+  test("toggleUnits mid-entry resets the current entry", () => {
+    let s = initialState();
+    s = dispatch(s, { type: "digit", value: 1 });
+    s = dispatch(s, { type: "fieldAdvance" });
+    s = dispatch(s, { type: "digit", value: 2 });
+    s = dispatch(s, { type: "fieldAdvance" });
+    s = dispatch(s, { type: "digit", value: 3 });
+    s = dispatch(s, { type: "toggleUnits" });
+    expect(s.entry).toEqual({ feet: 0, whole: 0, num: 0, den: null });
+    expect(s.activeField).toBe("feet");
+  });
 });
 
 describe("backspace", () => {
