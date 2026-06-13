@@ -1,0 +1,45 @@
+/* src/apps/fraction-calculator/components/Keypad.css */
+.fc-keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.fc-key {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  padding: var(--spacing-md) 0;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.fc-key:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.fc-key--fn {
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.fc-key--op {
+  color: var(--accent);
+  font-weight: var(--font-weight-heading);
+}
+
+.fc-key--equals {
+  grid-column: span 2;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-weight: var(--font-weight-heading);
+}
+
+.fc-key--equals:hover {
+  background: var(--accent);
+  opacity: 0.9;
+}
