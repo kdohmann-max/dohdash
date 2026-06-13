@@ -1,4 +1,4 @@
-import Anthropic from "npm:@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "npm:@google/generative-ai";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 /** Bump whenever PROMPT/VERIFY_PROMPT change so stale cached extractions stop being served. */
-const PROMPT_VERSION = "2";
+const PROMPT_VERSION = "3";
 
 const PROMPT = `You are analyzing a photo. Your task has two parts:
 
@@ -45,8 +45,8 @@ const VERIFY_PROMPT = `Audit your extraction above against the image, checking i
 Return the corrected JSON in exactly the same format ({"type":"blueprint","elements":[...],"labels":[...]}). If everything is already correct, return the same JSON unchanged. Return ONLY the JSON object — no commentary, no markdown fences.`;
 
 // Keep in sync with src/apps/chicken-scratch/models.ts MODEL_OPTIONS.
-const ALLOWED_MODELS = ["claude-opus-4-8", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"];
-const DEFAULT_MODEL_ID = "claude-opus-4-8";
+const ALLOWED_MODELS = ["gemini-flash-latest"];
+const DEFAULT_MODEL_ID = "gemini-flash-latest";
 
 function stripFences(raw: string): string {
   return raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "");
@@ -147,30 +147,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY secret not set");
+    const apiKey = Deno.env.get("GEMINI_API_KEY");
+    if (!apiKey) throw new Error("GEMINI_API_KEY secret not set");
 
-    const anthropic = new Anthropic({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const gModel = genAI.getGenerativeModel({ model, generationConfig: { maxOutputTokens: 8192 } });
 
-    const imageBlock = {
-      type: "image" as const,
-      source: {
-        type: "base64" as const,
-        media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-        data: image,
-      },
-    };
+    const imagePart = { inlineData: { mimeType, data: image } };
 
-    const msg = await anthropic.messages.create({
-      model,
-      max_tokens: 8192,
-      messages: [{
-        role: "user",
-        content: [imageBlock, { type: "text", text: PROMPT }],
-      }],
+    const msg = await gModel.generateContent({
+      contents: [{ role: "user", parts: [imagePart, { text: PROMPT }] }],
     });
 
-    const firstText = stripFences(msg.content[0].type === "text" ? msg.content[0].text : "");
+    const firstText = stripFences(msg.response.text());
     let result: unknown;
     try {
       result = JSON.parse(firstText);
@@ -185,18 +174,14 @@ Deno.serve(async (req) => {
     // against the image. If the audit output is broken, keep the first pass.
     if ((result as { type?: string }).type === "blueprint") {
       try {
-        const verifyMsg = await anthropic.messages.create({
-          model,
-          max_tokens: 8192,
-          messages: [
-            { role: "user", content: [imageBlock, { type: "text", text: PROMPT }] },
-            { role: "assistant", content: firstText },
-            { role: "user", content: [{ type: "text", text: VERIFY_PROMPT }] },
+        const verifyMsg = await gModel.generateContent({
+          contents: [
+            { role: "user", parts: [imagePart, { text: PROMPT }] },
+            { role: "model", parts: [{ text: firstText }] },
+            { role: "user", parts: [{ text: VERIFY_PROMPT }] },
           ],
         });
-        const verifyText = stripFences(
-          verifyMsg.content[0].type === "text" ? verifyMsg.content[0].text : "",
-        );
+        const verifyText = stripFences(verifyMsg.response.text());
         const verified = JSON.parse(verifyText);
         if (validateResult(verified) === null && verified.type === "blueprint") {
           result = verified;
