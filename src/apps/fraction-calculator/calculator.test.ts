@@ -3,15 +3,6 @@ import { describe, expect, test } from "vitest";
 import { initialState, dispatch } from "./calculator";
 import { toFractionString } from "./fraction";
 
-function entryToString(state: ReturnType<typeof initialState>): string {
-  const { feet, whole, num, den } = state.entry;
-  let s = "";
-  if (state.unitsMode && feet) s += `${feet}'`;
-  if (whole) s += `${s ? " " : ""}${whole}`;
-  if (den !== null) s += `${s && !s.endsWith("'") ? " " : ""}${num}/${den}`;
-  return s || "0";
-}
-
 describe("digit entry", () => {
   test("digits append to the active field (whole)", () => {
     let s = initialState();
