@@ -141,7 +141,11 @@ export function toFeetInchesString(r: Rational, accuracyDenominator: bigint): st
   const inches = totalInchesWhole % 12n;
 
   const inchesPart =
-    inchRem === 0n ? `${inches}` : `${inches} ${inchRem}/${denominator}`;
+    inchRem === 0n
+      ? `${inches}`
+      : inches === 0n
+        ? `${inchRem}/${denominator}`
+        : `${inches} ${inchRem}/${denominator}`;
 
   if (feet === 0n) return `${sign}${inchesPart}"`;
   return `${sign}${feet}' ${inchesPart}"`;

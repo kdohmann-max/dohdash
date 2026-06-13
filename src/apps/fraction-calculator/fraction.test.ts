@@ -129,4 +129,8 @@ describe("toFeetInchesString", () => {
   test("formats negative values", () => {
     expect(toFeetInchesString({ numerator: -85n, denominator: 2n }, 16n)).toBe(`-3' 6 1/2"`);
   });
+
+  test("formats negative sub-inch values without a redundant zero", () => {
+    expect(toFeetInchesString({ numerator: -1n, denominator: 2n }, 16n)).toBe(`-1/2"`);
+  });
 });
