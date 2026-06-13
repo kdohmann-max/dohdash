@@ -8,6 +8,7 @@ import {
   type Folder,
   createDoc,
   deleteDoc,
+  deleteDocs,
   getDoc,
   listDocs,
   saveDoc,
@@ -103,6 +104,8 @@ export function TasksApp() {
     () => (localStorage.getItem("dohdash-tasks-sort") as SortMode) || "edited"
   );
   const [remoteDeleted, setRemoteDeleted] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const initialized = useRef(false);
   const loadSeq = useRef(0);
   const activeRef = useRef(active);
@@ -228,6 +231,35 @@ export function TasksApp() {
     notifyDocsListChanged();
   }
 
+  function handleToggleSelectMode() {
+    setSelectMode((v) => !v);
+    setSelectedIds(new Set());
+  }
+
+  function handleToggleSelect(id: string) {
+    setSelectedIds((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleBulkDelete() {
+    const ids = [...selectedIds];
+    await deleteDocs(ids);
+    const list = await listDocs(search);
+    loadSeq.current++;
+    setDocs(list);
+    if (active && selectedIds.has(active.id)) {
+      setActive(list.length ? (await getDoc(list[0].id)) ?? null : null);
+      setRemoteDeleted(false);
+    }
+    setSelectedIds(new Set());
+    setSelectMode(false);
+    notifyDocsListChanged();
+  }
+
   // A collaborator's save was applied silently inside the Editor — keep the
   // active doc state in sync without re-saving.
   const handleRemoteUpdate = useCallback((markdown: string, updatedAt: number) => {
@@ -281,6 +313,11 @@ export function TasksApp() {
         onDeleteFolder={handleDeleteFolder}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        selectMode={selectMode}
+        selectedIds={selectedIds}
+        onToggleSelectMode={handleToggleSelectMode}
+        onToggleSelect={handleToggleSelect}
+        onBulkDelete={() => void handleBulkDelete()}
       />
       <main className="main">
         {active && remoteDeleted ? (

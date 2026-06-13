@@ -20,6 +20,11 @@ interface Props {
   onDeleteFolder: (id: string) => void;
   isOpen?: boolean;
   onClose?: () => void;
+  selectMode: boolean;
+  selectedIds: Set<string>;
+  onToggleSelectMode: () => void;
+  onToggleSelect: (id: string) => void;
+  onBulkDelete: () => void;
 }
 
 type Tree = Map<string | null, Folder[]>;
@@ -95,9 +100,12 @@ interface DocItemProps {
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onMoveDoc: (docId: string, folderId: string | null) => void;
+  selectMode: boolean;
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
 }
 
-function DocItem({ doc, activeId, depth, folders, onSelect, onDelete, onMoveDoc }: DocItemProps) {
+function DocItem({ doc, activeId, depth, folders, onSelect, onDelete, onMoveDoc, selectMode, selected, onToggleSelect }: DocItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -110,9 +118,19 @@ function DocItem({ doc, activeId, depth, folders, onSelect, onDelete, onMoveDoc 
     <li
       className={`doc-item${doc.id === activeId ? " active" : ""}`}
       style={{ paddingLeft: `${10 + depth * 16}px` }}
-      onClick={() => { onSelect(doc.id); closeMenu(); }}
+      onClick={() => { if (selectMode) onToggleSelect(doc.id); else { onSelect(doc.id); closeMenu(); } }}
     >
+      {selectMode && (
+        <input
+          className="doc-checkbox"
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggleSelect(doc.id)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
       <span className="doc-title">{doc.title || "Untitled"}</span>
+      {!selectMode && (
       <div className="doc-actions" onClick={(e) => e.stopPropagation()}>
         <button className="doc-menu-btn" title="Options" onClick={() => setShowMenu((v) => !v)}>
           ⋯
@@ -148,6 +166,7 @@ function DocItem({ doc, activeId, depth, folders, onSelect, onDelete, onMoveDoc 
           </div>
         )}
       </div>
+      )}
     </li>
   );
 }
@@ -168,12 +187,16 @@ interface FolderNodeProps {
   onCreateFolder: (name: string, parentId: string | null) => void;
   onRenameFolder: (id: string, name: string) => void;
   onDeleteFolder: (id: string) => void;
+  selectMode: boolean;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
 }
 
 function FolderNode({
   folder, depth, tree, docs, activeId, folders,
   onSelect, onDelete, onMoveDoc, onCreateInFolder,
   onCreateFolder, onRenameFolder, onDeleteFolder,
+  selectMode, selectedIds, onToggleSelect,
 }: FolderNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -285,6 +308,9 @@ function FolderNode({
               onCreateFolder={onCreateFolder}
               onRenameFolder={onRenameFolder}
               onDeleteFolder={onDeleteFolder}
+              selectMode={selectMode}
+              selectedIds={selectedIds}
+              onToggleSelect={onToggleSelect}
             />
           ))}
           {folderDocs.map((doc) => (
@@ -297,6 +323,9 @@ function FolderNode({
               onSelect={onSelect}
               onDelete={onDelete}
               onMoveDoc={onMoveDoc}
+              selectMode={selectMode}
+              selected={selectedIds.has(doc.id)}
+              onToggleSelect={onToggleSelect}
             />
           ))}
         </>
@@ -312,26 +341,58 @@ export function Sidebar({
   onSelect, onCreateInFolder, onDelete, onMoveDoc,
   onCreateFolder, onRenameFolder, onDeleteFolder,
   isOpen, onClose,
+  selectMode, selectedIds, onToggleSelectMode, onToggleSelect, onBulkDelete,
 }: Props) {
   const [addingRoot, setAddingRoot] = useState(false);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const tree = buildTree(folders);
   const rootFolders = tree.get(null) ?? [];
   const rootDocs = docs.filter((d) => d.folderId === null);
+
+  function cancelSelectMode() {
+    setConfirmBulkDelete(false);
+    onToggleSelectMode();
+  }
 
   return (
     <aside className={`sidebar${isOpen ? " open" : ""}`}>
       <div className="sidebar-head">
         <span className="brand">DohDocs</span>
-        <div className="head-actions">
-          <button className="new-folder" onClick={() => setAddingRoot(true)} title="New folder">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.764c.414 0 .8.182 1.06.5l.5.625A1.5 1.5 0 0 0 8.9 3.75H13.5A1.5 1.5 0 0 1 15 5.25v7.25A1.5 1.5 0 0 1 13.5 14h-11A1.5 1.5 0 0 1 1 12.5v-9Z"/>
-            </svg>
-            +
-          </button>
-          <button className="new-doc" onClick={() => onCreateInFolder(null)} title="New document">+</button>
-          <button className="sidebar-close" onClick={onClose} title="Close menu">✕</button>
-        </div>
+        {selectMode ? (
+          confirmBulkDelete ? (
+            <div className="select-bar">
+              <span className="select-count">Delete {selectedIds.size} notes?</span>
+              <button className="select-delete" onClick={() => { setConfirmBulkDelete(false); onBulkDelete(); }}>
+                Yes, delete
+              </button>
+              <button className="select-cancel" onClick={() => setConfirmBulkDelete(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className="select-bar">
+              <span className="select-count">{selectedIds.size} selected</span>
+              <button
+                className="select-delete"
+                disabled={selectedIds.size === 0}
+                onClick={() => setConfirmBulkDelete(true)}
+              >
+                Delete
+              </button>
+              <button className="select-cancel" onClick={cancelSelectMode}>Cancel</button>
+            </div>
+          )
+        ) : (
+          <div className="head-actions">
+            <button className="new-folder" onClick={() => setAddingRoot(true)} title="New folder">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.764c.414 0 .8.182 1.06.5l.5.625A1.5 1.5 0 0 0 8.9 3.75H13.5A1.5 1.5 0 0 1 15 5.25v7.25A1.5 1.5 0 0 1 13.5 14h-11A1.5 1.5 0 0 1 1 12.5v-9Z"/>
+              </svg>
+              +
+            </button>
+            <button className="new-doc" onClick={() => onCreateInFolder(null)} title="New document">+</button>
+            <button className="select-toggle" onClick={onToggleSelectMode} title="Select notes">Select</button>
+            <button className="sidebar-close" onClick={onClose} title="Close menu">✕</button>
+          </div>
+        )}
       </div>
 
       <div className="sidebar-controls">
@@ -379,6 +440,9 @@ export function Sidebar({
             onCreateFolder={onCreateFolder}
             onRenameFolder={onRenameFolder}
             onDeleteFolder={onDeleteFolder}
+            selectMode={selectMode}
+            selectedIds={selectedIds}
+            onToggleSelect={onToggleSelect}
           />
         ))}
         {rootDocs.map((doc) => (
@@ -391,6 +455,9 @@ export function Sidebar({
             onSelect={onSelect}
             onDelete={onDelete}
             onMoveDoc={onMoveDoc}
+            selectMode={selectMode}
+            selected={selectedIds.has(doc.id)}
+            onToggleSelect={onToggleSelect}
           />
         ))}
       </ul>

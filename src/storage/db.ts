@@ -422,6 +422,11 @@ export async function deleteDoc(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function deleteDocs(ids: string[]): Promise<void> {
+  const { error } = await supabase.from("notes").delete().in("id", ids);
+  if (error) throw error;
+}
+
 export async function createDoc(folderId: string | null = null, ownerId: string | null = null): Promise<DohDoc> {
   const doc: DohDoc = {
     id: crypto.randomUUID(),

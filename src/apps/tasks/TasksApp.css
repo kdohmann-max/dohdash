@@ -72,6 +72,58 @@
   display: none;
 }
 
+.tasks-app .select-toggle {
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ---- Select-mode bar (header) ---- */
+.tasks-app .select-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.tasks-app .select-count {
+  font-size: 12px;
+  color: var(--muted);
+  margin-right: auto;
+}
+
+.tasks-app .select-delete,
+.tasks-app .select-cancel {
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.tasks-app .select-delete {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.tasks-app .select-delete:disabled {
+  color: var(--muted);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+/* ---- Per-row select checkbox ---- */
+.tasks-app .doc-checkbox {
+  margin-right: 8px;
+  accent-color: var(--accent);
+}
+
 /* ---- Sidebar controls (search + sort) ---- */
 .tasks-app .sidebar-controls {
   padding: var(--spacing-sm) var(--spacing-sm);
