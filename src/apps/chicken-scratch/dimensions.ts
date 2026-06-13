@@ -91,12 +91,13 @@ export function matchDimensionLabels(elements: Shape[], labels: DimensionLabel[]
   labels.forEach((lbl, labelIndex) => {
     let best: { dist: number; shapeIndex: number } | null = null;
 
-    elements.forEach((el, shapeIndex) => {
+    for (let shapeIndex = 0; shapeIndex < elements.length; shapeIndex++) {
+      const el = elements[shapeIndex];
       const dist = pointToSegmentDistance(lbl.x, lbl.y, el.x, el.y, el.x2, el.y2);
       if (dist <= MATCH_THRESHOLD && (!best || dist < best.dist)) {
         best = { dist, shapeIndex };
       }
-    });
+    }
 
     if (best) {
       matches.push({
