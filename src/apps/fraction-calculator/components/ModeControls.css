@@ -1,0 +1,38 @@
+/* src/apps/fraction-calculator/components/ModeControls.css */
+.fc-mode-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.fc-mode-toggles,
+.fc-accuracy {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.fc-toggle,
+.fc-accuracy-chip {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm);
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fc-toggle[aria-pressed="true"],
+.fc-accuracy-chip[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: var(--font-weight-heading);
+}
+
+.fc-accuracy-chip {
+  flex: 1;
+  text-align: center;
+}
