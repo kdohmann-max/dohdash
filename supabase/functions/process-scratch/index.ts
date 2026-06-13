@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI } from "npm:@google/generative-ai";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import extractPromptRaw from "./prompts/extract.md" with { type: "text" };
+import verifyPromptRaw from "./prompts/verify.md" with { type: "text" };
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,8 +11,8 @@ const corsHeaders = {
 /** Bump whenever prompts/extract.md or prompts/verify.md change so stale cached extractions stop being served. */
 const PROMPT_VERSION = "4";
 
-const PROMPT = (await Deno.readTextFile(new URL("./prompts/extract.md", import.meta.url))).trim();
-const VERIFY_PROMPT = (await Deno.readTextFile(new URL("./prompts/verify.md", import.meta.url))).trim();
+const PROMPT = extractPromptRaw.trim();
+const VERIFY_PROMPT = verifyPromptRaw.trim();
 
 // Keep in sync with src/apps/chicken-scratch/models.ts MODEL_OPTIONS.
 const ALLOWED_MODELS = ["gemini-flash-latest"];
