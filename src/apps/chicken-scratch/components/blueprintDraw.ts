@@ -56,6 +56,9 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   const adjusted = adjustShapeProportions(elements, matches);
   const { annotations, unmatched } = buildDimensionAnnotations(adjusted, labels, matches);
 
+  const { offsetX, offsetY } = centeringOffset(adjusted);
+  ctx.translate(offsetX, offsetY);
+
   for (const el of adjusted) {
     if (el.kind === "rect") {
       const w = el.width ?? 0;
@@ -94,6 +97,39 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   }
 
   ctx.restore();
+}
+
+/** Translation that centers the shapes' bounding box (plus room for dimension lines) within the model's 0-1000 grid. */
+function centeringOffset(elements: Shape[]): { offsetX: number; offsetY: number } {
+  if (elements.length === 0) return { offsetX: 0, offsetY: 0 };
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const el of elements) {
+    if (el.kind === "rect") {
+      const w = el.width ?? 0;
+      const h = el.height ?? 0;
+      minX = Math.min(minX, el.x);
+      minY = Math.min(minY, el.y);
+      maxX = Math.max(maxX, el.x + w);
+      maxY = Math.max(maxY, el.y + h);
+    } else {
+      const x2 = el.x2 ?? el.x;
+      const y2 = el.y2 ?? el.y;
+      minX = Math.min(minX, el.x, x2);
+      minY = Math.min(minY, el.y, y2);
+      maxX = Math.max(maxX, el.x, x2);
+      maxY = Math.max(maxY, el.y, y2);
+    }
+  }
+
+  const margin = DIM_OFFSET + EXT_OVERSHOOT;
+  const width = maxX - minX + 2 * margin;
+  const height = maxY - minY + 2 * margin;
+
+  return {
+    offsetX: (MODEL_SIZE - width) / 2 - (minX - margin),
+    offsetY: (MODEL_SIZE - height) / 2 - (minY - margin),
+  };
 }
 
 function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAnnotation): void {
