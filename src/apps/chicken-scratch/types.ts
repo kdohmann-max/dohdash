@@ -1,12 +1,9 @@
 export interface Shape {
-  kind: "rect" | "line";
+  kind: "line";
   x: number;
   y: number;
-  width?: number;
-  height?: number;
-  x2?: number;
-  y2?: number;
-  label?: string;
+  x2: number;
+  y2: number;
 }
 
 export interface DimensionLabel {

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chicken Scratch — How It Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f7f8fa;
+    --border: #e2e4e8;
+    --text: #1f2328;
+    --muted: #5f6368;
+    --accent: #00bd65;
+    --accent-soft: #e8f0fe;
+    --error: #dc2626;
+
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 32px;
+
+    --rounded-sm: 4px;
+    --rounded-md: 6px;
+    --rounded-lg: 8px;
+
+    --font-display: 'Comfortaa', sans-serif;
+    --font-heading: 'Comfortaa', sans-serif;
+    --font-body: 'Comfortaa', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg-alt);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-xl);
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2.25rem;
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text);
+  }
+
+  .hero .subtitle {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--spacing-xl);
+    align-items: start;
+  }
+
+  @media (max-width: 880px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .side {
+      position: static !important;
+    }
+  }
+
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--rounded-md);
+    padding: var(--spacing-lg);
+  }
+
+  /* ---------- pipeline ---------- */
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stage {
+    display: flex;
+    gap: var(--spacing-lg);
+  }
+
+  .stage-num {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .stage-body { flex: 1; min-width: 0; }
+
+  .stage-body h2 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .stage-body .file {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: var(--rounded-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .stage-body ul {
+    margin: 0;
+    padding-left: 1.1em;
+    color: var(--text);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .stage-body ul li + li { margin-top: var(--spacing-xs); }
+
+  .stage-body code, .branch-box code, .lane-card code, .side code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--rounded-sm);
+    padding: 0 4px;
+  }
+
+  .arrow {
+    text-align: center;
+    color: var(--muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    margin: var(--spacing-sm) 0;
+  }
+
+  /* ---------- edge function cache branch ---------- */
+
+  .cache-branch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+
+  @media (max-width: 600px) {
+    .cache-branch { grid-template-columns: 1fr; }
+  }
+
+  .branch-box {
+    border-radius: var(--rounded-md);
+    padding: var(--spacing-md);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .branch-box h3 {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .branch-box.hit {
+    border: 1px dashed var(--accent);
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+
+  .branch-box.hit h3 { color: var(--accent); }
+
+  .branch-box.miss {
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+  }
+
+  .branch-box.miss h3 { color: var(--muted); }
+
+  .branch-box ol {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+
+  .branch-box ol li + li { margin-top: var(--spacing-xs); }
+
+  /* ---------- result-type fork ---------- */
+
+  .fork-label {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: var(--spacing-xs) 0 var(--spacing-sm);
+  }
+
+  .branch-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  @media (max-width: 700px) {
+    .branch-row { grid-template-columns: 1fr; }
+  }
+
+  .lane {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lane-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .lane-card .lane-tag {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--bg);
+    background: var(--accent);
+    border-radius: var(--rounded-sm);
+    padding: 1px 8px;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .lane-card h2 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  .lane-card .file {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    display: inline-block;
+    align-self: flex-start;
+    padding: 2px 6px;
+    border-radius: var(--rounded-sm);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .lane-card ul {
+    margin: 0;
+    padding-left: 1.1em;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .lane-card ul li + li { margin-top: var(--spacing-xs); }
+
+  .arrow.merge { margin-top: var(--spacing-sm); }
+
+  /* ---------- side panels ---------- */
+
+  .side {
+    position: sticky;
+    top: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .side h3 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin: 0 0 var(--spacing-md) 0;
+  }
+
+  .state-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+  }
+
+  .state-pill {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--rounded-sm);
+    padding: 3px 8px;
+    background: var(--bg-alt);
+  }
+
+  .state-pill.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .state-pill.err {
+    border-color: var(--error);
+    color: var(--error);
+    background: var(--bg);
+  }
+
+  .state-arrow {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .state-loop {
+    margin-top: var(--spacing-md);
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: var(--spacing-md);
+    line-height: 1.5;
+  }
+
+  .gotchas ul {
+    margin: 0;
+    padding-left: 1.1em;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  .gotchas ul li + li { margin-top: var(--spacing-sm); }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: var(--spacing-xl);
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>Chicken Scratch — How It Works</h1>
+      <p class="subtitle">A field sketch becomes clean text or a dimensioned blueprint, end to end.</p>
+    </header>
+
+    <div class="layout">
+      <main class="pipeline">
+
+        <section class="stage card">
+          <div class="stage-num">1</div>
+          <div class="stage-body">
+            <h2>Upload</h2>
+            <span class="file">UploadPanel.tsx</span>
+            <ul>
+              <li>Pick a model — currently just <code>gemini-flash-latest</code> (the only entry in <code>MODEL_OPTIONS</code>)</li>
+              <li>Upload an image via camera or file input</li>
+              <li>Client-enforced 10&nbsp;MB size limit</li>
+            </ul>
+          </div>
+        </section>
+        <div class="arrow">↓</div>
+
+        <section class="stage card">
+          <div class="stage-num">2</div>
+          <div class="stage-body">
+            <h2>Client orchestration</h2>
+            <span class="file">ChickenScratchApp.tsx</span>
+            <ul>
+              <li>Base64-encode the image</li>
+              <li>State transitions <code>idle → processing</code></li>
+              <li>Calls <code>supabase.functions.invoke("process-scratch", { image, mimeType, model })</code></li>
+            </ul>
+          </div>
+        </section>
+        <div class="arrow">↓</div>
+
+        <section class="stage card">
+          <div class="stage-num">3</div>
+          <div class="stage-body">
+            <h2>Edge function</h2>
+            <span class="file">supabase/functions/process-scratch/index.ts</span>
+            <ul>
+              <li>Validate image MIME type + <code>model</code> against <code>ALLOWED_MODELS</code></li>
+              <li>Hash <code>image + "::v3"</code> (current <code>PROMPT_VERSION</code>) → look up <code>scratch_cache</code> by <code>(image_hash, model)</code></li>
+            </ul>
+            <div class="cache-branch">
+              <div class="branch-box hit">
+                <h3>Cache hit</h3>
+                Return the cached <code>ProcessResult</code> directly — no model call.
+              </div>
+              <div class="branch-box miss">
+                <h3>Cache miss</h3>
+                <ol>
+                  <li>Call Gemini (<code>GoogleGenerativeAI</code>, <code>gemini-flash-latest</code>, <code>GEMINI_API_KEY</code>) with <code>PROMPT</code></li>
+                  <li>If result <code>type === "blueprint"</code>, run a second-pass verification via multi-turn chat with <code>VERIFY_PROMPT</code></li>
+                  <li>Write the result to <code>scratch_cache</code></li>
+                </ol>
+              </div>
+            </div>
+            <ul style="margin-top: var(--spacing-md);">
+              <li>Either way, returns a <code>ProcessResult</code></li>
+            </ul>
+          </div>
+        </section>
+        <div class="arrow">↓</div>
+
+        <div class="fork-label">branch on <code>ProcessResult.type</code></div>
+        <div class="branch-row">
+          <div class="lane">
+            <section class="card lane-card">
+              <span class="lane-tag">type: "handwriting"</span>
+              <h2>4a. Handwriting result</h2>
+              <ul>
+                <li><code>{ type: "handwriting", markdown: string }</code></li>
+              </ul>
+            </section>
+            <div class="arrow">↓</div>
+            <section class="card lane-card">
+              <h2>5a. Render markdown</h2>
+              <span class="file">ResultPanel.tsx</span>
+              <ul>
+                <li>Renders the markdown via <code>marked.js</code></li>
+                <li>State <code>processing → done</code> (or <code>error</code> on failure)</li>
+              </ul>
+            </section>
+          </div>
+          <div class="lane">
+            <section class="card lane-card">
+              <span class="lane-tag">type: "blueprint"</span>
+              <h2>4b. Blueprint result</h2>
+              <ul>
+                <li><code>{ type: "blueprint", elements: Shape[], labels: DimensionLabel[] }</code></li>
+              </ul>
+            </section>
+            <div class="arrow">↓</div>
+            <section class="card lane-card">
+              <h2>5b. Render to canvas</h2>
+              <span class="file">BlueprintRenderer.tsx / blueprintDraw.ts</span>
+              <ul>
+                <li>Canvas2D raster — <code>MODEL_SIZE = 1000</code>, <code>RENDER_SCALE = 2</code></li>
+                <li><code>centeringOffset()</code> centers the shapes' bounding box + dimension margins in the grid</li>
+                <li>Fixed technical palette (white bg, charcoal ink, gray dimension lines), independent of app theme</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+        <div class="arrow merge">↓</div>
+
+        <section class="stage card">
+          <div class="stage-num">6</div>
+          <div class="stage-body">
+            <h2>Output actions</h2>
+            <span class="file">ResultPanel.tsx</span>
+            <ul>
+              <li><strong>Copy / Download</strong> — handwriting as Markdown text / <code>.md</code>; blueprint as PNG via <code>canvasToBlob</code> / <code>canvasToDataUrl</code> (clipboard falls back to download)</li>
+              <li><strong>Send to DohDocs</strong> — <code>createDoc()</code> → <code>saveDoc()</code>, then navigate to <code>/dashboard/app/tasks</code>. Blueprint is embedded as a base64 PNG (<code>![Blueprint](data:image/png;...)</code>) with dimension labels appended as a Markdown list</li>
+            </ul>
+          </div>
+        </section>
+
+      </main>
+
+      <aside class="side">
+        <section class="card">
+          <h3>State machine</h3>
+          <div class="state-row">
+            <span class="state-pill">idle</span>
+            <span class="state-arrow">→</span>
+            <span class="state-pill active">processing</span>
+            <span class="state-arrow">→</span>
+            <span class="state-pill active">done</span>
+          </div>
+          <div class="state-row" style="margin-top: var(--spacing-sm);">
+            <span class="state-pill" style="visibility:hidden;">idle</span>
+            <span class="state-arrow" style="visibility:hidden;">→</span>
+            <span class="state-pill" style="visibility:hidden;">processing</span>
+            <span class="state-arrow">↘</span>
+            <span class="state-pill err">error</span>
+          </div>
+          <div class="state-loop">
+            "Try Again" / "New Image" resets <code>done</code> or <code>error</code> back to <code>idle</code>. There's no edge-function retry — the user just re-uploads.
+          </div>
+        </section>
+
+        <section class="card gotchas">
+          <h3>Gotchas &amp; ops notes</h3>
+          <ul>
+            <li><code>FunctionsHttpError</code> wraps the real error in <code>.context</code> (a <code>Response</code>) — call <code>.context.json()</code> for <code>{ error }</code>; logging the raw error won't show it.</li>
+            <li>Bump <code>PROMPT_VERSION</code> whenever <code>PROMPT</code> / <code>VERIFY_PROMPT</code> change — it salts the <code>scratch_cache</code> hash, so stale extractions stop being served.</li>
+            <li>Edits to <code>index.ts</code> require manual <code>supabase functions deploy process-scratch</code> — not part of the normal Vercel deploy.</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <footer>
+      Source: <code>.claude/context/chicken-scratch.md</code> · DohDash
+    </footer>
+  </div>
+</body>
+</html>

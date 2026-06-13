@@ -28,6 +28,9 @@ const PALETTE = {
 
 const DRAW_FONT = "Helvetica, Arial, sans-serif";
 
+const LINE_WIDTH = 8;
+const DIMENSION_FONT_SIZE = 21;
+
 const DIM_OFFSET = 28;
 const EXT_OVERSHOOT = 8;
 const TICK_LEN = 10;
@@ -59,29 +62,13 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   const { offsetX, offsetY } = centeringOffset(adjusted);
   ctx.translate(offsetX, offsetY);
 
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = LINE_WIDTH;
   for (const el of adjusted) {
-    if (el.kind === "rect") {
-      const w = el.width ?? 0;
-      const h = el.height ?? 0;
-      ctx.strokeStyle = PALETTE.ink;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(el.x, el.y, w, h);
-
-      if (el.label) {
-        ctx.fillStyle = PALETTE.ink;
-        ctx.font = `24px ${DRAW_FONT}`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(el.label, el.x + w / 2, el.y + h / 2);
-      }
-    } else {
-      ctx.strokeStyle = PALETTE.ink;
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.moveTo(el.x, el.y);
-      ctx.lineTo(el.x2 ?? el.x, el.y2 ?? el.y);
-      ctx.stroke();
-    }
+    ctx.beginPath();
+    ctx.moveTo(el.x, el.y);
+    ctx.lineTo(el.x2, el.y2);
+    ctx.stroke();
   }
 
   for (const ann of annotations) {
@@ -90,7 +77,7 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
 
   for (const lbl of unmatched) {
     ctx.fillStyle = PALETTE.ink;
-    ctx.font = `20px ${DRAW_FONT}`;
+    ctx.font = `${DIMENSION_FONT_SIZE}px ${DRAW_FONT}`;
     ctx.textAlign = lbl.anchor === "middle" ? "center" : lbl.anchor;
     ctx.textBaseline = "alphabetic";
     ctx.fillText(lbl.text, lbl.x, lbl.y);
@@ -99,27 +86,16 @@ export function renderBlueprint(canvas: HTMLCanvasElement, elements: Shape[], la
   ctx.restore();
 }
 
-/** Translation that centers the shapes' bounding box (plus room for dimension lines) within the model's 0-1000 grid. */
+/** Translation that centers the lines' bounding box (plus room for dimension lines) within the model's 0-1000 grid. */
 function centeringOffset(elements: Shape[]): { offsetX: number; offsetY: number } {
   if (elements.length === 0) return { offsetX: 0, offsetY: 0 };
 
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const el of elements) {
-    if (el.kind === "rect") {
-      const w = el.width ?? 0;
-      const h = el.height ?? 0;
-      minX = Math.min(minX, el.x);
-      minY = Math.min(minY, el.y);
-      maxX = Math.max(maxX, el.x + w);
-      maxY = Math.max(maxY, el.y + h);
-    } else {
-      const x2 = el.x2 ?? el.x;
-      const y2 = el.y2 ?? el.y;
-      minX = Math.min(minX, el.x, x2);
-      minY = Math.min(minY, el.y, y2);
-      maxX = Math.max(maxX, el.x, x2);
-      maxY = Math.max(maxY, el.y, y2);
-    }
+    minX = Math.min(minX, el.x, el.x2);
+    minY = Math.min(minY, el.y, el.y2);
+    maxX = Math.max(maxX, el.x, el.x2);
+    maxY = Math.max(maxY, el.y, el.y2);
   }
 
   const margin = DIM_OFFSET + EXT_OVERSHOOT;
@@ -136,35 +112,32 @@ function drawDimensionAnnotation(ctx: CanvasRenderingContext2D, ann: DimensionAn
   ctx.strokeStyle = PALETTE.dimension;
   ctx.lineWidth = 1;
 
-  // Bottom/right edges (flip) get their dimension line below/right of the shape.
-  const dir = ann.flip ? 1 : -1;
-
   if (ann.orientation === "horizontal") {
-    const dimY = ann.y1 + dir * DIM_OFFSET;
+    const dimY = ann.y1 - DIM_OFFSET;
 
-    // Extension lines from the rect corners past the dimension line.
-    drawLine(ctx, ann.x1, ann.y1, ann.x1, dimY + dir * EXT_OVERSHOOT);
-    drawLine(ctx, ann.x2, ann.y1, ann.x2, dimY + dir * EXT_OVERSHOOT);
+    // Extension lines from the line's endpoints past the dimension line.
+    drawLine(ctx, ann.x1, ann.y1, ann.x1, dimY - EXT_OVERSHOOT);
+    drawLine(ctx, ann.x2, ann.y1, ann.x2, dimY - EXT_OVERSHOOT);
 
     // Dimension line with tick marks at each end.
     drawLine(ctx, ann.x1, dimY, ann.x2, dimY);
     drawTick(ctx, ann.x1, dimY);
     drawTick(ctx, ann.x2, dimY);
 
-    drawLabel(ctx, ann.text, (ann.x1 + ann.x2) / 2, ann.flip ? dimY + 20 : dimY - 6, "center");
+    drawLabel(ctx, ann.text, (ann.x1 + ann.x2) / 2, dimY, "center");
   } else {
-    const dimX = ann.x1 + dir * DIM_OFFSET;
+    const dimX = ann.x1 - DIM_OFFSET;
 
-    // Extension lines from the rect corners past the dimension line.
-    drawLine(ctx, ann.x1, ann.y1, dimX + dir * EXT_OVERSHOOT, ann.y1);
-    drawLine(ctx, ann.x1, ann.y2, dimX + dir * EXT_OVERSHOOT, ann.y2);
+    // Extension lines from the line's endpoints past the dimension line.
+    drawLine(ctx, ann.x1, ann.y1, dimX - EXT_OVERSHOOT, ann.y1);
+    drawLine(ctx, ann.x1, ann.y2, dimX - EXT_OVERSHOOT, ann.y2);
 
     // Dimension line with tick marks at each end.
     drawLine(ctx, dimX, ann.y1, dimX, ann.y2);
     drawTick(ctx, dimX, ann.y1);
     drawTick(ctx, dimX, ann.y2);
 
-    drawRotatedLabel(ctx, ann.text, ann.flip ? dimX + 20 : dimX - 6, (ann.y1 + ann.y2) / 2);
+    drawRotatedLabel(ctx, ann.text, dimX, (ann.y1 + ann.y2) / 2);
   }
 }
 
@@ -188,17 +161,18 @@ function drawLabel(
   y: number,
   align: CanvasTextAlign,
 ): void {
-  ctx.font = `18px ${DRAW_FONT}`;
+  ctx.font = `${DIMENSION_FONT_SIZE}px ${DRAW_FONT}`;
   ctx.textAlign = align;
-  ctx.textBaseline = "alphabetic";
+  ctx.textBaseline = "middle";
 
   const metrics = ctx.measureText(text);
   const padding = 4;
+  const boxHeight = DIMENSION_FONT_SIZE + 4;
   ctx.fillStyle = PALETTE.dimensionLabelBg;
   let boxX = x;
   if (align === "center") boxX = x - metrics.width / 2;
   else if (align === "end") boxX = x - metrics.width;
-  ctx.fillRect(boxX - padding, y - 14, metrics.width + padding * 2, 18);
+  ctx.fillRect(boxX - padding, y - boxHeight / 2, metrics.width + padding * 2, boxHeight);
 
   ctx.fillStyle = PALETTE.dimension;
   ctx.fillText(text, x, y);

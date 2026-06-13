@@ -44,6 +44,8 @@ Calls `process-scratch` via `supabase.functions.invoke()` (a permitted direct `s
 - Blueprint prompt is shape/part-generic — no assumption of buildings/rooms/walls; extracts arbitrary `Shape[]` + `DimensionLabel[]`.
 - Client-side 10 MB size limit enforced in `UploadPanel.tsx`.
 - **Error-unwrap gotcha:** `FunctionsHttpError` wraps the real message in `.context` (a `Response`). Read `.context.json()` for `{ error? }` — logging the raw error won't show it.
+- **Model backend:** Google Gemini via direct `@google/generative-ai` SDK (`GoogleGenerativeAI`, `getGenerativeModel().generateContent()`), `GEMINI_API_KEY` secret. Only model is `gemini-flash-latest` (`MODEL_OPTIONS`/`ALLOWED_MODELS`/`DEFAULT_MODEL_ID`). Anthropic has been fully removed. Prompts live in `supabase/functions/process-scratch/prompts/extract.md` and `verify.md` (loaded at startup via `Deno.readTextFile`) — edit these directly to iterate on the prompt, no `index.ts` changes needed. `PROMPT_VERSION` (currently `"3"`) salts the `scratch_cache` hash — bump it whenever either prompt file changes so stale cached extractions stop being served.
+- **Deploy:** edits to `index.ts` require `supabase functions deploy process-scratch` — not automatic.
 
 ## Blueprint rendering
 
@@ -52,6 +54,7 @@ Calls `process-scratch` via `supabase.functions.invoke()` (a permitted direct `s
 `components/blueprintDraw.ts` — Canvas2D drawing.
 - `MODEL_SIZE = 1000` (logical space, matches the 0–1000 grid the model returns), `RENDER_SCALE = 2` (crisp raster). `CANVAS_SIZE` adds padding + charcoal border + outer margin. `PALETTE` is fixed, not theme-derived.
 - Draws border/padding → rects/lines + shape labels → dimension annotations (extension lines, 45° ticks, offset dimension line, centered/rotated label with background box) → unmatched labels as plain text.
+- `centeringOffset(adjusted)` translates the drawing (via `ctx.translate`) so the adjusted shapes' bounding box, expanded by `DIM_OFFSET + EXT_OVERSHOOT` margin on each side for dimension lines, is centered within the `MODEL_SIZE` 0-1000 grid — keeps sketches that don't span the full grid from rendering pinned to the top-left.
 
 `dimensions.ts` — pure logic (no canvas/DOM), consumed by `blueprintDraw.ts`:
 - `parseDimension(text)` — label → inches (feet/inches `12'-6"`, feet, inches, m, cm, mm, or a bare number = feet)

@@ -6,43 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-/** Bump whenever PROMPT/VERIFY_PROMPT change so stale cached extractions stop being served. */
-const PROMPT_VERSION = "3";
+/** Bump whenever prompts/extract.md or prompts/verify.md change so stale cached extractions stop being served. */
+const PROMPT_VERSION = "4";
 
-const PROMPT = `You are analyzing a photo. Your task has two parts:
-
-1. Classify the image as either "handwriting" (handwritten text, notes, a document) or "blueprint" (a sketch or technical drawing of physical objects — this may be a floor plan/room layout, furniture or cabinet parts, a mechanical part, or any other diagram made of shapes, lines, and dimensions).
-
-2. Process it accordingly:
-
-If "handwriting": Transcribe the text and format it as clean Markdown. Use headings (##) where the writer clearly intended section titles. Use bullet lists (-) for lists. Use plain paragraphs for everything else. Do not add extra structure that isn't implied by the original.
-
-If "blueprint": Extract the drawing's shapes and dimension labels. Do not assume the drawing represents a building, rooms, or walls — it could equally be a cabinet, a furniture part, a mechanical component, or any other object. Work systematically:
-
-STEP 1 — ENUMERATE: Scan the sketch left-to-right, top-to-bottom. Count every distinct closed rectangle and every standalone straight edge before writing any JSON. Every pen stroke that is part of the drawing must be accounted for by exactly one shape — do not merge two adjacent rectangles into one, do not split one rectangle into separate lines, and do not invent shapes that are not drawn. If the sketch is drawn on graph/grid paper, the background grid is NOT part of the drawing — never extract it as shapes or lines.
-
-STEP 2 — COORDINATES: Return coordinates on a 0-1000 x 0-1000 grid (0,0 is top-left). Preserve the RELATIVE positions and proportions exactly as drawn: if one rectangle is drawn twice as wide as another, its width value must be about twice as large; if two rectangles share a wall or touch edge-to-edge, their coordinates must share that exact edge — identical coordinate values, no gap and no overlap. Edges that are clearly intended to be horizontal or vertical (the vast majority in this kind of sketch) must be reported as exactly horizontal or vertical — snap out any slight skew from hand-drawing rather than reproducing it; only report a non-90-degree angle when the sketch unambiguously shows a deliberate diagonal.
-
-STEP 3 — DIMENSION LABELS: Capture every written measurement (e.g. "12'-6\\"", "300mm", "24") as a separate label with its position and its text EXACTLY as written. Place each label's x,y at the point where the text sits in the sketch, adjacent to the edge it measures. Only include a shape's "label" or a dimension label if that text is actually written on the sketch — never invent, infer, or add names, titles, or dimensions that are not present in the image.
-
-STEP 4 — CROSS-CHECK: Before answering, compare your coordinates against the written dimensions. If one edge is labeled 20 ft and another 10 ft, the first edge's drawn coordinate span must be about twice the second's. When the sketch's hand-drawn proportions and its written dimension labels conflict, adjust your coordinates to agree with the written dimensions.
-
-Shape kinds: "rect" for rectangles, "line" for any other straight edge or segment that doesn't form a complete rect.
-
-Return ONLY a valid JSON object in one of these two shapes — no explanation, no markdown fences:
-
-Handwriting: {"type":"handwriting","markdown":"# Title\n\nContent..."}
-
-Blueprint: {"type":"blueprint","elements":[{"kind":"rect","x":0,"y":0,"width":400,"height":300,"label":"Part A"},{"kind":"line","x":400,"y":0,"x2":400,"y2":500}],"labels":[{"text":"24 ft","x":200,"y":320,"anchor":"middle"}]}`;
-
-const VERIFY_PROMPT = `Audit your extraction above against the image, checking in this order:
-1. MISSING shapes — is any drawn rectangle or standalone line absent from the JSON?
-2. INVENTED shapes — does any JSON shape have no corresponding pen stroke in the drawing (including graph-paper grid lines mistakenly extracted)?
-3. MISPLACED shapes — do the relative positions match the sketch (left of, above, touching, contained in)? Shapes drawn sharing an edge must share identical coordinate values in the JSON — no gap, no overlap.
-4. PROPORTIONS — do the coordinate spans agree with the written dimension labels? An edge labeled twice as long as another must have roughly twice the coordinate span.
-5. LABELS — is every written measurement present, with its text verbatim, positioned next to the edge it measures? Is any label invented?
-
-Return the corrected JSON in exactly the same format ({"type":"blueprint","elements":[...],"labels":[...]}). If everything is already correct, return the same JSON unchanged. Return ONLY the JSON object — no commentary, no markdown fences.`;
+const PROMPT = (await Deno.readTextFile(new URL("./prompts/extract.md", import.meta.url))).trim();
+const VERIFY_PROMPT = (await Deno.readTextFile(new URL("./prompts/verify.md", import.meta.url))).trim();
 
 // Keep in sync with src/apps/chicken-scratch/models.ts MODEL_OPTIONS.
 const ALLOWED_MODELS = ["gemini-flash-latest"];
@@ -70,16 +38,8 @@ function validateResult(r: unknown): string | null {
   if (!Array.isArray(obj.elements)) return "blueprint result missing elements array";
   for (const el of obj.elements as Record<string, unknown>[]) {
     if (typeof el !== "object" || el === null) return "element is not an object";
-    if (el.kind === "rect") {
-      if (!isFinitePair(el.x, el.y)) return "rect has invalid position";
-      if (typeof el.width !== "number" || !Number.isFinite(el.width) || el.width <= 0) return "rect has invalid width";
-      if (typeof el.height !== "number" || !Number.isFinite(el.height) || el.height <= 0) return "rect has invalid height";
-      if (el.label !== undefined && typeof el.label !== "string") return "rect has invalid label";
-    } else if (el.kind === "line") {
-      if (!isFinitePair(el.x, el.y, el.x2, el.y2)) return "line has invalid coordinates";
-    } else {
-      return "element has unknown kind";
-    }
+    if (el.kind !== "line") return "element has unknown kind";
+    if (!isFinitePair(el.x, el.y, el.x2, el.y2)) return "line has invalid coordinates";
   }
 
   if (!Array.isArray(obj.labels)) return "blueprint result missing labels array";

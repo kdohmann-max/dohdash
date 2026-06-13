@@ -57,6 +57,8 @@ Apps (`APP_REGISTRY`, `src/apps/registry.tsx`): Job Files, Tasks (a.k.a. DohDocs
 
 ## App-level context
 
+- update app-level context when major changes are made
+
 @public/CompanyInfo.md
 @.claude/context/styleguide.md
 @.claude/context/dohdash.md

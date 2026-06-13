@@ -10,9 +10,7 @@ interface Props {
 }
 
 export function BlueprintRenderer({ elements, labels, canvasRef }: Props) {
-  const validElements = elements.filter(
-    (el) => el.kind === "rect" || el.kind === "line",
-  );
+  const validElements = elements.filter((el) => el.kind === "line");
   const hasWarning = validElements.length < elements.length;
 
   useEffect(() => {
