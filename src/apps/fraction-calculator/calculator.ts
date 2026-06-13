@@ -55,7 +55,8 @@ export type CalcAction =
   | { type: "allClear" }
   | { type: "toggleDisplay" }
   | { type: "toggleUnits" }
-  | { type: "setAccuracy"; value: Accuracy };
+  | { type: "setAccuracy"; value: Accuracy }
+  | { type: "recallResult"; value: Rational };
 
 const EMPTY_ENTRY: EntryValue = { feet: 0, whole: 0, num: 0, den: null };
 
@@ -245,6 +246,16 @@ export function dispatch(state: CalcState, action: CalcAction): CalcState {
 
     case "setAccuracy":
       return { ...state, accuracy: action.value };
+
+    case "recallResult":
+      return {
+        ...state,
+        accumulator: action.value,
+        pendingOp: null,
+        entry: { ...EMPTY_ENTRY },
+        activeField: fieldOrder(state.unitsMode)[0],
+        error: false,
+      };
 
     default:
       return state;

@@ -176,3 +176,15 @@ describe("mode toggles", () => {
     expect(s.accuracy).toBe(32);
   });
 });
+
+describe("recallResult", () => {
+  test("loads a value as the accumulator, clearing pending state", () => {
+    let s = initialState();
+    s = dispatch(s, { type: "digit", value: 9 });
+    s = dispatch(s, { type: "operator", op: "+" });
+    s = dispatch(s, { type: "recallResult", value: { numerator: 5n, denominator: 1n } });
+    expect(s.accumulator).toEqual({ numerator: 5n, denominator: 1n });
+    expect(s.pendingOp).toBeNull();
+    expect(s.entry).toEqual({ feet: 0, whole: 0, num: 0, den: null });
+  });
+});
