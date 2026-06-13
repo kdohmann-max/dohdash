@@ -1,138 +1,89 @@
 # DohDash — Design System & Style Guide
 
-> **Mandate: All DohDash apps must follow this guide.** No hardcoded colors, no ad-hoc icon SVGs, no magic pixel values.
+> **Mandate: all DohDash apps follow this guide.** No hardcoded colors, no ad-hoc icon SVGs, no magic pixel values.
 
-## Philosophy
+Clean, minimal, professional with a friendly rounded feel (Comfortaa). No decorative flourishes, drop shadows, or gradients.
 
-Clean, minimal, professional — with a friendly, rounded feel from the Comfortaa typeface. Avoid decorative flourishes, drop shadows, or gradients. Let whitespace and consistent tokens do the work.
+## Colors
 
-## Color System
-
-All colors are CSS custom properties written at runtime by `applyCompanyTheme()`. **Never hardcode hex values in CSS or TSX.**
+CSS custom properties written at runtime by `applyCompanyTheme()`. **Never hardcode hex in CSS or TSX.** `--dark-*` equivalents swap in when `[data-theme="dark"]` is set on `<html>`.
 
 | Token | Light default | Purpose |
 |-------|---------------|---------|
-| `--bg` | #ffffff | Page and surface backgrounds |
+| `--bg` | #ffffff | Page/surface backgrounds |
 | `--bg-alt` | #f7f8fa | Sidebar, panel, card backgrounds |
 | `--border` | #e2e4e8 | Dividers, input borders, card outlines |
-| `--text` | #1f2328 | Primary readable text |
+| `--text` | #1f2328 | Primary text |
 | `--muted` | #5f6368 | Secondary labels, descriptions, placeholders |
 | `--accent` | #00bd65 | Interactive elements, links, active states |
 | `--accent-soft` | #e8f0fe | Hover backgrounds, focus rings, highlight fills |
-| `--error` | #dc2626 | Destructive actions, delete buttons, error states |
+| `--error` | #dc2626 | Destructive actions, error states |
 
-Dark equivalents (`--dark-*`) are swapped in automatically when `[data-theme="dark"]` is set on `<html>`.
-
-### Rules
-
-- Use `--bg` not `#fff`. Use `--text` not `#000`. Use `--error` not any hardcoded red.
-- Buttons with `color: #fff` → use `color: var(--bg)` so dark mode inverts correctly.
-- Use `--muted` for secondary/helper text; `--text` for primary content.
-- Use `--accent-soft` for hover backgrounds on interactive items; `--accent` for the active/focus border or icon color.
+- `--bg` not `#fff`; `--text` not `#000`; `--error` not any hardcoded red.
+- Buttons with white text → `color: var(--bg)` (so dark mode inverts).
+- `--muted` for secondary/helper text, `--text` for primary.
+- `--accent-soft` for hover backgrounds on interactive items; `--accent` for active/focus border or icon color.
 
 ## Typography
 
-All fonts come from `public/CompanyInfo.md` and are applied as CSS vars:
+Fonts come from `public/CompanyInfo.md` as CSS vars — **never set `font-family` directly**. Default: Comfortaa for all three.
 
 - `--font-display` / `--font-weight-display` — hero headings, dashboard title
 - `--font-heading` / `--font-weight-heading` — section headers, app names (bold)
-- `--font-body` / `--font-weight-body` — all body text (regular weight)
-
-Default: Comfortaa for all three. **Never set `font-family` directly — always use the var.**
+- `--font-body` / `--font-weight-body` — body text (regular)
 
 ## Spacing
 
-Five-step scale — use these vars only, no magic pixel numbers:
+Five-step scale only, no magic numbers. Standard pattern: card padding `--spacing-lg`; item gap `--spacing-sm`/`--spacing-md`; section separation `--spacing-xl`.
 
-| Token | Value |
-|-------|-------|
-| `--spacing-xs` | 4px |
-| `--spacing-sm` | 8px |
-| `--spacing-md` | 12px |
-| `--spacing-lg` | 16px |
-| `--spacing-xl` | 32px |
+| Token | Value |  | Token | Value |
+|-------|-------|--|-------|-------|
+| `--spacing-xs` | 4px |  | `--spacing-lg` | 16px |
+| `--spacing-sm` | 8px |  | `--spacing-xl` | 32px |
+| `--spacing-md` | 12px |  | | |
 
-Standard pattern: card padding = `--spacing-lg`; item gap = `--spacing-sm` or `--spacing-md`; section separation = `--spacing-xl`.
-
-## Border Radius
+## Border radius
 
 | Token | Value | Use |
 |-------|-------|-----|
-| `--rounded-sm` | 4px | Badges, tags, small chips |
-| `--rounded-md` | 6px | Cards, app tiles, input fields, buttons |
+| `--rounded-sm` | 4px | Badges, tags, chips |
+| `--rounded-md` | 6px | Cards, tiles, inputs, buttons (default) |
 | `--rounded-lg` | 8px | Modals, panels, larger containers |
-
-Default for most interactive elements: `--rounded-md`.
 
 ## Icons
 
-**Icon library: `src/icons/index.tsx`** — the only place to define or import app icons.
+**`src/icons/index.tsx` is the only place to define/import app icons** — never inline ad-hoc SVGs in components.
 
-### Rules
-
-- **Never inline ad-hoc SVGs in component files.** Add them to `src/icons/index.tsx` and import.
-- All icons use the shared `svgProps(size)` helper defined in that file.
-- Default rendered size: 28px (configurable via `size` prop).
-- ViewBox: `0 0 24 24`
-- Stroke: `currentColor`, width `1.5`, `strokeLinecap: "round"`, `strokeLinejoin: "round"`
-- Fill: `none` (stroke-only, no fills)
-- Color: always inherits via `currentColor` — the parent sets color, not the icon
-
-### Adding a new icon
+- Use the shared `svgProps(size)` helper. Default size 28px (`size` prop).
+- ViewBox `0 0 24 24`; stroke `currentColor` width `1.5`, `strokeLinecap`/`strokeLinejoin` `"round"`; fill `none`. Color always inherits via `currentColor` (parent sets it).
 
 ```tsx
 export function MyAppIcon({ size }: { size?: number } = {}) {
-  return (
-    <svg {...svgProps(size)}>
-      <path d="..." />
-    </svg>
-  );
+  return <svg {...svgProps(size)}><path d="..." /></svg>;
 }
 ```
 
-## Light / Dark Theme
+## Light / dark theme
 
-The `data-theme` attribute on `<html>` (managed by `src/theme.ts`) swaps in dark palette values.
+`data-theme` on `<html>` (managed by `src/theme.ts`) swaps in the dark palette. Every color reference **must** work in both modes — test with the shell header toggle. `applyCompanyTheme()` sets the `--dark-*` vars; the `[data-theme="dark"]` rule in `index.css` remaps the un-prefixed vars to them.
 
-- Every color reference in CSS **must** work in both modes.
-- Test by toggling the theme button in the shell header.
-- The `--dark-*` vars are set by `applyCompanyTheme()`; the `[data-theme="dark"]` rule in `index.css` remaps the un-prefixed vars to them.
-
-## Component Patterns
-
-### Cards / Tiles
+## Component patterns
 
 ```css
-background: var(--bg);
-border: 1px solid var(--border);
-border-radius: var(--rounded-md);
-padding: var(--spacing-lg);
-```
+/* Card / tile */
+background: var(--bg); border: 1px solid var(--border);
+border-radius: var(--rounded-md); padding: var(--spacing-lg);
+/* hover: */ border-color: var(--accent); background: var(--accent-soft);
 
-Hover:
-```css
-border-color: var(--accent);
-background: var(--accent-soft);
-```
-
-### Primary Buttons
-
-```css
-background: var(--accent);
-color: var(--bg);          /* NOT #fff */
-border: none;
-border-radius: var(--rounded-md);
+/* Primary button */
+background: var(--accent); color: var(--bg); /* NOT #fff */
+border: none; border-radius: var(--rounded-md);
 padding: var(--spacing-sm) var(--spacing-lg);
-```
 
-### Destructive / Delete
-
-```css
+/* Destructive (delete/remove/reset only) */
 color: var(--error);
 ```
 
-Use `--accent` for primary actions; `--error` for destructive (delete, remove, reset) actions only.
+## Per-component CSS
 
-## Per-Component CSS
-
-Each `.tsx` component owns a co-located `.css` file. Scope all selectors under a unique wrapper class (e.g., `.tasks-app`) to avoid style leakage between apps. Inherit shell tokens — don't redefine them inside the app.
+Each `.tsx` owns a co-located `.css`. Scope all selectors under a unique wrapper class (e.g. `.tasks-app`) to avoid leakage. Inherit shell tokens — don't redefine them.

@@ -1,5 +1,7 @@
 # Chicken Scratch — Context
 
+Converts handwriting/sketches to clean text or a dimensioned blueprint via a Supabase Edge Function. Functional app (not a stub).
+
 ## State machine
 
 `src/apps/chicken-scratch/ChickenScratchApp.tsx`
@@ -12,7 +14,7 @@ type AppState =
   | { status: "error"; message: string }
 ```
 
-Transitions: upload → `processing` → `done` | `error`. "Try Again" / "New Image" resets to `idle`. There is no retry on the edge function — user must re-upload.
+upload → `processing` → `done` | `error`. "Try Again" / "New Image" resets to `idle`. No edge-function retry — user re-uploads.
 
 ## Result types
 
@@ -31,52 +33,34 @@ interface Shape {
   label?: string;
 }
 
-interface DimensionLabel {
-  text: string; x: number; y: number;
-  anchor: "start" | "middle" | "end";
-}
+interface DimensionLabel { text: string; x: number; y: number; anchor: "start" | "middle" | "end"; }
 ```
 
-## Edge function integration
+## Edge function
 
-Calls Supabase Edge Function `process-scratch` via `supabase.functions.invoke()` (one of two permitted direct `supabase` uses — see `dohdash.md`).
+Calls `process-scratch` via `supabase.functions.invoke()` (a permitted direct `supabase` use — see `dohdash.md`).
 
-Input: `{ image: base64string, mimeType: string, model?: string }` — `model` comes from the picker in `UploadPanel.tsx` (`src/apps/chicken-scratch/models.ts`, `MODEL_OPTIONS`/`DEFAULT_MODEL`). The edge function validates it against its own `ALLOWED_MODELS` allowlist (kept in sync with `models.ts`) and falls back to `DEFAULT_MODEL_ID` if missing/invalid. `scratch_cache` is keyed on `(image_hash, model)` so the same image re-processed with a different model isn't served a stale result.
-Output: `ProcessResult`
-
-The blueprint extraction prompt is shape/part-generic — it does not assume the drawing is a building, rooms, or walls; it extracts arbitrary `Shape[]` (rects/lines) and `DimensionLabel[]`.
-
-**Error unwrapping gotcha:** `FunctionsHttpError` wraps the actual error message in `.context` (a `Response` object). The code reads `.context.json()` to extract `{ error?: string }`. Logging the raw error won't show the real message.
-
-Client-side 10 MB size limit enforced in `UploadPanel.tsx` before the call is made.
+- **In:** `{ image: base64, mimeType, model? }`. `model` from the `UploadPanel.tsx` picker (`models.ts`: `MODEL_OPTIONS`/`DEFAULT_MODEL`); the function validates against its own `ALLOWED_MODELS` allowlist (keep in sync) and falls back to `DEFAULT_MODEL_ID`. `scratch_cache` is keyed on `(image_hash, model)` so re-processing with a different model isn't served a stale result. **Out:** `ProcessResult`.
+- Blueprint prompt is shape/part-generic — no assumption of buildings/rooms/walls; extracts arbitrary `Shape[]` + `DimensionLabel[]`.
+- Client-side 10 MB size limit enforced in `UploadPanel.tsx`.
+- **Error-unwrap gotcha:** `FunctionsHttpError` wraps the real message in `.context` (a `Response`). Read `.context.json()` for `{ error? }` — logging the raw error won't show it.
 
 ## Blueprint rendering
 
-`src/apps/chicken-scratch/components/BlueprintRenderer.tsx` — renders `Shape[]` + `DimensionLabel[]` to a `<canvas>` (rasterized PNG, not SVG) via `renderBlueprint()`. Output is a fixed-palette "technical drawing": white background, charcoal ink, gray dimension lines — independent of the app's light/dark theme.
+`components/BlueprintRenderer.tsx` — renders `Shape[]` + `DimensionLabel[]` to a `<canvas>` (rasterized PNG, not SVG) via `renderBlueprint()`. Fixed "technical drawing" palette (white bg, charcoal ink, gray dimension lines), independent of app theme. Exports `canvasToBlob()` / `canvasToDataUrl()`.
 
-Exports `canvasToBlob()` and `canvasToDataUrl()` for PNG export.
+`components/blueprintDraw.ts` — Canvas2D drawing.
+- `MODEL_SIZE = 1000` (logical space, matches the 0–1000 grid the model returns), `RENDER_SCALE = 2` (crisp raster). `CANVAS_SIZE` adds padding + charcoal border + outer margin. `PALETTE` is fixed, not theme-derived.
+- Draws border/padding → rects/lines + shape labels → dimension annotations (extension lines, 45° ticks, offset dimension line, centered/rotated label with background box) → unmatched labels as plain text.
 
-`src/apps/chicken-scratch/components/blueprintDraw.ts` — the actual Canvas2D drawing code, called by `BlueprintRenderer`.
-- `MODEL_SIZE = 1000` (logical drawing space, matches the 0-1000 grid the model returns coordinates in), `RENDER_SCALE = 2` (output pixel multiplier for a crisp raster export). `CANVAS_SIZE` adds padding + a charcoal border + outer margin around `MODEL_SIZE`.
-- `PALETTE` is a fixed set of colors (white background, charcoal ink, gray dimension lines/labels) — not theme-derived.
-- Draws the border/padding, then rects/lines and shape labels, then dimension annotations (extension lines, 45° tick marks, offset dimension line, centered/rotated label with a background box for legibility), then any unmatched labels as plain text
+`dimensions.ts` — pure logic (no canvas/DOM), consumed by `blueprintDraw.ts`:
+- `parseDimension(text)` — label → inches (feet/inches `12'-6"`, feet, inches, m, cm, mm, or a bare number = feet)
+- `matchDimensionLabels(elements, labels)` — each label → nearest rect edge (top = width, left = height) or a line's full segment (`edge: "length"`), within a sketch-unit threshold
+- `adjustShapeProportions(elements, matches)` — 3 phases: (1) rects with both width+height labels get drawn height corrected to real aspect ratio; (2) `globalScale` (sketch px → real units) = median across all matched shapes/lines incl. phase-1; (3) remaining single-dimension shapes rescaled by `globalScale`
+- `buildDimensionAnnotations(...)` — matches → annotations, incl. standalone lines (horizontal/vertical by `|dx|` vs `|dy|`); non-matching labels returned as `unmatched`, rendered as plain text
 
-`src/apps/chicken-scratch/dimensions.ts` — pure logic consumed by `blueprintDraw.ts`, no canvas/DOM dependency:
-- `parseDimension(text)` — parses a label into inches (feet/inches like `12'-6"`, plain feet, inches, meters, centimeters, millimeters, or a bare number assumed to be feet)
-- `matchDimensionLabels(elements, labels)` — matches each `DimensionLabel` to the nearest rect edge (top = width, left = height) or to a line's full segment (`edge: "length"`), within a sketch-unit threshold
-- `adjustShapeProportions(elements, matches)` — three phases: (1) rects with both width+height labels get their drawn height corrected to the real-world aspect ratio; (2) a `globalScale` (sketch px → real units) is computed as the median across all matched shapes/lines, including phase-1 results; (3) remaining shapes with only one matched dimension (rects with one edge, or lines with a length label) are rescaled using `globalScale`
-- `buildDimensionAnnotations(elements, labels, matches)` — turns matches into dimension-line annotations for `blueprintDraw.ts`, including standalone lines (classified as horizontal/vertical by `|dx|` vs `|dy|`); labels that don't match any edge are returned as `unmatched` and rendered as plain text
+## ResultPanel — save / copy / download
 
-## "Send to DohDocs"
-
-`ResultPanel.tsx` — on save:
-1. Calls `createDoc(null, ownerId)` then `saveDoc({ ...doc, title, markdown })` via `db.ts`
-2. Navigates to `/dashboard/app/tasks`
-
-Handwriting result → saved as-is Markdown. Blueprint result → canvas rasterized via `canvasToDataUrl()` and embedded as a base64 PNG `![Blueprint](data:image/png;...)` Markdown image, with dimension labels appended as a Markdown list.
-
-## Copy / Download
-
-`ResultPanel.tsx` — both are async and branch on `result.type`:
-- Handwriting: Copy writes the Markdown text to the clipboard; Download saves a `.md` file.
-- Blueprint: Copy writes a PNG (`canvasToBlob()`) to the clipboard via `ClipboardItem`, falling back to `handleDownload()` if `navigator.clipboard.write` isn't available; Download saves a `.png` file.
+`ResultPanel.tsx`:
+- **Send to DohDocs:** `createDoc(null, ownerId)` → `saveDoc({...doc, title, markdown})` → navigate `/dashboard/app/tasks`. Handwriting saved as-is; blueprint embedded as a base64 PNG (`canvasToDataUrl()`) `![Blueprint](data:image/png;...)` with dimension labels appended as a Markdown list.
+- **Copy/Download** (async, branch on `result.type`): handwriting → Markdown text / `.md` file; blueprint → PNG via `ClipboardItem` (falls back to download if `clipboard.write` unavailable) / `.png` file.
