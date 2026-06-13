@@ -8,6 +8,7 @@ import { Launcher } from "./launcher/Launcher";
 import { AppStubPage } from "./apps/AppStubPage";
 import { TasksApp } from "./apps/tasks/TasksApp";
 import { ChickenScratchApp } from "./apps/chicken-scratch/ChickenScratchApp";
+import { FractionCalculatorApp } from "./apps/fraction-calculator/FractionCalculatorApp";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import "./App.css";
 
@@ -25,6 +26,7 @@ function AppRoute() {
   const { appId } = useParams<{ appId: string }>();
   if (appId === "tasks") return <TasksApp />;
   if (appId === "chicken-scratch") return <ChickenScratchApp />;
+  if (appId === "fraction-calculator") return <FractionCalculatorApp />;
   return <AppStubPage />;
 }
 

@@ -9,6 +9,7 @@ import {
   ExpensesIcon,
   CleanUpIcon,
   ChickenScratchIcon,
+  FractionCalculatorIcon,
 } from "../icons";
 
 export interface AppDef {
@@ -75,6 +76,13 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <ChickenScratchIcon />,
     description: "Convert handwriting and sketches into clean digital text and diagrams.",
     route: "/dashboard/app/chicken-scratch",
+  },
+  {
+    id: "fraction-calculator",
+    name: "Fraction Calculator",
+    icon: <FractionCalculatorIcon />,
+    description: "Calculate with fractions, decimals, and measurements.",
+    route: "/dashboard/app/fraction-calculator",
   },
 ];
 

@@ -174,3 +174,15 @@ export function MoonIcon({ size }: { size?: number } = {}) {
     </svg>
   );
 }
+
+export function FractionCalculatorIcon({ size }: { size?: number } = {}) {
+  return (
+    <svg {...svgProps(size)}>
+      <path d="M5 5h14" />
+      <path d="M5 19h14" />
+      <path d="M8 3l-2 4" />
+      <path d="M16 17l2 4" />
+      <rect x="4" y="9" width="16" height="6" rx="1" />
+    </svg>
+  );
+}
