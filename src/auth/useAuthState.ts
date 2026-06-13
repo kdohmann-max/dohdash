@@ -90,9 +90,12 @@ export function useAuthState() {
     // Stash the destination before the OAuth round-trip so AuthGate can
     // restore it afterwards — fixes the lost-deep-link problem (see plan §4).
     sessionStorage.setItem(REDIRECT_STORAGE_KEY, window.location.pathname + window.location.search);
+    // Must land back under /dashboard so AuthGate (which restores the stashed
+    // path above) is mounted — redirecting to "/" would land on LandingPage
+    // and silently drop the deep link.
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: `${window.location.origin}/dashboard` },
     });
   }
 

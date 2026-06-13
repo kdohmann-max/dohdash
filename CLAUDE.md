@@ -1,5 +1,10 @@
 # DohDash — Claude Context
 
+## Token Discipline & Diff Constraints
+- **Diff-Only Output:** You must provide all code modifications strictly as standard unified diffs or targeted function replacements. Do not rewrite unaffected code block blocks, surrounding boilerplate, or entire files.
+- **Strict Context Limitation:** Do not execute global repository searches (`grep`, `find`) or read files outside the explicitly targeted paths unless absolutely critical to resolve a compilation dependency.
+- **Console Output Discipline:** When running build or test terminal commands, only output lines containing errors or warnings. Suppress verbose success logs.
+
 ## Project overview
 
 DohDash is a "company OS" dashboard: employees sign in (Google OAuth via Supabase Auth) to a launcher of company apps, gated by admin-controlled per-app permissions. Also serves a public landing page. **Portable to another company** by swapping `public/CompanyInfo.md` (+ logo + Supabase credentials) — no source edits, no rebuild.
