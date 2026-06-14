@@ -57,8 +57,21 @@ export function Display({ state }: { state: CalcState }) {
       ? `${formatValue(state.accumulator, state)} ${OP_SYMBOL[state.pendingOp]}`
       : "";
 
+  const lastTwoResults = state.history.slice(-2);
+
   return (
     <div className="fc-display">
+      {lastTwoResults.length > 0 && (
+        <div className="fc-display-history">
+          {lastTwoResults.map((entry, i) => (
+            <div key={i} className="fc-display-history-item">
+              <span className="fc-display-history-result">
+                {formatValue(entry.result, state)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="fc-display-pending">{pending}</div>
       <div className="fc-display-current">{formatEntry(state)}</div>
     </div>

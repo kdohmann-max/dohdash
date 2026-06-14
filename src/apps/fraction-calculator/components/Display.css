@@ -42,3 +42,33 @@
   font-size: 1.8rem;
   letter-spacing: normal;
 }
+
+.fc-display-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(0,0,0,0.1);
+  font-size: 0.85rem;
+  color: var(--muted);
+  opacity: 0.65;
+  width: 100%;
+}
+
+[data-theme="dark"] .fc-display-history {
+  border-top-color: rgba(255,255,255,0.1);
+}
+
+.fc-display-history-item {
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.fc-display-history-result {
+  font-size: 1rem;
+  font-weight: var(--font-weight-mono);
+  letter-spacing: 0.5px;
+  color: var(--accent-secondary);
+  opacity: 0.8;
+}
