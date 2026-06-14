@@ -8,21 +8,6 @@
   padding: var(--spacing-lg);
   gap: var(--spacing-lg);
   animation: slideUp 0.5s ease-out;
-  position: relative;
-}
-
-.fraction-calculator > .fc-history {
-  position: absolute;
-  top: var(--spacing-lg);
-  left: var(--spacing-lg);
-  right: var(--spacing-lg);
-  max-height: 90px;
-  z-index: 10;
-  margin: 0;
-}
-
-.fraction-calculator > .fc-display {
-  margin-top: 100px;
 }
 
 .fraction-calculator h1 {
