@@ -11,7 +11,36 @@
   gap: var(--spacing-sm);
 }
 
-.fc-toggle,
+.fc-segmented {
+  flex: 1;
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  overflow: hidden;
+}
+
+.fc-segment {
+  flex: 1;
+  background: var(--bg);
+  border: none;
+  border-left: 1px solid var(--border);
+  padding: var(--spacing-sm);
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.fc-segment:first-child {
+  border-left: none;
+}
+
+.fc-segment[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: var(--font-weight-heading);
+}
+
 .fc-accuracy-chip {
   flex: 1;
   background: var(--bg);
@@ -22,17 +51,12 @@
   font-family: var(--font-body);
   color: var(--text);
   cursor: pointer;
+  text-align: center;
 }
 
-.fc-toggle[aria-pressed="true"],
 .fc-accuracy-chip[aria-pressed="true"] {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
   font-weight: var(--font-weight-heading);
-}
-
-.fc-accuracy-chip {
-  flex: 1;
-  text-align: center;
 }

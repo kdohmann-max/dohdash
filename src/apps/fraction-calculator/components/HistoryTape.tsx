@@ -1,13 +1,23 @@
 // src/apps/fraction-calculator/components/HistoryTape.tsx
 import { useEffect, useRef } from "react";
-import { toDecimalString, toFeetInchesString, toFractionString } from "../fraction";
+import {
+  roundToFraction,
+  toDecimalString,
+  toFeetAndInches,
+  toFeetInchesString,
+  toFractionString,
+} from "../fraction";
 import type { CalcState, HistoryEntry } from "../calculator";
 import "./HistoryTape.css";
 
 function formatResult(entry: HistoryEntry, state: CalcState): string {
-  if (state.unitsMode) return toFeetInchesString(entry.result, BigInt(state.accuracy));
+  if (state.unitsMode === "ftIn") return toFeetInchesString(entry.result, BigInt(state.accuracy));
+  if (state.unitsMode === "ftInSeparate") {
+    const { feet, inches } = toFeetAndInches(entry.result, BigInt(state.accuracy));
+    return `${feet} ft ${inches} in`;
+  }
   if (state.display === "decimal") return toDecimalString(entry.result);
-  return toFractionString(entry.result);
+  return toFractionString(roundToFraction(entry.result, BigInt(state.accuracy)));
 }
 
 export function HistoryTape({

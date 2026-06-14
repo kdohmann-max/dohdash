@@ -13,6 +13,7 @@ export type ActiveField = "feet" | "whole" | "num" | "den";
 export type Operator = "+" | "-" | "*" | "/";
 export type DisplayMode = "fraction" | "decimal";
 export type Accuracy = 64 | 32 | 16 | 8;
+export type UnitsMode = "plain" | "ftIn" | "ftInSeparate";
 
 const OPERATOR_SYMBOLS: Record<Operator, string> = { "+": "+", "-": "−", "*": "×", "/": "÷" };
 
@@ -39,7 +40,7 @@ export interface CalcState {
   accumulator: Rational | null;
   pendingOp: Operator | null;
   display: DisplayMode;
-  unitsMode: boolean;
+  unitsMode: UnitsMode;
   accuracy: Accuracy;
   history: HistoryEntry[];
   error: boolean;
@@ -53,8 +54,8 @@ export type CalcAction =
   | { type: "equals" }
   | { type: "clearEntry" }
   | { type: "allClear" }
-  | { type: "toggleDisplay" }
-  | { type: "toggleUnits" }
+  | { type: "setDisplay"; value: DisplayMode }
+  | { type: "setUnitsMode"; value: UnitsMode }
   | { type: "setAccuracy"; value: Accuracy }
   | { type: "recallResult"; value: Rational };
 
@@ -67,27 +68,28 @@ export function initialState(): CalcState {
     accumulator: null,
     pendingOp: null,
     display: "fraction",
-    unitsMode: false,
+    unitsMode: "plain",
     accuracy: 16,
     history: [],
     error: false,
   };
 }
 
-/** Order of fields for field-advance, with "feet" only included in units mode. */
-function fieldOrder(unitsMode: boolean): ActiveField[] {
-  return unitsMode ? ["feet", "whole", "num", "den"] : ["whole", "num", "den"];
+/** Order of fields for field-advance, with "feet" only included when units mode has a feet field. */
+function fieldOrder(unitsMode: UnitsMode): ActiveField[] {
+  return unitsMode === "plain" ? ["whole", "num", "den"] : ["feet", "whole", "num", "den"];
 }
 
 /** Convert an EntryValue to a Rational. `den === null` is treated as a whole number (no fraction part). */
-function entryToRational(entry: EntryValue, unitsMode: boolean): Rational {
+function entryToRational(entry: EntryValue, unitsMode: UnitsMode): Rational {
+  const hasFeet = unitsMode !== "plain";
   const denom = entry.den ?? 0;
   if (denom === 0) {
-    const wholeInches = unitsMode ? entry.feet * 12 + entry.whole : entry.whole;
+    const wholeInches = hasFeet ? entry.feet * 12 + entry.whole : entry.whole;
     return fromInt(wholeInches);
   }
   const fraction: Rational = { numerator: BigInt(entry.num), denominator: BigInt(denom) };
-  const whole = unitsMode ? entry.feet * 12 + entry.whole : entry.whole;
+  const whole = hasFeet ? entry.feet * 12 + entry.whole : entry.whole;
   return add(fromInt(whole), fraction);
 }
 
@@ -109,9 +111,10 @@ function applyOp(a: Rational, op: Operator, b: Rational): Rational {
   }
 }
 
-function entryDisplayString(entry: EntryValue, unitsMode: boolean): string {
+function entryDisplayString(entry: EntryValue, unitsMode: UnitsMode): string {
+  const hasFeet = unitsMode !== "plain";
   const parts: string[] = [];
-  if (unitsMode && entry.feet) parts.push(`${entry.feet}'`);
+  if (hasFeet && entry.feet) parts.push(`${entry.feet}'`);
   if (entry.whole || (!parts.length && entry.den === null)) parts.push(`${entry.whole}`);
   if (entry.den !== null) parts.push(`${entry.num}/${entry.den || 1}`);
   return parts.join(" ");
@@ -231,11 +234,12 @@ export function dispatch(state: CalcState, action: CalcAction): CalcState {
         error: false,
       };
 
-    case "toggleDisplay":
-      return { ...state, display: state.display === "fraction" ? "decimal" : "fraction" };
+    case "setDisplay":
+      return { ...state, display: action.value };
 
-    case "toggleUnits": {
-      const unitsMode = !state.unitsMode;
+    case "setUnitsMode": {
+      const unitsMode = action.value;
+      if (unitsMode === state.unitsMode) return state;
       return {
         ...state,
         unitsMode,

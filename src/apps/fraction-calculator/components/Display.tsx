@@ -1,6 +1,8 @@
 // src/apps/fraction-calculator/components/Display.tsx
 import {
+  roundToFraction,
   toDecimalString,
+  toFeetAndInches,
   toFeetInchesString,
   toFractionString,
   type Rational,
@@ -17,22 +19,27 @@ const OP_SYMBOL: Record<string, string> = {
 
 function formatEntry(state: CalcState): string {
   const { entry, unitsMode } = state;
+  const hasFeet = unitsMode !== "plain";
   const parts: string[] = [];
-  if (unitsMode && entry.feet) parts.push(`${entry.feet}'`);
-  if (entry.whole || entry.den === null || (unitsMode && entry.feet === 0 && entry.whole === 0)) {
-    if (!(unitsMode && entry.feet > 0 && entry.whole === 0 && entry.den !== null)) {
+  if (hasFeet && entry.feet) parts.push(`${entry.feet}'`);
+  if (entry.whole || entry.den === null || (hasFeet && entry.feet === 0 && entry.whole === 0)) {
+    if (!(hasFeet && entry.feet > 0 && entry.whole === 0 && entry.den !== null)) {
       parts.push(`${entry.whole}`);
     }
   }
   if (entry.den !== null) parts.push(`${entry.num}/${entry.den}`);
   const joined = parts.join(" ");
-  return unitsMode ? `${joined}"` : joined || "0";
+  return hasFeet ? `${joined}"` : joined || "0";
 }
 
 function formatValue(value: Rational, state: CalcState): string {
-  if (state.unitsMode) return toFeetInchesString(value, BigInt(state.accuracy));
+  if (state.unitsMode === "ftIn") return toFeetInchesString(value, BigInt(state.accuracy));
+  if (state.unitsMode === "ftInSeparate") {
+    const { feet, inches } = toFeetAndInches(value, BigInt(state.accuracy));
+    return `${feet} ft ${inches} in`;
+  }
   if (state.display === "decimal") return toDecimalString(value);
-  return toFractionString(value);
+  return toFractionString(roundToFraction(value, BigInt(state.accuracy)));
 }
 
 export function Display({ state }: { state: CalcState }) {

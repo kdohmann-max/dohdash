@@ -31,22 +31,29 @@ describe("digit entry", () => {
 
   test("field-advance includes feet when units mode is on", () => {
     let s = initialState();
-    s = dispatch(s, { type: "toggleUnits" });
+    s = dispatch(s, { type: "setUnitsMode", value: "ftIn" });
     expect(s.activeField).toBe("feet");
     s = dispatch(s, { type: "fieldAdvance" });
     expect(s.activeField).toBe("whole");
   });
 
-  test("toggleUnits mid-entry resets the current entry", () => {
+  test("setUnitsMode mid-entry resets the current entry", () => {
     let s = initialState();
     s = dispatch(s, { type: "digit", value: 1 });
     s = dispatch(s, { type: "fieldAdvance" });
     s = dispatch(s, { type: "digit", value: 2 });
     s = dispatch(s, { type: "fieldAdvance" });
     s = dispatch(s, { type: "digit", value: 3 });
-    s = dispatch(s, { type: "toggleUnits" });
+    s = dispatch(s, { type: "setUnitsMode", value: "ftIn" });
     expect(s.entry).toEqual({ feet: 0, whole: 0, num: 0, den: null });
     expect(s.activeField).toBe("feet");
+  });
+
+  test("setUnitsMode to the current mode is a no-op", () => {
+    let s = initialState();
+    s = dispatch(s, { type: "digit", value: 1 });
+    s = dispatch(s, { type: "setUnitsMode", value: "plain" });
+    expect(s.entry.whole).toBe(1);
   });
 });
 
@@ -162,12 +169,14 @@ describe("division by zero", () => {
   });
 });
 
-describe("mode toggles", () => {
-  test("toggleDisplay flips between fraction and decimal", () => {
+describe("mode setters", () => {
+  test("setDisplay sets the display mode", () => {
     let s = initialState();
     expect(s.display).toBe("fraction");
-    s = dispatch(s, { type: "toggleDisplay" });
+    s = dispatch(s, { type: "setDisplay", value: "decimal" });
     expect(s.display).toBe("decimal");
+    s = dispatch(s, { type: "setDisplay", value: "fraction" });
+    expect(s.display).toBe("fraction");
   });
 
   test("setAccuracy updates the accuracy denominator", () => {

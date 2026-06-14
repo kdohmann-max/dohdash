@@ -150,3 +150,33 @@ export function toFeetInchesString(r: Rational, accuracyDenominator: bigint): st
   if (feet === 0n) return `${sign}${inchesPart}"`;
   return `${sign}${feet}' ${inchesPart}"`;
 }
+
+/**
+ * Like `toFeetInchesString`, but returns feet and inches as separate plain
+ * values (no `'`/`"` glyphs). Sign is attached to feet when nonzero,
+ * otherwise to inches.
+ */
+export function toFeetAndInches(
+  r: Rational,
+  accuracyDenominator: bigint,
+): { feet: bigint; inches: string } {
+  const rounded = roundToFraction(r, accuracyDenominator);
+  const { numerator, denominator } = rounded;
+  const negative = numerator < 0n;
+  const n = negative ? -numerator : numerator;
+
+  const totalInchesWhole = n / denominator;
+  const inchRem = n % denominator;
+  const feet = totalInchesWhole / 12n;
+  const inches = totalInchesWhole % 12n;
+
+  const inchesStr =
+    inchRem === 0n
+      ? `${inches}`
+      : inches === 0n
+        ? `${inchRem}/${denominator}`
+        : `${inches} ${inchRem}/${denominator}`;
+
+  if (feet === 0n) return { feet: 0n, inches: negative ? `-${inchesStr}` : inchesStr };
+  return { feet: negative ? -feet : feet, inches: inchesStr };
+}

@@ -10,6 +10,7 @@ import {
   toDecimalString,
   toFractionString,
   toFeetInchesString,
+  toFeetAndInches,
   roundToFraction,
   type Rational,
 } from "./fraction";
@@ -132,5 +133,36 @@ describe("toFeetInchesString", () => {
 
   test("formats negative sub-inch values without a redundant zero", () => {
     expect(toFeetInchesString({ numerator: -1n, denominator: 2n }, 16n)).toBe(`-1/2"`);
+  });
+});
+
+describe("toFeetAndInches", () => {
+  test("splits feet and inches into separate values", () => {
+    expect(toFeetAndInches({ numerator: 85n, denominator: 2n }, 16n)).toEqual({
+      feet: 3n,
+      inches: "6 1/2",
+    });
+  });
+
+  test("formats whole inches under a foot with feet = 0", () => {
+    expect(toFeetAndInches(fromInt(8), 16n)).toEqual({ feet: 0n, inches: "8" });
+  });
+
+  test("formats exact feet with no remainder", () => {
+    expect(toFeetAndInches(fromInt(24), 16n)).toEqual({ feet: 2n, inches: "0" });
+  });
+
+  test("formats negative values with sign on feet", () => {
+    expect(toFeetAndInches({ numerator: -85n, denominator: 2n }, 16n)).toEqual({
+      feet: -3n,
+      inches: "6 1/2",
+    });
+  });
+
+  test("formats negative sub-inch values with sign on inches", () => {
+    expect(toFeetAndInches({ numerator: -1n, denominator: 2n }, 16n)).toEqual({
+      feet: 0n,
+      inches: "-1/2",
+    });
   });
 });
