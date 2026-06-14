@@ -9,6 +9,7 @@
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: var(--rounded-md);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .fc-history--empty {

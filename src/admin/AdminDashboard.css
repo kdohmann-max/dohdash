@@ -270,6 +270,7 @@
   border: 1px solid var(--error);
   border-radius: var(--rounded-md);
   background: var(--bg-alt);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
 }
 
 .admin-confirm-card p {

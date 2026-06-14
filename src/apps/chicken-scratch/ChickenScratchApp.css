@@ -68,11 +68,12 @@
   font-size: 0.9rem;
   font-weight: var(--font-weight-heading);
   cursor: pointer;
-  transition: opacity 0.15s, box-shadow 0.15s;
-  box-shadow: 0 2px 8px rgba(200, 108, 46, 0.15);
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.2), 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .cs-error button:hover {
   opacity: 0.95;
-  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.25);
+  box-shadow: 0 6px 16px rgba(200, 108, 46, 0.3), 0 3px 6px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
 }

@@ -11,6 +11,7 @@
   padding: var(--spacing-sm) var(--spacing-lg);
   border-bottom: 1px solid var(--border);
   background: var(--bg-alt);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .shell-brand {
