@@ -64,3 +64,4 @@ Apps (`APP_REGISTRY`, `src/apps/registry.tsx`): Job Files, Tasks (a.k.a. DohDocs
 @.claude/context/dohdash.md
 @.claude/context/tasks.md
 @.claude/context/chicken-scratch.md
+@.claude/context/fraction-calculator.md
