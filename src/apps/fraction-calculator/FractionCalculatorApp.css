@@ -1,10 +1,19 @@
 .fraction-calculator {
   display: flex;
   flex-direction: column;
-  max-width: 420px;
+  max-width: 480px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
   padding: var(--spacing-lg);
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+  animation: slideUp 0.5s ease-out;
+}
+
+.fraction-calculator h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: 2rem;
+  margin: var(--spacing-md) 0 0 0;
+  letter-spacing: -0.5px;
 }

@@ -7,6 +7,15 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  animation: slideUp 0.5s ease-out;
+}
+
+.chicken-scratch h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: 2rem;
+  margin: 0 0 var(--spacing-lg) 0;
+  letter-spacing: -0.5px;
 }
 
 .cs-processing {
@@ -57,5 +66,13 @@
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 0.9rem;
+  font-weight: var(--font-weight-heading);
   cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(200, 108, 46, 0.15);
+}
+
+.cs-error button:hover {
+  opacity: 0.95;
+  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.25);
 }

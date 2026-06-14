@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2b2c2f;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   color: var(--text);
 }
 
@@ -24,8 +24,9 @@
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
   margin: 0;
-  font-size: 2.5rem;
-  font-variant: small-caps;
+  font-size: 2.8rem;
+  letter-spacing: -1px;
+  animation: slideUp 0.6s ease-out 0.1s both;
 }
 
 .landing-cta {
@@ -37,9 +38,13 @@
   color: var(--bg);
   font-weight: var(--font-weight-heading);
   text-decoration: none;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(200, 108, 46, 0.3);
+  animation: slideUp 0.6s ease-out 0.2s both;
 }
 
 .landing-cta:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
+  opacity: 0.95;
+  box-shadow: 0 6px 20px rgba(200, 108, 46, 0.4);
+  color: var(--bg);
 }

@@ -2,33 +2,52 @@
 .fc-keypad {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .fc-key {
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--rounded-md);
-  font-family: var(--font-body);
-  font-size: 1.4rem;
-  padding: var(--spacing-md) 0;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  font-size: 1.3rem;
+  padding: var(--spacing-lg) var(--spacing-sm);
   cursor: pointer;
   color: var(--text);
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  user-select: none;
 }
 
 .fc-key:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
+  box-shadow: 0 4px 8px rgba(200, 108, 46, 0.15);
+  transform: translateY(-2px);
+}
+
+.fc-key:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
 .fc-key--fn {
   color: var(--muted);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
 }
 
 .fc-key--op {
-  color: var(--accent);
-  font-weight: var(--font-weight-heading);
+  color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+  font-weight: var(--font-weight-mono);
+}
+
+.fc-key--op:hover {
+  background: rgba(30, 64, 175, 0.08);
+  border-color: var(--accent-secondary);
 }
 
 .fc-key--equals {
@@ -36,10 +55,19 @@
   background: var(--accent);
   color: var(--bg);
   border: none;
-  font-weight: var(--font-weight-heading);
+  font-weight: var(--font-weight-mono);
+  font-size: 1.4rem;
+  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.2);
 }
 
 .fc-key--equals:hover {
   background: var(--accent);
-  opacity: 0.9;
+  opacity: 0.95;
+  box-shadow: 0 6px 16px rgba(200, 108, 46, 0.3);
+  transform: translateY(-2px);
+}
+
+.fc-key--equals:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(200, 108, 46, 0.2);
 }

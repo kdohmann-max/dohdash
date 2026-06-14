@@ -19,10 +19,10 @@
   gap: var(--spacing-sm);
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
-  font-size: 18px;
-  letter-spacing: -0.5px;
-  font-variant: small-caps;
+  font-size: 20px;
+  letter-spacing: -0.75px;
   color: var(--text);
+  font-style: normal;
 }
 
 .shell-nav {

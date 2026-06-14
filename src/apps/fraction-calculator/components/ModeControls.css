@@ -36,15 +36,16 @@
 }
 
 .fc-segment[aria-pressed="true"] {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--accent-secondary);
+  color: var(--bg);
   font-weight: var(--font-weight-heading);
+  border-color: var(--accent-secondary);
 }
 
 .fc-accuracy-chip {
   flex: 1;
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm);
   font-size: 0.9rem;
@@ -52,11 +53,17 @@
   color: var(--text);
   cursor: pointer;
   text-align: center;
+  transition: all 0.15s ease;
+}
+
+.fc-accuracy-chip:hover {
+  border-color: var(--accent-secondary);
+  background: rgba(30, 64, 175, 0.05);
 }
 
 .fc-accuracy-chip[aria-pressed="true"] {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+  color: var(--bg);
   font-weight: var(--font-weight-heading);
 }

@@ -5,6 +5,10 @@
   gap: var(--spacing-xs);
   max-height: 140px;
   overflow-y: auto;
+  padding: var(--spacing-sm);
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
 }
 
 .fc-history--empty {
@@ -15,22 +19,26 @@
   display: flex;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  background: none;
+  background: transparent;
   border: none;
   border-radius: var(--rounded-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
   color: var(--muted);
   font-size: 0.9rem;
+  font-family: var(--font-mono);
   text-align: left;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .fc-history-item:hover {
   background: var(--accent-soft);
-  color: var(--text);
+  color: var(--accent);
+  border-radius: var(--rounded-sm);
 }
 
 .fc-history-result {
-  font-weight: var(--font-weight-heading);
+  font-weight: var(--font-weight-mono);
   white-space: nowrap;
+  color: var(--accent-secondary);
 }

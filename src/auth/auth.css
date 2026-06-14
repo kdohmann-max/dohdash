@@ -50,21 +50,26 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-lg);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--rounded-md);
   background: var(--accent);
   color: var(--bg);
   font-weight: var(--font-weight-heading);
   cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(200, 108, 46, 0.15);
 }
 
 .auth-button:hover {
-  opacity: 0.9;
+  opacity: 0.95;
+  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.25);
 }
 
 .auth-button--ghost {
   background: transparent;
   color: var(--text);
+  box-shadow: none;
+  border: 1.5px solid var(--border);
 }
 
 .auth-button--ghost:hover {

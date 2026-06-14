@@ -2,7 +2,7 @@
 
 > **Mandate: all DohDash apps follow this guide.** No hardcoded colors, no ad-hoc icon SVGs, no magic pixel values.
 
-Clean, minimal, professional with a friendly rounded feel (Comfortaa). No decorative flourishes, drop shadows, or gradients.
+Construction-inspired precision modern: geometric IBM Plex Sans display paired with warm Comfortaa body. Grid-based layouts with measured accents in construction brass/rust. Professional, distinctive, built-for-builders.
 
 ## Colors
 
@@ -11,26 +11,30 @@ CSS custom properties written at runtime by `applyCompanyTheme()`. **Never hardc
 | Token | Light default | Purpose |
 |-------|---------------|---------|
 | `--bg` | #ffffff | Page/surface backgrounds |
-| `--bg-alt` | #f7f8fa | Sidebar, panel, card backgrounds |
-| `--border` | #e2e4e8 | Dividers, input borders, card outlines |
+| `--bg-alt` | #f9f8f6 | Sidebar, panel, card backgrounds (warm cream) |
+| `--border` | #e8e4df | Dividers, input borders, card outlines |
 | `--text` | #1f2328 | Primary text |
-| `--muted` | #5f6368 | Secondary labels, descriptions, placeholders |
-| `--accent` | #00bd65 | Interactive elements, links, active states |
-| `--accent-soft` | #e8f0fe | Hover backgrounds, focus rings, highlight fills |
+| `--muted` | #6b6b6b | Secondary labels, descriptions, placeholders |
+| `--accent` | #c86c2e | Primary interactive (construction brass/rust) |
+| `--accent-soft` | #fef3ee | Hover backgrounds, focus rings, highlight fills |
+| `--accent-secondary` | #1e40af | Secondary actions, important controls (deep blue) |
+| `--accent-tertiary` | #fbbf24 | Highlights, "construction gold" accents |
 | `--error` | #dc2626 | Destructive actions, error states |
 
 - `--bg` not `#fff`; `--text` not `#000`; `--error` not any hardcoded red.
 - Buttons with white text → `color: var(--bg)` (so dark mode inverts).
 - `--muted` for secondary/helper text, `--text` for primary.
-- `--accent-soft` for hover backgrounds on interactive items; `--accent` for active/focus border or icon color.
+- `--accent-soft` for hover backgrounds on interactive items; `--accent` for primary focus/active states.
+- `--accent-secondary` (deep blue) for secondary/important controls; `--accent-tertiary` (gold) for highlights and accents.
 
 ## Typography
 
-Fonts come from `public/CompanyInfo.md` as CSS vars — **never set `font-family` directly**. Default: Comfortaa for all three.
+Fonts come from `public/CompanyInfo.md` as CSS vars — **never set `font-family` directly**. Geometric IBM Plex Sans for impact, warm Comfortaa for readability.
 
-- `--font-display` / `--font-weight-display` — hero headings, dashboard title
-- `--font-heading` / `--font-weight-heading` — section headers, app names (bold)
-- `--font-body` / `--font-weight-body` — body text (regular)
+- `--font-display` / `--font-weight-display` — hero h1, dashboard title (IBM Plex Sans 700)
+- `--font-heading` / `--font-weight-heading` — section h2–h4, app names (IBM Plex Sans 600)
+- `--font-body` / `--font-weight-body` — body text, content (Comfortaa 400)
+- `--font-mono` / `--font-weight-mono` — measurements, technical display, code (IBM Plex Mono 500)
 
 ## Spacing
 
@@ -67,21 +71,49 @@ export function MyAppIcon({ size }: { size?: number } = {}) {
 
 `data-theme` on `<html>` (managed by `src/theme.ts`) swaps in the dark palette. Every color reference **must** work in both modes — test with the shell header toggle. `applyCompanyTheme()` sets the `--dark-*` vars; the `[data-theme="dark"]` rule in `index.css` remaps the un-prefixed vars to them.
 
+## Animations
+
+Three reusable keyframes for entrance/transitions. Use `animation-delay` for staggered reveals (0ms, 100ms, 200ms).
+
+- `fadeIn` — opacity 0→1, 250ms default
+- `slideUp` — translateY(12px) → 0, 250ms default
+- `slideInLeft` — translateX(-12px) → 0, 250ms default
+
+Apply sparingly; one well-orchestrated entrance (staggered) outweighs scattered micro-interactions.
+
 ## Component patterns
 
+**Card / tile with accent bar:**
 ```css
-/* Card / tile */
+border-left: 3px solid var(--accent-secondary);
 background: var(--bg); border: 1px solid var(--border);
 border-radius: var(--rounded-md); padding: var(--spacing-lg);
+transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 /* hover: */ border-color: var(--accent); background: var(--accent-soft);
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+```
 
-/* Primary button */
-background: var(--accent); color: var(--bg); /* NOT #fff */
+**Primary button (accent):**
+```css
+background: var(--accent); color: var(--bg);
 border: none; border-radius: var(--rounded-md);
 padding: var(--spacing-sm) var(--spacing-lg);
+font-weight: var(--font-weight-heading);
+transition: opacity 0.15s, box-shadow 0.15s;
+/* hover: */ opacity: 0.9; box-shadow: 0 4px 12px rgba(200,108,46,0.2);
+```
 
-/* Destructive (delete/remove/reset only) */
-color: var(--error);
+**Secondary button (blue accent):**
+```css
+background: transparent; color: var(--accent-secondary); border: 1.5px solid var(--accent-secondary);
+border-radius: var(--rounded-md); padding: var(--spacing-sm) var(--spacing-lg);
+/* hover: */ background: rgba(30, 64, 175, 0.08);
+```
+
+**Destructive (delete/remove only):**
+```css
+color: var(--error); transition: all 0.15s;
+/* hover: */ background: var(--error); color: var(--bg);
 ```
 
 ## Per-component CSS

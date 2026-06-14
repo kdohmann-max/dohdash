@@ -10,28 +10,32 @@ appNames:
 styleGuide:
   colors:
     bg: "#ffffff"
-    bgAlt: "#f7f8fa"
-    border: "#e2e4e8"
+    bgAlt: "#f9f8f6"
+    border: "#e8e4df"
     text: "#1f2328"
-    muted: "#5f6368"
-    accent: "#ea580c"
-    accentSoft: "#ffedd5"
+    muted: "#6b6b6b"
+    accent: "#c86c2e"
+    accentSoft: "#fef3ee"
+    accentSecondary: "#1e40af"
+    accentTertiary: "#fbbf24"
     error: "#dc2626"
-    darkBg: "#1e1f22"
-    darkBgAlt: "#16171a"
-    darkBorder: "#34363b"
-    darkText: "#e6e7e9"
-    darkMuted: "#9aa0a6"
-    darkAccent: "#f97316"
-    darkAccentSoft: "#4a2511"
+    darkBg: "#1a1a1a"
+    darkBgAlt: "#242424"
+    darkBorder: "#3a3a3a"
+    darkText: "#e8e8e8"
+    darkMuted: "#ababab"
+    darkAccent: "#f08d5d"
+    darkAccentSoft: "#5a3426"
+    darkAccentSecondary: "#3b82f6"
+    darkAccentTertiary: "#f59e0b"
     darkError: "#f07070"
   typography:
     display:
-      fontFamily: "Comfortaa, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+      fontFamily: "IBM Plex Sans, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
       fontWeight: 700
     heading:
-      fontFamily: "Comfortaa, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-      fontWeight: 700
+      fontFamily: "IBM Plex Sans, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+      fontWeight: 600
     body:
       fontFamily: "Comfortaa, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
       fontWeight: 400

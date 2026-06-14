@@ -28,11 +28,13 @@
 
 .admin-tab:hover {
   color: var(--accent);
+  border-bottom-color: var(--accent-soft);
 }
 
 .admin-tab--active {
   color: var(--accent);
   border-bottom-color: var(--accent);
+  border-bottom-width: 3px;
 }
 
 .admin-status {
@@ -74,16 +76,25 @@
 
 .admin-provision-form button {
   padding: var(--spacing-xs) var(--spacing-md);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--rounded-sm);
   background: var(--accent);
   color: var(--bg);
   cursor: pointer;
+  font-weight: var(--font-weight-heading);
+  transition: opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 6px rgba(200, 108, 46, 0.15);
+}
+
+.admin-provision-form button:hover {
+  opacity: 0.95;
+  box-shadow: 0 4px 8px rgba(200, 108, 46, 0.2);
 }
 
 .admin-provision-form button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: default;
+  box-shadow: none;
 }
 
 .admin-hint {
@@ -167,8 +178,9 @@
 }
 
 .admin-role-badge--admin {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: rgba(30, 64, 175, 0.1);
+  color: var(--accent-secondary);
+  border: 1px solid var(--accent-secondary);
 }
 
 .admin-link-button {
@@ -203,10 +215,12 @@
 .admin-accept-button,
 .admin-reject-button {
   padding: var(--spacing-xs) var(--spacing-md);
-  border: 1px solid var(--border);
+  border: 1.5px solid;
   border-radius: var(--rounded-sm);
   cursor: pointer;
-  background: var(--bg);
+  background: transparent;
+  font-weight: var(--font-weight-heading);
+  transition: all 0.15s ease;
 }
 
 .admin-accept-button {
@@ -216,6 +230,7 @@
 
 .admin-accept-button:hover {
   background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .admin-reject-button {
@@ -224,7 +239,8 @@
 }
 
 .admin-reject-button:hover {
-  background: var(--accent-soft);
+  background: rgba(220, 38, 38, 0.1);
+  border-color: var(--error);
 }
 
 .admin-last-signin {
