@@ -178,11 +178,27 @@ export function MoonIcon({ size }: { size?: number } = {}) {
 export function FractionCalculatorIcon({ size }: { size?: number } = {}) {
   return (
     <svg {...svgProps(size)}>
-      <path d="M5 5h14" />
-      <path d="M5 19h14" />
-      <path d="M8 3l-2 4" />
-      <path d="M16 17l2 4" />
-      <rect x="4" y="9" width="16" height="6" rx="1" />
+      {/* Calculator body */}
+      <rect x="3" y="2" width="18" height="20" rx="2" ry="2" />
+      {/* Display screen */}
+      <rect x="5" y="4" width="14" height="4" rx="0.5" />
+      {/* Button grid: 3 columns x 4 rows */}
+      {/* Row 1 */}
+      <rect x="5.5" y="9" width="3.5" height="1.8" rx="0.3" />
+      <rect x="10" y="9" width="3.5" height="1.8" rx="0.3" />
+      <rect x="14.5" y="9" width="3.5" height="1.8" rx="0.3" />
+      {/* Row 2 */}
+      <rect x="5.5" y="11.2" width="3.5" height="1.8" rx="0.3" />
+      <rect x="10" y="11.2" width="3.5" height="1.8" rx="0.3" />
+      <rect x="14.5" y="11.2" width="3.5" height="1.8" rx="0.3" />
+      {/* Row 3 */}
+      <rect x="5.5" y="13.4" width="3.5" height="1.8" rx="0.3" />
+      <rect x="10" y="13.4" width="3.5" height="1.8" rx="0.3" />
+      <rect x="14.5" y="13.4" width="3.5" height="1.8" rx="0.3" />
+      {/* Row 4 */}
+      <rect x="5.5" y="15.6" width="3.5" height="1.8" rx="0.3" />
+      <rect x="10" y="15.6" width="3.5" height="1.8" rx="0.3" />
+      <rect x="14.5" y="15.6" width="3.5" height="1.8" rx="0.3" />
     </svg>
   );
 }
