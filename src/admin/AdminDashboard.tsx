@@ -89,8 +89,10 @@ export function AdminDashboard() {
   }
 
   async function handleAcceptRequest(id: string) {
+    const request = accessRequests?.find((item) => item.id === id);
     try {
       await acceptAccessRequest(id);
+      audit("accept_request", request?.email ?? id);
       reload();
     } catch (err) {
       setError(errorMessage(err));
