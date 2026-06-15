@@ -32,6 +32,8 @@ if (linkError) {
   process.exit(1);
 }
 
+// Use email_otp, not hashed_token: this project's GoTrue rejects
+// hashed_token from generateLink as immediately expired.
 const tokenHash = linkData.properties.email_otp;
 
 const anonClient = createClient(supabaseUrl, anonKey, {
