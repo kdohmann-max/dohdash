@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Doh Built Inc. logo</title>
+  <desc id="desc">A simple DB lettermark in the Doh Built construction brass and graphite palette.</desc>
+  <defs>
+    <linearGradient id="frameGradient" x1="40" x2="472" y1="40" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c86c2e"/>
+      <stop offset="1" stop-color="#fbbf24"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="48" fill="#f9f8f6"/>
+  <rect x="40" y="40" width="432" height="432" rx="28" fill="#ffffff" stroke="url(#frameGradient)" stroke-width="16"/>
+  <text x="256" y="318" fill="#c86c2e" font-family="IBM Plex Sans, Segoe UI, Arial, sans-serif" font-size="196" font-weight="700" letter-spacing="-12" text-anchor="middle">DB</text>
+</svg>
