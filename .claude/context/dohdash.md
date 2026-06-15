@@ -50,3 +50,28 @@ type AuthState =
 Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`.
 
 `app_id` is a code-defined string key into `APP_REGISTRY` (`src/apps/registry.tsx`) — apps are not DB rows.
+
+## Dev auth bypass & browser testing
+
+For local testing/troubleshooting, Claude can load DohDash already
+`authenticated` (bypassing Google OAuth) using Playwright:
+
+1. `.env.local` must have `SUPABASE_SERVICE_ROLE_KEY` (service_role secret,
+   Project Settings -> API in Supabase). Only read by scripts in `scripts/`
+   via `--env-file`; never imported by `src/`.
+2. `npm run auth:mint` mints a session for the admin test user
+   (`yeg.built.form@gmail.com`) via `generateLink`/`verifyOtp` and writes
+   `playwright/.auth/admin.json` (Playwright storageState, gitignored).
+   Uses the `email_otp` from `generateLink`, not `hashed_token` — this
+   project's GoTrue rejects `hashed_token` as immediately expired.
+3. With `npm run dev` running, write a one-off script under `scripts/dev/`
+   that launches Chromium with `storageState: "playwright/.auth/admin.json"`
+   to land on `/dashboard` pre-authenticated — see
+   `scripts/dev/check-dashboard.mjs` for the pattern.
+4. OAuth troubleshooting: a session-loaded context exercises post-redirect
+   states (`pending-access`/`error`/profile provisioning, see
+   `useAuthState.ts`); a fresh context with no `storageState` clicking
+   "Sign in with Google" reveals pre-redirect config issues (redirect URI
+   mismatch) without real Google credentials.
+
+Re-run `npm run auth:mint` if the session expires or is rotated.
