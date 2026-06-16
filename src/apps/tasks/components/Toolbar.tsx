@@ -16,11 +16,13 @@ import { CommentIcon } from "../../../icons";
 interface Props {
   editor: Editor | null;
   onAddComment?: () => void;
+  onShareOpen?: () => void;
+  isReadOnly?: boolean;
 }
 
 const HEADING_LEVELS = [1, 2, 3, 4] as const;
 
-export function Toolbar({ editor, onAddComment }: Props) {
+export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props) {
   const [showFormat, setShowFormat] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -103,38 +105,56 @@ export function Toolbar({ editor, onAddComment }: Props) {
   return (
     <div className="toolbar">
       <div className="ribbon">
-            <label className="control">
-              <span className="control-label">Heading</span>
-              <select value={headingValue} onChange={(e) => setHeading(e.target.value)}>
-                <option value="p">Normal text</option>
-                {HEADING_LEVELS.map((l) => (
-                  <option key={l} value={l}>Heading {l}</option>
-                ))}
-              </select>
-            </label>
-            <label className="control">
-              <span className="control-label">List</span>
-              <select value={listValue} onChange={(e) => setList(e.target.value)}>
-                <option value="none">None</option>
-                <option value="bullet">Bulleted</option>
-                <option value="ordered">Numbered</option>
-                <option value="task">Task (checkbox)</option>
-              </select>
-            </label>
-            <button className={`f-button ${showFormat ? "active" : ""}`} onClick={() => setShowFormat((v) => !v)} title="Formatting selectors">F</button>
-            <button className="image-btn" onClick={() => fileInput.current?.click()} title="Insert image" aria-label="Insert image">
-              <svg width="16" height="16" aria-hidden="true"><use href="/icons.svg#paperclip-icon" /></svg>
-            </button>
-            <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPickImage} />
+            {!isReadOnly && (
+              <>
+                <label className="control">
+                  <span className="control-label">Heading</span>
+                  <select value={headingValue} onChange={(e) => setHeading(e.target.value)}>
+                    <option value="p">Normal text</option>
+                    {HEADING_LEVELS.map((l) => (
+                      <option key={l} value={l}>Heading {l}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="control">
+                  <span className="control-label">List</span>
+                  <select value={listValue} onChange={(e) => setList(e.target.value)}>
+                    <option value="none">None</option>
+                    <option value="bullet">Bulleted</option>
+                    <option value="ordered">Numbered</option>
+                    <option value="task">Task (checkbox)</option>
+                  </select>
+                </label>
+                <button className={`f-button ${showFormat ? "active" : ""}`} onClick={() => setShowFormat((v) => !v)} title="Formatting selectors">F</button>
+                <button className="image-btn" onClick={() => fileInput.current?.click()} title="Insert image" aria-label="Insert image">
+                  <svg width="16" height="16" aria-hidden="true"><use href="/icons.svg#paperclip-icon" /></svg>
+                </button>
+                <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPickImage} />
+              </>
+            )}
             {onAddComment ? (
               <button className="image-btn" onClick={onAddComment} title="Comment on selection" aria-label="Comment on selection">
                 <CommentIcon size={16} />
               </button>
             ) : null}
-            <button className="archive-btn" onClick={() => archiveDone(editor)}>Archive Done</button>
+            {!isReadOnly && (
+              <button className="archive-btn" onClick={() => archiveDone(editor)}>Archive Done</button>
+            )}
+            {onShareOpen && (
+              <button
+                className="toolbar-btn"
+                title="Share note"
+                onClick={onShareOpen}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+              </button>
+            )}
           </div>
 
-      {showFormat && (
+      {!isReadOnly && showFormat && (
         <div className="ribbon sub-ribbon">
           {FORMATTING_SELECTORS.map((sel) => (
             <button

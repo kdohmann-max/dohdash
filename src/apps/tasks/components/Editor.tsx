@@ -4,6 +4,7 @@ import { buildExtensions } from "../editor/extensions";
 import { RESOLVED_META } from "../editor/CommentMark";
 import { Toolbar } from "./Toolbar";
 import { CommentsPanel, type ThreadView } from "./CommentsPanel";
+import { SharePanel } from "./SharePanel";
 import { PresenceBar } from "./PresenceBar";
 import { exportPdf, copyRichText } from "../share";
 import { CommentIcon } from "../../../icons";
@@ -60,6 +61,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
 
   const [peers, setPeers] = useState<DocPeer[]>([]);
   const [remoteUpdate, setRemoteUpdate] = useState<DocUpdatePayload | null>(null);
+  const [sharePanelOpen, setSharePanelOpen] = useState(false);
 
   // Always call the latest onChange (TasksApp recreates it as `active`
   // changes; the useEditor onUpdate closure is frozen at editor creation).
@@ -102,6 +104,14 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     },
     [note.id]
   );
+
+  const isOwner = note.ownerId === self?.id;
+  const isCommentOnly = note.effectivePermission === 'comment';
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.setEditable(!isCommentOnly);
+  }, [editor, isCommentOnly]);
 
   if (import.meta.env.DEV && editor) {
     (window as unknown as { __editor?: unknown }).__editor = editor;
@@ -396,7 +406,17 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
         />
       ) : (
         <>
-          <Toolbar editor={editor} onAddComment={handleAddComment} />
+          <Toolbar
+            editor={editor}
+            onAddComment={handleAddComment}
+            onShareOpen={isOwner ? (() => setSharePanelOpen(true)) : undefined}
+            isReadOnly={isCommentOnly}
+          />
+          {isCommentOnly && (
+            <div className="editor-readonly-banner">
+              You have comment-only access to this note
+            </div>
+          )}
           <div className="editor-body">
             <div className="editor-content-wrap" ref={surfaceRef} onClick={handleSurfaceClick}>
               <EditorContent editor={editor} className="editor-surface" />
@@ -417,6 +437,14 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
                 onClose={() => setPanelOpen(false)}
               />
             ) : null}
+            {sharePanelOpen && self && (
+              <SharePanel
+                noteId={note.id}
+                ownerName={self.displayName}
+                currentUserId={self.id}
+                onClose={() => setSharePanelOpen(false)}
+              />
+            )}
           </div>
         </>
       )}
