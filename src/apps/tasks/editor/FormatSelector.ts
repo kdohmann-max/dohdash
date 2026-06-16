@@ -16,6 +16,8 @@ declare module "@tiptap/core" {
     formatSelector: {
       /** Toggle a named formatting selector on the current selection. */
       toggleFormatSelector: (name: string) => ReturnType;
+      /** Tag the current selection for a list of users (comma-separated names). */
+      setUserTag: (users: string) => ReturnType;
       /** Remove any formatting selector from the current selection. */
       unsetFormatSelector: () => ReturnType;
     };
@@ -39,6 +41,16 @@ export const FormatSelector = Mark.create<FormatSelectorOptions>({
         renderHTML: (attrs) =>
           attrs.name
             ? { "data-fmt": attrs.name, class: `fmt-${attrs.name}` }
+            : {},
+      },
+      // Comma-separated list of tagged user names; only set for the
+      // "user-tag" selector. Stored as data-users so it round-trips.
+      users: {
+        default: null,
+        parseHTML: (el) => (el as HTMLElement).getAttribute("data-users"),
+        renderHTML: (attrs) =>
+          attrs.users
+            ? { "data-users": attrs.users, title: `Tagged: ${attrs.users}` }
             : {},
       },
     };
@@ -90,6 +102,10 @@ export const FormatSelector = Mark.create<FormatSelectorOptions>({
           if (active) return commands.unsetMark(this.name);
           return commands.setMark(this.name, { name });
         },
+      setUserTag:
+        (users: string) =>
+        ({ commands }) =>
+          commands.setMark(this.name, { name: "user-tag", users }),
       unsetFormatSelector:
         () =>
         ({ commands }) =>
@@ -102,10 +118,18 @@ export const FormatSelector = Mark.create<FormatSelectorOptions>({
     return {
       markdown: {
         serialize: {
-          open(_state: unknown, mark: { attrs: { name: string } }) {
-            return `<span data-fmt="${mark.attrs.name}" class="fmt-${mark.attrs.name}">`;
+          open(_state: unknown, mark: { attrs: { name: string; users?: string | null } }) {
+            const users = mark.attrs.users ? ` data-users="${mark.attrs.users}"` : "";
+            return `<span data-fmt="${mark.attrs.name}" class="fmt-${mark.attrs.name}"${users}>`;
           },
-          close: "</span>",
+          // For user tags, follow the span with a Markdown/HTML comment listing
+          // the tagged people so the .md file (and any export) names them.
+          close(_state: unknown, mark: { attrs: { name: string; users?: string | null } }) {
+            if (mark.attrs.name === "user-tag" && mark.attrs.users) {
+              return `</span><!-- tagged: ${mark.attrs.users} -->`;
+            }
+            return "</span>";
+          },
         },
         parse: {},
       },

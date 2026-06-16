@@ -25,14 +25,16 @@ App id `tasks`; displayed as "DohDocs" via `CompanyInfo.md` `appNames`.
 
 | Extension | File | What it does |
 |-----------|------|--------------|
-| `FormatSelector` | `FormatSelector.ts` | Single custom mark with a `name` attr — drives P1/P2/P3/Comment highlighting (not separate mark types) |
+| `FormatSelector` | `FormatSelector.ts` | Single custom mark with a `name` attr — drives P1/P2/P3/Comment/user-tag highlighting (not separate mark types). Also has a `users` attr (only for `user-tag`) and a `setUserTag(names)` command |
 | `DocCommentMark` | `CommentMark.ts` | Anchors a comment thread (`docComment` mark) to a text range; mark id matches the `doc_comments` row id |
 | `AutoTask` | `autoTask.ts` | `- [ ]` lines auto-convert to task-list items on input |
 | `HeadingFormat` | `headingFormat.ts` | H1–H4 rendered with `font-variant: small-caps` |
 | `math` | `math.ts` | Inline arithmetic auto-evaluated (wired via Editor/Toolbar, not `buildExtensions`) |
 | `ArchiveDecorations` | `archive.ts` | "Archive Done" uses ProseMirror decorations — archived tasks stay in the doc, visually separated, not moved |
 
-Format registry: `data/formattingSelectors.ts` — P1/P2/P3/Comment/Math are entries for the single `formatSelector` mark. New format = new registry entry, not a new TipTap mark. (Toolbar "F" button opens this selector.)
+Format registry: `data/formattingSelectors.ts` — P1/P2/P3/Comment/"TAG with user"/Math are entries for the single `formatSelector` mark (each has a `kind`: `mark` | `math` | `user`). New format = new registry entry, not a new TipTap mark. (Toolbar **TAG** button — formerly "F" — opens this ribbon; the editor toolbar's share button is now the word **Share**, not an icon.)
+
+**"TAG with user"** (`kind: "user"`, id `user-tag`): selecting it opens a checkbox picker of all `listProfiles()` users (filter box) in `Toolbar.tsx`; the captured selection range is re-applied via `setUserTag(names)`. Renders as a green-highlighted `fmt-user-tag` span carrying `data-users` (+ a `Tagged: …` title tooltip). Markdown serialization emits the span **plus a trailing `<!-- tagged: Name, Name -->` HTML comment** listing the people — `data-users` is what actually round-trips; the comment is the human-readable/greppable record requested for the .md.
 
 ## Live collaboration
 

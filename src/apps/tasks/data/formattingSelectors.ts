@@ -9,7 +9,7 @@ export interface FormattingSelector {
   label: string;
   description: string;
   /** Special behaviors that aren't a plain styling mark. */
-  kind?: "mark" | "math";
+  kind?: "mark" | "math" | "user";
 }
 
 export const FORMATTING_SELECTORS: FormattingSelector[] = [
@@ -17,6 +17,7 @@ export const FORMATTING_SELECTORS: FormattingSelector[] = [
   { id: "p2", label: "P2", description: "Yellow highlight (priority 2)", kind: "mark" },
   { id: "p3", label: "P3", description: "Blue highlight (priority 3)", kind: "mark" },
   { id: "comment", label: "Comment", description: "Italic, quoted", kind: "mark" },
+  { id: "user-tag", label: "TAG with user", description: "Tag this section for specific people", kind: "user" },
   { id: "math", label: "Math", description: "Text-based calculator", kind: "math" },
 ];
 
