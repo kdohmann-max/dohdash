@@ -440,7 +440,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
             {sharePanelOpen && self && (
               <SharePanel
                 noteId={note.id}
-                ownerName={self.displayName}
+                ownerName={note.ownerName ?? self.displayName}
                 currentUserId={self.id}
                 onClose={() => setSharePanelOpen(false)}
               />
