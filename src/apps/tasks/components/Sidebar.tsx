@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { DocMeta, Folder } from "../../../storage/db";
 import type { ViewMode } from "../TasksApp";
+import { FolderShareModal } from "./FolderShareModal";
 
 export type SortMode = "edited" | "name";
 
@@ -211,6 +212,7 @@ function FolderNode({
   const [renaming, setRenaming] = useState(false);
   const [addingChild, setAddingChild] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const children = tree.get(folder.id) ?? [];
   const folderDocs = docs.filter((d) => d.folderId === folder.id);
@@ -279,6 +281,8 @@ function FolderNode({
             <div className="folder-menu">
               <button onMouseDown={(e) => e.preventDefault()} onClick={() => { closeMenu(); setRenaming(true); }}>Rename</button>
               <button onMouseDown={(e) => e.preventDefault()} onClick={() => { closeMenu(); setExpanded(true); setAddingChild(true); }}>New subfolder</button>
+              <button onMouseDown={(e) => e.preventDefault()} onClick={() => { closeMenu(); setShareModalOpen(true); }}>Share folder</button>
+              <div className="folder-menu-sep" />
               <button className="folder-menu-delete" onMouseDown={(e) => e.preventDefault()} onClick={() => setConfirmDelete(true)}>Delete…</button>
             </div>
           )}
@@ -345,6 +349,14 @@ function FolderNode({
             />
           ))}
         </>
+      )}
+      {shareModalOpen && currentUserId && (
+        <FolderShareModal
+          folderId={folder.id}
+          folderName={folder.name}
+          currentUserId={currentUserId}
+          onClose={() => setShareModalOpen(false)}
+        />
       )}
     </>
   );
