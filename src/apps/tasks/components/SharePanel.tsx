@@ -21,7 +21,6 @@ export function SharePanel({ noteId, ownerName, currentUserId, onClose }: Props)
   const [error, setError] = useState<string | null>(null);
   const [nameMap, setNameMap] = useState<Map<string, string>>(new Map());
   const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void (async () => {
@@ -46,7 +45,7 @@ export function SharePanel({ noteId, ownerName, currentUserId, onClose }: Props)
     }, 200);
   }, []);
 
-  useEffect(() => { doSearch(query); }, [query, doSearch]);
+  useEffect(() => { doSearch(query); }, [query]); // doSearch is stable (useCallback [])
 
   async function handleAdd(target: ShareTarget) {
     try {
@@ -78,7 +77,7 @@ export function SharePanel({ noteId, ownerName, currentUserId, onClose }: Props)
   }
 
   return (
-    <div className="share-panel" ref={panelRef}>
+    <div className="share-panel">
       <div className="share-panel-head">
         <h3 className="share-panel-title">Share note</h3>
         <button className="share-panel-close" onClick={onClose}>✕</button>
