@@ -300,8 +300,8 @@ Migrations run in order via `supabase db push`. No source changes are needed to 
 ## File Inventory
 
 **New files:**
-- `supabase/migrations/0010_groups.sql`
-- `supabase/migrations/0011_note_sharing.sql`
+- `supabase/migrations/0010_groups.sql` — `groups`, `group_members` tables + RLS
+- `supabase/migrations/0011_note_sharing.sql` — `note_shares`, `folder_shares` tables + `resolve_note_permission` function + drop/replace `notes`/`folders` RLS policies + null-owner backfill
 - `src/admin/GroupsPanel.tsx` + `GroupsPanel.css`
 - `src/apps/tasks/components/SharePanel.tsx` + `SharePanel.css`
 - `src/apps/tasks/components/FolderShareModal.tsx` + `FolderShareModal.css`
