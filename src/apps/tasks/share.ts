@@ -2,7 +2,7 @@
 //
 // - exportPdf: opens a print window with the rendered HTML + matching styles and
 //   triggers the browser print dialog, where the user can "Save as PDF". This is
-//   zero-dependency and preserves the editor's look (small-caps headings, nested
+//   zero-dependency and preserves the editor's look (accent headings, nested
 //   emphasis, images, task checkboxes).
 // - copyRichText: writes both rich (text/html) and plain (Markdown) flavors to
 //   the clipboard so pasting into Word/Gmail keeps formatting.
@@ -12,7 +12,8 @@ import type { Editor } from "@tiptap/react";
 /** Inline styles applied to the print/export document so it matches the app. */
 const PRINT_STYLES = `
   body { font-family: "Comfortaa", system-ui, sans-serif; color: #1f2328; max-width: 720px; margin: 40px auto; padding: 0 24px; line-height: 1.4; }
-  h1, h2, h3, h4 { font-variant: small-caps; letter-spacing: 0.015em; }
+  h1, h2, h3, h4 { color: #c86c2e; font-variant: small-caps; letter-spacing: 0.015em; }
+  h1 { padding-bottom: 4px; border-bottom: 2px solid #c86c2e; }
   ul[data-type="taskList"] { list-style: none; padding-left: 0; }
   ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 8px; }
   li:not(li li):has(> ul, > ol) > p,

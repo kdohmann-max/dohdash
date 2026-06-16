@@ -613,13 +613,18 @@
 .tasks-app .ProseMirror h4 {
   margin: 0.6em 0 0.3em;
   font-family: var(--font-heading);
+  color: var(--accent);
   font-variant: small-caps;
   letter-spacing: 0.015em;
 }
 
 .tasks-app .ProseMirror:focus { outline: none; }
 
-.tasks-app .ProseMirror h1 { font-size: 2em; }
+.tasks-app .ProseMirror h1 {
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--accent);
+  font-size: 2em;
+}
 .tasks-app .ProseMirror h2 { font-size: 1.6em; }
 .tasks-app .ProseMirror h3 { font-size: 1.3em; }
 .tasks-app .ProseMirror h4 { font-size: 1.1em; }
