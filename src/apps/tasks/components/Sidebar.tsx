@@ -28,6 +28,8 @@ interface Props {
   onBulkDelete: () => void;
   view: ViewMode;
   onViewChange: (v: ViewMode) => void;
+  sharedFolderIds: Set<string>;
+  currentUserId: string | null;
 }
 
 type Tree = Map<string | null, Folder[]>;
@@ -193,6 +195,8 @@ interface FolderNodeProps {
   selectMode: boolean;
   selectedIds: Set<string>;
   onToggleSelect: (id: string) => void;
+  sharedFolderIds: Set<string>;
+  currentUserId: string | null;
 }
 
 function FolderNode({
@@ -200,6 +204,7 @@ function FolderNode({
   onSelect, onDelete, onMoveDoc, onCreateInFolder,
   onCreateFolder, onRenameFolder, onDeleteFolder,
   selectMode, selectedIds, onToggleSelect,
+  sharedFolderIds, currentUserId,
 }: FolderNodeProps) {
   const [expanded, setExpanded] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -249,6 +254,12 @@ function FolderNode({
               <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h3.764c.414 0 .8.182 1.06.5l.5.625A1.5 1.5 0 0 0 8.9 3.75H13.5A1.5 1.5 0 0 1 15 5.25v7.25A1.5 1.5 0 0 1 13.5 14h-11A1.5 1.5 0 0 1 1 12.5v-9Z"/>
             </svg>
             {folder.name}
+            {sharedFolderIds.has(folder.id) && (
+              <svg className="folder-shared-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Shared">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            )}
           </span>
         )}
 
@@ -314,6 +325,8 @@ function FolderNode({
               selectMode={selectMode}
               selectedIds={selectedIds}
               onToggleSelect={onToggleSelect}
+              sharedFolderIds={sharedFolderIds}
+              currentUserId={currentUserId}
             />
           ))}
           {folderDocs.map((doc) => (
@@ -346,12 +359,23 @@ export function Sidebar({
   isOpen, onClose,
   selectMode, selectedIds, onToggleSelectMode, onToggleSelect, onBulkDelete,
   view, onViewChange,
+  sharedFolderIds, currentUserId,
 }: Props) {
   const [addingRoot, setAddingRoot] = useState(false);
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const tree = buildTree(folders);
-  const rootFolders = tree.get(null) ?? [];
-  const rootDocs = docs.filter((d) => d.folderId === null);
+
+  const sharedDocs = docs.filter((d) => d.effectivePermission !== 'owner' && d.effectivePermission != null);
+  const ownedDocs = docs.filter((d) => d.effectivePermission === 'owner' || d.effectivePermission == null);
+
+  const sharedByOwner = new Map<string, { name: string | null; avatar: string | null; docs: DocMeta[] }>();
+  for (const doc of sharedDocs) {
+    const key = doc.ownerId ?? 'unknown';
+    if (!sharedByOwner.has(key)) {
+      sharedByOwner.set(key, { name: doc.ownerName ?? null, avatar: doc.ownerAvatarUrl ?? null, docs: [] });
+    }
+    sharedByOwner.get(key)!.docs.push(doc);
+  }
 
   function cancelSelectMode() {
     setConfirmBulkDelete(false);
@@ -428,53 +452,109 @@ export function Sidebar({
       </div>
 
       <ul className="doc-list">
-        {addingRoot && (
-          <InlineInput
-            placeholder="Folder name…"
-            depth={0}
-            onConfirm={(name) => { setAddingRoot(false); onCreateFolder(name, null); }}
-            onCancel={() => setAddingRoot(false)}
-          />
+        {view === 'shared' ? (
+          sharedDocs.length === 0
+            ? <li className="empty">{search ? "No matches" : "Nothing shared with you yet"}</li>
+            : Array.from(sharedByOwner.entries()).map(([ownerId, group]) => (
+                <li key={ownerId} className="shared-owner-group">
+                  <div className="shared-owner-header">
+                    {group.avatar
+                      ? <img className="shared-owner-avatar" src={group.avatar} alt="" />
+                      : <span className="shared-owner-avatar shared-owner-avatar--placeholder">{(group.name ?? '?').slice(0, 1).toUpperCase()}</span>
+                    }
+                    <span className="shared-owner-name">{group.name ?? 'Unknown'}</span>
+                  </div>
+                  <ul className="shared-docs-list">
+                    {group.docs.map((doc) => (
+                      <li key={doc.id}
+                        className={`doc-item${doc.id === activeId ? ' active' : ''}`}
+                        style={{ paddingLeft: '26px' }}
+                        onClick={() => onSelect(doc.id)}
+                      >
+                        <span className="doc-title">{doc.title || 'Untitled'}</span>
+                        <span className={`doc-perm-badge doc-perm-badge--${doc.effectivePermission}`}>
+                          {doc.effectivePermission === 'edit' ? 'Edit' : 'Comment'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))
+        ) : (
+          <>
+            {addingRoot && (
+              <InlineInput
+                placeholder="Folder name…"
+                depth={0}
+                onConfirm={(name) => { setAddingRoot(false); onCreateFolder(name, null); }}
+                onCancel={() => setAddingRoot(false)}
+              />
+            )}
+            {ownedDocs.length === 0 && folders.filter((f) => f.ownerId === currentUserId || !f.ownerId).length === 0 && !addingRoot && (
+              <li className="empty">{search ? "No matches" : "No documents yet"}</li>
+            )}
+            {folders.filter((f) => (f.ownerId === currentUserId || !f.ownerId) && f.parentId === null).map((f) => (
+              <FolderNode
+                key={f.id}
+                folder={f}
+                depth={0}
+                tree={tree}
+                docs={ownedDocs}
+                activeId={activeId}
+                folders={folders}
+                onSelect={onSelect}
+                onDelete={onDelete}
+                onMoveDoc={onMoveDoc}
+                onCreateInFolder={onCreateInFolder}
+                onCreateFolder={onCreateFolder}
+                onRenameFolder={onRenameFolder}
+                onDeleteFolder={onDeleteFolder}
+                selectMode={selectMode}
+                selectedIds={selectedIds}
+                onToggleSelect={onToggleSelect}
+                sharedFolderIds={sharedFolderIds}
+                currentUserId={currentUserId}
+              />
+            ))}
+            {ownedDocs.filter((d) => d.folderId === null).map((doc) => (
+              <DocItem
+                key={doc.id}
+                doc={doc}
+                activeId={activeId}
+                depth={0}
+                folders={folders}
+                onSelect={onSelect}
+                onDelete={onDelete}
+                onMoveDoc={onMoveDoc}
+                selectMode={selectMode}
+                selected={selectedIds.has(doc.id)}
+                onToggleSelect={onToggleSelect}
+              />
+            ))}
+            {view === 'all' && sharedDocs.length > 0 && (
+              <>
+                <li className="shared-section-divider">Shared with me</li>
+                {Array.from(sharedByOwner.values()).flatMap((group) =>
+                  group.docs.map((doc) => (
+                    <li key={doc.id} className={`doc-item${doc.id === activeId ? ' active' : ''}`}
+                      style={{ paddingLeft: '10px' }}
+                      onClick={() => onSelect(doc.id)}
+                    >
+                      {group.avatar
+                        ? <img className="doc-owner-avatar" src={group.avatar} alt="" title={`Shared by ${group.name}`} />
+                        : <span className="doc-owner-initial" title={`Shared by ${group.name}`}>{(group.name ?? '?').slice(0, 1).toUpperCase()}</span>
+                      }
+                      <span className="doc-title">{doc.title || 'Untitled'}</span>
+                      <span className={`doc-perm-badge doc-perm-badge--${doc.effectivePermission}`}>
+                        {doc.effectivePermission === 'edit' ? 'Edit' : 'Comment'}
+                      </span>
+                    </li>
+                  ))
+                )}
+              </>
+            )}
+          </>
         )}
-        {rootFolders.length === 0 && rootDocs.length === 0 && !addingRoot && (
-          <li className="empty">{search ? "No matches" : "No documents yet"}</li>
-        )}
-        {rootFolders.map((f) => (
-          <FolderNode
-            key={f.id}
-            folder={f}
-            depth={0}
-            tree={tree}
-            docs={docs}
-            activeId={activeId}
-            folders={folders}
-            onSelect={onSelect}
-            onDelete={onDelete}
-            onMoveDoc={onMoveDoc}
-            onCreateInFolder={onCreateInFolder}
-            onCreateFolder={onCreateFolder}
-            onRenameFolder={onRenameFolder}
-            onDeleteFolder={onDeleteFolder}
-            selectMode={selectMode}
-            selectedIds={selectedIds}
-            onToggleSelect={onToggleSelect}
-          />
-        ))}
-        {rootDocs.map((doc) => (
-          <DocItem
-            key={doc.id}
-            doc={doc}
-            activeId={activeId}
-            depth={0}
-            folders={folders}
-            onSelect={onSelect}
-            onDelete={onDelete}
-            onMoveDoc={onMoveDoc}
-            selectMode={selectMode}
-            selected={selectedIds.has(doc.id)}
-            onToggleSelect={onToggleSelect}
-          />
-        ))}
       </ul>
     </aside>
   );

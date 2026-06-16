@@ -17,6 +17,7 @@ import {
   renameFolder,
   deleteFolder,
   moveDoc,
+  listAllVisibleFolderShares,
 } from "../../storage/db";
 import { subscribeDocsList, notifyDocsListChanged } from "../../storage/realtime";
 import "./TasksApp.css";
@@ -111,6 +112,7 @@ export function TasksApp() {
   const [remoteDeleted, setRemoteDeleted] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sharedFolderIds, setSharedFolderIds] = useState<Set<string>>(new Set());
   const initialized = useRef(false);
   const loadSeq = useRef(0);
   const activeRef = useRef(active);
@@ -138,6 +140,9 @@ export function TasksApp() {
       const [list, folderList] = await Promise.all([listDocs(), listFolders()]);
       setDocs(list);
       setFolders(folderList);
+      const folderShares = await listAllVisibleFolderShares();
+      const ownedFolderIds = new Set(folderList.map((f) => f.id));
+      setSharedFolderIds(new Set(folderShares.filter((s) => ownedFolderIds.has(s.folderId)).map((s) => s.folderId)));
       if (list.length) setActive((await getDoc(list[0].id)) ?? null);
     })();
   // ownerId is stable for the lifetime of a session; exclude to avoid re-seeding
@@ -332,6 +337,8 @@ export function TasksApp() {
         onBulkDelete={() => void handleBulkDelete()}
         view={view}
         onViewChange={setView}
+        sharedFolderIds={sharedFolderIds}
+        currentUserId={ownerId}
       />
       <main className="main">
         {active && remoteDeleted ? (

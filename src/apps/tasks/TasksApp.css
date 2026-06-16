@@ -776,3 +776,58 @@
   font-weight: var(--font-weight-heading);
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
+
+/* ---- Shared view styles ---- */
+
+.tasks-app .shared-owner-group { list-style: none; margin-bottom: var(--spacing-md); }
+
+.tasks-app .shared-owner-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-heading);
+}
+
+.tasks-app .shared-owner-avatar {
+  width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+}
+.tasks-app .shared-owner-avatar--placeholder {
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: var(--font-weight-heading);
+}
+
+.tasks-app .shared-owner-name { font-size: 0.8rem; color: var(--muted); }
+
+.tasks-app .shared-docs-list { list-style: none; padding: 0; margin: 0; }
+
+.tasks-app .shared-section-divider {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: var(--font-weight-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-xs);
+  border-top: 1px solid var(--border);
+  margin-top: var(--spacing-sm);
+  list-style: none;
+}
+
+.tasks-app .doc-owner-avatar { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.tasks-app .doc-owner-initial {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--accent-soft);
+  color: var(--accent); font-size: 0.65rem; display: inline-flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.tasks-app .doc-perm-badge {
+  font-size: 0.7rem; border-radius: var(--rounded-sm);
+  padding: 1px 5px; flex-shrink: 0;
+}
+.tasks-app .doc-perm-badge--edit { background: var(--accent-soft); color: var(--accent); }
+.tasks-app .doc-perm-badge--comment { background: var(--bg-alt); color: var(--muted); }
+
+.tasks-app .folder-shared-icon { margin-left: 4px; opacity: 0.5; vertical-align: middle; }
