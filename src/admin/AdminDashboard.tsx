@@ -20,9 +20,10 @@ import {
 } from "../storage/db";
 import { AppAccessPanel } from "./AppAccessPanel";
 import { ActivityPanel } from "./ActivityPanel";
+import { GroupsPanel } from "./GroupsPanel";
 import "./AdminDashboard.css";
 
-type Tab = "users" | "app-access" | "activity";
+type Tab = "users" | "app-access" | "activity" | "groups";
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -141,6 +142,12 @@ export function AdminDashboard() {
         >
           Activity
         </button>
+        <button
+          className={tab === "groups" ? "admin-tab admin-tab--active" : "admin-tab"}
+          onClick={() => setTab("groups")}
+        >
+          Groups
+        </button>
       </div>
 
       {error ? <p className="admin-error">{error}</p> : null}
@@ -163,8 +170,10 @@ export function AdminDashboard() {
         />
       ) : tab === "app-access" ? (
         <AppAccessPanel profiles={profiles} currentUserId={currentUserId} />
-      ) : (
+      ) : tab === "activity" ? (
         <ActivityPanel profiles={profiles} />
+      ) : (
+        <GroupsPanel />
       )}
     </div>
   );
