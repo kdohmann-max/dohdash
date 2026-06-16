@@ -441,6 +441,9 @@ export interface DocMeta {
   updatedAt: number;
   folderId: string | null;
   ownerId: string | null;
+  ownerName?: string | null;
+  ownerAvatarUrl?: string | null;
+  effectivePermission?: 'owner' | 'edit' | 'comment' | null;
 }
 
 export interface DohDoc extends DocMeta {
@@ -452,6 +455,7 @@ export interface Folder {
   name: string;
   parentId: string | null;
   createdAt: number;
+  ownerId: string | null;
 }
 
 interface NoteRow {
@@ -461,6 +465,7 @@ interface NoteRow {
   updated_at: number;
   folder_id: string | null;
   owner_id: string | null;
+  owner?: { display_name: string | null; avatar_url: string | null } | null;
 }
 
 interface FolderRow {
@@ -468,11 +473,19 @@ interface FolderRow {
   name: string;
   parent_id: string | null;
   created_at: number;
-  owner_id?: string | null;
+  owner_id: string | null;
 }
 
 function noteRowToMeta(row: NoteRow): DocMeta {
-  return { id: row.id, title: row.title, updatedAt: row.updated_at, folderId: row.folder_id, ownerId: row.owner_id };
+  return {
+    id: row.id,
+    title: row.title,
+    updatedAt: row.updated_at,
+    folderId: row.folder_id,
+    ownerId: row.owner_id,
+    ownerName: row.owner?.display_name ?? null,
+    ownerAvatarUrl: row.owner?.avatar_url ?? null,
+  };
 }
 
 function noteRowToDoc(row: NoteRow): DohDoc {
@@ -484,23 +497,210 @@ function docToNoteRow(doc: DohDoc): NoteRow {
 }
 
 function folderRowToFolder(row: FolderRow): Folder {
-  return { id: row.id, name: row.name, parentId: row.parent_id, createdAt: row.created_at };
+  return { id: row.id, name: row.name, parentId: row.parent_id, createdAt: row.created_at, ownerId: row.owner_id ?? null };
 }
 
-export async function listDocs(query = ""): Promise<DocMeta[]> {
+export async function listDocs(
+  query = "",
+  view: 'mine' | 'shared' | 'all' = 'all',
+  userId?: string
+): Promise<DocMeta[]> {
   const q = query.trim();
   let req = supabase
     .from("notes")
-    .select("id, title, updated_at, folder_id, owner_id")
+    .select("id, title, updated_at, folder_id, owner_id, owner:profiles!owner_id(display_name, avatar_url)")
     .order("updated_at", { ascending: false });
 
-  if (q) {
-    req = req.or(`title.ilike.%${q}%,markdown.ilike.%${q}%`);
-  }
+  if (q) req = req.or(`title.ilike.%${q}%,markdown.ilike.%${q}%`);
+  if (view === 'mine' && userId) req = req.eq('owner_id', userId);
+  else if (view === 'shared' && userId) req = req.neq('owner_id', userId);
 
   const { data, error } = await req;
   if (error) throw error;
-  return (data as NoteRow[]).map(noteRowToMeta);
+
+  const metas = (data as unknown as NoteRow[]).map(noteRowToMeta);
+
+  if (userId && (view === 'shared' || view === 'all')) {
+    const sharedIds = metas.filter((m) => m.ownerId !== userId).map((m) => m.id);
+    if (sharedIds.length > 0) {
+      const { data: perms } = await supabase.rpc('get_notes_effective_permissions', {
+        p_note_ids: sharedIds,
+        p_user_id: userId,
+      });
+      if (perms) {
+        const permMap = new Map(
+          (perms as { note_id: string; effective_permission: string }[]).map((p) => [
+            p.note_id,
+            p.effective_permission as 'owner' | 'edit' | 'comment',
+          ])
+        );
+        return metas.map((m) => ({
+          ...m,
+          effectivePermission: m.ownerId === userId ? 'owner' : (permMap.get(m.id) ?? null),
+        }));
+      }
+    }
+  }
+
+  return metas.map((m) => ({ ...m, effectivePermission: m.ownerId === userId ? 'owner' : null }));
+}
+
+// ---- note & folder shares ----
+
+export type Permission = 'edit' | 'comment';
+export type GranteeType = 'user' | 'group';
+
+export interface NoteShare {
+  id: string;
+  noteId: string;
+  granteeType: GranteeType;
+  granteeId: string;
+  permission: Permission;
+  grantedBy: string | null;
+  createdAt: number;
+}
+
+export interface FolderShare {
+  id: string;
+  folderId: string;
+  granteeType: GranteeType;
+  granteeId: string;
+  permission: Permission;
+  grantedBy: string | null;
+  createdAt: number;
+}
+
+export interface ShareTarget {
+  id: string;
+  type: GranteeType;
+  name: string | null;
+  avatarUrl: string | null;
+}
+
+interface ShareRow {
+  id: string;
+  note_id?: string;
+  folder_id?: string;
+  grantee_type: string;
+  grantee_id: string;
+  permission: string;
+  granted_by: string | null;
+  created_at: number;
+}
+
+export async function listNoteShares(noteId: string): Promise<NoteShare[]> {
+  const { data, error } = await supabase
+    .from('note_shares')
+    .select('*')
+    .eq('note_id', noteId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return ((data ?? []) as ShareRow[]).map((row) => ({
+    id: row.id,
+    noteId: row.note_id!,
+    granteeType: row.grantee_type as GranteeType,
+    granteeId: row.grantee_id,
+    permission: row.permission as Permission,
+    grantedBy: row.granted_by,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function addNoteShare(
+  noteId: string, granteeType: GranteeType, granteeId: string,
+  permission: Permission, grantedBy: string
+): Promise<void> {
+  const { error } = await supabase.from('note_shares').insert({
+    id: crypto.randomUUID(), note_id: noteId, grantee_type: granteeType,
+    grantee_id: granteeId, permission, granted_by: grantedBy, created_at: Date.now(),
+  });
+  if (error) throw error;
+}
+
+export async function updateNoteShare(id: string, permission: Permission): Promise<void> {
+  const { error } = await supabase.from('note_shares').update({ permission }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removeNoteShare(id: string): Promise<void> {
+  const { error } = await supabase.from('note_shares').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function listFolderShares(folderId: string): Promise<FolderShare[]> {
+  const { data, error } = await supabase
+    .from('folder_shares')
+    .select('*')
+    .eq('folder_id', folderId)
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return ((data ?? []) as ShareRow[]).map((row) => ({
+    id: row.id,
+    folderId: row.folder_id!,
+    granteeType: row.grantee_type as GranteeType,
+    granteeId: row.grantee_id,
+    permission: row.permission as Permission,
+    grantedBy: row.granted_by,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function addFolderShare(
+  folderId: string, granteeType: GranteeType, granteeId: string,
+  permission: Permission, grantedBy: string
+): Promise<void> {
+  const { error } = await supabase.from('folder_shares').insert({
+    id: crypto.randomUUID(), folder_id: folderId, grantee_type: granteeType,
+    grantee_id: granteeId, permission, granted_by: grantedBy, created_at: Date.now(),
+  });
+  if (error) throw error;
+}
+
+export async function updateFolderShare(id: string, permission: Permission): Promise<void> {
+  const { error } = await supabase.from('folder_shares').update({ permission }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removeFolderShare(id: string): Promise<void> {
+  const { error } = await supabase.from('folder_shares').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/** Full-text search across profiles and groups; used by share target type-ahead. */
+export async function searchShareTargets(query: string): Promise<ShareTarget[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const [{ data: users }, { data: groups }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, display_name, email, avatar_url')
+      .or(`display_name.ilike.%${q}%,email.ilike.%${q}%`)
+      .limit(5),
+    supabase.from('groups').select('id, name').ilike('name', `%${q}%`).limit(5),
+  ]);
+  return [
+    ...((users ?? []) as { id: string; display_name: string | null; email: string; avatar_url: string | null }[]).map(
+      (u) => ({ id: u.id, type: 'user' as const, name: u.display_name ?? u.email, avatarUrl: u.avatar_url })
+    ),
+    ...((groups ?? []) as { id: string; name: string }[]).map(
+      (g) => ({ id: g.id, type: 'group' as const, name: g.name, avatarUrl: null })
+    ),
+  ];
+}
+
+/** Returns folder_shares visible to the current user (RLS-filtered). */
+export async function listAllVisibleFolderShares(): Promise<FolderShare[]> {
+  const { data, error } = await supabase.from('folder_shares').select('*');
+  if (error) throw error;
+  return ((data ?? []) as ShareRow[]).map((row) => ({
+    id: row.id,
+    folderId: row.folder_id!,
+    granteeType: row.grantee_type as GranteeType,
+    granteeId: row.grantee_id,
+    permission: row.permission as Permission,
+    grantedBy: row.granted_by,
+    createdAt: row.created_at,
+  }));
 }
 
 /** Convert an image file to a base64 data URL so it can be embedded inline. */
@@ -560,7 +760,7 @@ export async function listFolders(): Promise<Folder[]> {
 }
 
 export async function createFolder(name: string, parentId: string | null = null, ownerId: string | null = null): Promise<Folder> {
-  const folder: Folder = { id: crypto.randomUUID(), name, parentId, createdAt: Date.now() };
+  const folder: Folder = { id: crypto.randomUUID(), name, parentId, createdAt: Date.now(), ownerId };
   const { error } = await supabase.from("folders").insert({ id: folder.id, name: folder.name, parent_id: folder.parentId, created_at: folder.createdAt, owner_id: ownerId });
   if (error) throw error;
   return folder;
