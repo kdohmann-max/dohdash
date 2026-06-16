@@ -11,6 +11,18 @@ DohDash is a "company OS" dashboard: employees sign in (Google OAuth via Supabas
 
 Apps (`APP_REGISTRY`, `src/apps/registry.tsx`): Job Files, Tasks (a.k.a. DohDocs), Calendar, Contacts, Time Tracker, Expense Tracker, Clean Up, Chicken Scratch. **Functional: Tasks/DohDocs + Chicken Scratch. The rest are stubs.** `resolveAppName()` lets `CompanyInfo.md`'s `appNames` map rename an app per-deployment (that's how "Tasks" displays as "DohDocs").
 
+## UX mandate — built for non-technical users
+
+**DohDash and every app in it are operated by non-technical, field-based users (construction/trades staff), not engineers.** This is a hard product constraint, not a nice-to-have. When building or changing any UI:
+
+- **Favor recognition over recall.** Don't make users type what they could pick. Prefer checkbox/select lists, toggles, and clickable rows over free-text fields that require knowing an exact name, email, ID, or syntax. (Example: group membership is a checkbox roster of all users with a filter box — not a type-the-email search.)
+- **No hidden knowledge.** Never require users to know Markdown, query syntax, IDs, or keyboard-only affordances. Every action should be discoverable through visible controls with plain-language labels.
+- **Plain language, short labels.** Avoid jargon ("provision", "RLS", "grantee"). Say what the button does.
+- **Forgiving + obvious state.** Confirm destructive actions, show what's selected/checked, and make the next step clear. Empty states should say what to do, not just "nothing here".
+- **Sensible defaults.** Pre-fill and pre-select the common choice so the happy path is one or two clicks.
+
+When a flow feels like it needs a tutorial, redesign it. If unsure whether something is friendly enough, assume the user has never used a similar app. Visual/token rules live in `styleguide.md`; this section is about interaction design.
+
 ## Tech stack
 
 - React 19 + TypeScript 6 + Vite 8 (rolldown-based)

@@ -105,37 +105,38 @@ export function GroupsPanel() {
     }
   }
 
-  async function handleAddMember(userId: string) {
+  // Single toggle: checking a user adds them to the group, unchecking removes
+  // them. Keeps the filter text so an admin can tick several users in a row.
+  async function handleToggleMember(userId: string, isMember: boolean) {
     if (!selectedId || !currentUserId) return;
-    if (members.some((m) => m.userId === userId)) return;
     try {
-      await addGroupMember(selectedId, userId, currentUserId);
-      setMembers(await listGroupMembers(selectedId));
-      setMemberSearch("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }
-
-  async function handleRemoveMember(userId: string) {
-    if (!selectedId) return;
-    try {
-      await removeGroupMember(selectedId, userId);
-      setMembers((prev) => prev.filter((m) => m.userId !== userId));
+      if (isMember) {
+        await removeGroupMember(selectedId, userId);
+        setMembers((prev) => prev.filter((m) => m.userId !== userId));
+      } else {
+        await addGroupMember(selectedId, userId, currentUserId);
+        setMembers(await listGroupMembers(selectedId));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }
 
   const memberIds = new Set(members.map((m) => m.userId));
-  const suggestions = profiles
+  const filter = memberSearch.trim().toLowerCase();
+  const roster = profiles
     .filter(
       (p) =>
-        !memberIds.has(p.id) &&
-        (p.displayName?.toLowerCase().includes(memberSearch.toLowerCase()) ||
-          p.email.toLowerCase().includes(memberSearch.toLowerCase()))
+        !filter ||
+        p.displayName?.toLowerCase().includes(filter) ||
+        p.email.toLowerCase().includes(filter)
     )
-    .slice(0, 5);
+    // Current members float to the top, then alphabetical by name/email.
+    .sort((a, b) => {
+      const am = memberIds.has(a.id), bm = memberIds.has(b.id);
+      if (am !== bm) return am ? -1 : 1;
+      return (a.displayName ?? a.email).localeCompare(b.displayName ?? b.email);
+    });
 
   return (
     <div className="groups-panel">
@@ -218,56 +219,47 @@ export function GroupsPanel() {
 
             <section className="groups-members-section">
               <h3 className="groups-section-title">Members ({members.length})</h3>
-              <ul className="groups-members-list">
-                {members.map((m) => (
-                  <li key={m.userId} className="groups-member-row">
-                    {m.avatarUrl ? (
-                      <img className="groups-avatar" src={m.avatarUrl} alt="" />
-                    ) : (
-                      <span className="groups-avatar groups-avatar--placeholder">
-                        {(m.displayName ?? "?").slice(0, 1).toUpperCase()}
-                      </span>
-                    )}
-                    <span className="groups-member-name">{m.displayName ?? m.userId}</span>
-                    <button
-                      className="groups-remove-btn"
-                      onClick={() => void handleRemoveMember(m.userId)}
-                    >
-                      Remove
-                    </button>
+              <p className="groups-roster-hint">
+                Check a person to add them to this group; uncheck to remove them.
+              </p>
+              <input
+                className="groups-member-search"
+                placeholder="Filter people by name or email…"
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+              />
+              <ul className="groups-roster">
+                {roster.length === 0 ? (
+                  <li className="groups-roster-empty">
+                    {profiles.length === 0 ? "No people to add yet" : "No matches"}
                   </li>
-                ))}
-              </ul>
-
-              <div className="groups-add-member">
-                <input
-                  className="groups-member-search"
-                  placeholder="Add member by name or email…"
-                  value={memberSearch}
-                  onChange={(e) => setMemberSearch(e.target.value)}
-                />
-                {memberSearch && suggestions.length > 0 && (
-                  <ul className="groups-suggestions">
-                    {suggestions.map((p) => (
-                      <li
-                        key={p.id}
-                        className="groups-suggestion-item"
-                        onMouseDown={(e) => { e.preventDefault(); void handleAddMember(p.id); }}
-                      >
-                        {p.avatarUrl ? (
-                          <img className="groups-avatar groups-avatar--sm" src={p.avatarUrl} alt="" />
-                        ) : (
-                          <span className="groups-avatar groups-avatar--placeholder groups-avatar--sm">
-                            {(p.displayName ?? p.email).slice(0, 1).toUpperCase()}
-                          </span>
-                        )}
-                        <span>{p.displayName ?? p.email}</span>
-                        <span className="groups-suggestion-email">{p.email}</span>
+                ) : (
+                  roster.map((p) => {
+                    const isMember = memberIds.has(p.id);
+                    return (
+                      <li key={p.id} className="groups-roster-row">
+                        <label className="groups-roster-label">
+                          <input
+                            type="checkbox"
+                            className="groups-roster-check"
+                            checked={isMember}
+                            onChange={() => void handleToggleMember(p.id, isMember)}
+                          />
+                          {p.avatarUrl ? (
+                            <img className="groups-avatar groups-avatar--sm" src={p.avatarUrl} alt="" />
+                          ) : (
+                            <span className="groups-avatar groups-avatar--placeholder groups-avatar--sm">
+                              {(p.displayName ?? p.email).slice(0, 1).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="groups-roster-name">{p.displayName ?? p.email}</span>
+                          <span className="groups-roster-email">{p.email}</span>
+                        </label>
                       </li>
-                    ))}
-                  </ul>
+                    );
+                  })
                 )}
-              </div>
+              </ul>
             </section>
 
             <div className="groups-danger-zone">

@@ -58,7 +58,7 @@ Admin-managed groups (`groups` + `group_members` tables) live at the DohDash she
 - **SELECT** on both tables: any authenticated user (needed for share-target search)
 - **INSERT/UPDATE/DELETE**: `is_admin()` only; `group_members` has no UPDATE policy (add/remove only)
 - `db.ts` exports: `listGroups`, `createGroup`, `updateGroup`, `deleteGroup`, `listGroupMembers`, `addGroupMember`, `removeGroupMember`, `listMyGroups`
-- Admin UI: `src/admin/GroupsPanel.tsx` — left column list + right detail pane (editable name/description, member management with type-ahead, delete with confirmation)
+- Admin UI: `src/admin/GroupsPanel.tsx` — left column list + right detail pane (editable name/description, delete with confirmation). **Member management is a checkbox roster:** every profile is listed with a checkbox (current members float to top), a filter box narrows by name/email, and toggling a checkbox calls `addGroupMember`/`removeGroupMember`. No type-to-search-then-pick — chosen deliberately for non-technical users (see CLAUDE.md "UX mandate").
 
 ## Dev auth bypass & browser testing
 

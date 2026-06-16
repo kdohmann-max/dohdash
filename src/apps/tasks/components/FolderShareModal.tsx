@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   listFolderShares, addFolderShare, updateFolderShare, removeFolderShare,
-  searchShareTargets,
-  type FolderShare, type Permission, type ShareTarget,
+  listProfiles, listGroups,
+  type FolderShare, type Permission, type GranteeType,
 } from "../../../storage/db";
 import "./FolderShareModal.css";
 
@@ -13,36 +13,55 @@ interface Props {
   onClose: () => void;
 }
 
+interface RosterEntry {
+  id: string;
+  type: GranteeType;
+  name: string;
+  email: string | null;
+  avatarUrl: string | null;
+}
+
 export function FolderShareModal({ folderId, folderName, currentUserId, onClose }: Props) {
   const [shares, setShares] = useState<FolderShare[]>([]);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ShareTarget[]>([]);
+  const [roster, setRoster] = useState<RosterEntry[]>([]);
+  const [filter, setFilter] = useState("");
   const [pendingPermission, setPendingPermission] = useState<Permission>('edit');
   const [error, setError] = useState<string | null>(null);
-  const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    void listFolderShares(folderId).then(setShares).catch(() => {});
-  }, [folderId]);
+    void (async () => {
+      const [folderShares, profiles, groups] = await Promise.all([
+        listFolderShares(folderId),
+        listProfiles(),
+        listGroups(),
+      ]);
+      setShares(folderShares);
+      const entries: RosterEntry[] = [
+        ...profiles
+          .filter((p) => p.id !== currentUserId)
+          .map((p) => ({
+            id: p.id, type: 'user' as const,
+            name: p.displayName ?? p.email, email: p.email, avatarUrl: p.avatarUrl,
+          })),
+        ...groups.map((g) => ({
+          id: g.id, type: 'group' as const, name: g.name, email: null, avatarUrl: null,
+        })),
+      ];
+      setRoster(entries);
+    })().catch((err) => setError(err instanceof Error ? err.message : String(err)));
+  }, [folderId, currentUserId]);
 
-  const doSearch = useCallback((q: string) => {
-    if (searchRef.current) clearTimeout(searchRef.current);
-    if (!q.trim()) { setResults([]); return; }
-    searchRef.current = setTimeout(() => {
-      void searchShareTargets(q).then(setResults).catch(() => setResults([]));
-    }, 200);
-  }, []);
+  const shareByGrantee = new Map(shares.map((s) => [s.granteeId, s]));
 
-  // doSearch is stable (useCallback []) — only depend on query
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { doSearch(query); }, [query]);
-
-  async function handleAdd(target: ShareTarget) {
+  async function handleToggle(entry: RosterEntry, existing: FolderShare | undefined) {
     try {
-      await addFolderShare(folderId, target.type, target.id, pendingPermission, currentUserId);
-      setShares(await listFolderShares(folderId));
-      setQuery("");
-      setResults([]);
+      if (existing) {
+        await removeFolderShare(existing.id);
+        setShares((prev) => prev.filter((s) => s.id !== existing.id));
+      } else {
+        await addFolderShare(folderId, entry.type, entry.id, pendingPermission, currentUserId);
+        setShares(await listFolderShares(folderId));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -57,14 +76,14 @@ export function FolderShareModal({ folderId, folderName, currentUserId, onClose 
     }
   }
 
-  async function handleRemove(shareId: string) {
-    try {
-      await removeFolderShare(shareId);
-      setShares((prev) => prev.filter((s) => s.id !== shareId));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-  }
+  const f = filter.trim().toLowerCase();
+  const visible = roster
+    .filter((e) => !f || e.name.toLowerCase().includes(f) || (e.email?.toLowerCase().includes(f) ?? false))
+    .sort((a, b) => {
+      const as = shareByGrantee.has(a.id), bs = shareByGrantee.has(b.id);
+      if (as !== bs) return as ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
 
   return (
     <div className="fsm-backdrop" onClick={onClose}>
@@ -76,29 +95,9 @@ export function FolderShareModal({ folderId, folderName, currentUserId, onClose 
 
         {error && <p className="fsm-error">{error}</p>}
 
-        {shares.length > 0 && (
-          <ul className="fsm-share-list">
-            {shares.map((s) => (
-              <li key={s.id} className="fsm-share-row">
-                <span className="fsm-type-badge">{s.granteeType === 'group' ? 'Group' : 'User'}</span>
-                <span className="fsm-grantee-id">{s.granteeId.slice(0, 8)}…</span>
-                <select
-                  className="fsm-perm-select"
-                  value={s.permission}
-                  onChange={(e) => void handleUpdatePermission(s.id, e.target.value as Permission)}
-                >
-                  <option value="edit">Full Edit</option>
-                  <option value="comment">Comment Only</option>
-                </select>
-                <button className="fsm-remove-btn" onClick={() => void handleRemove(s.id)}>✕</button>
-              </li>
-            ))}
-          </ul>
-        )}
-
         <div className="fsm-add-section">
           <div className="fsm-perm-row">
-            <label className="fsm-perm-label">Permission:</label>
+            <label className="fsm-perm-label">New shares get:</label>
             <select
               className="fsm-perm-select"
               value={pendingPermission}
@@ -108,34 +107,54 @@ export function FolderShareModal({ folderId, folderName, currentUserId, onClose 
               <option value="comment">Comment Only</option>
             </select>
           </div>
-          <div className="fsm-search-wrap">
-            <input
-              className="fsm-search-input"
-              placeholder="Search users or groups…"
-              value={query}
-              autoFocus
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {results.length > 0 && (
-              <ul className="fsm-results">
-                {results.map((r) => (
-                  <li
-                    key={r.id}
-                    className="fsm-result-item"
-                    onMouseDown={(e) => { e.preventDefault(); void handleAdd(r); }}
-                  >
-                    {r.avatarUrl
-                      ? <img className="fsm-avatar" src={r.avatarUrl} alt="" />
-                      : <span className="fsm-avatar fsm-avatar--placeholder">{(r.name ?? '?').slice(0, 1).toUpperCase()}</span>
-                    }
-                    <span className="fsm-result-name">{r.name}</span>
-                    <span className="fsm-result-type">{r.type === 'group' ? 'Group' : 'User'}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <input
+            className="fsm-search-input"
+            placeholder="Filter people or groups…"
+            value={filter}
+            autoFocus
+            onChange={(e) => setFilter(e.target.value)}
+          />
         </div>
+
+        <ul className="fsm-roster">
+          {visible.length === 0 ? (
+            <li className="fsm-roster-empty">
+              {roster.length === 0 ? "No people or groups to share with" : "No matches"}
+            </li>
+          ) : (
+            visible.map((e) => {
+              const existing = shareByGrantee.get(e.id);
+              return (
+                <li key={e.id} className="fsm-roster-row">
+                  <label className="fsm-roster-label">
+                    <input
+                      type="checkbox"
+                      className="fsm-roster-check"
+                      checked={!!existing}
+                      onChange={() => void handleToggle(e, existing)}
+                    />
+                    {e.avatarUrl
+                      ? <img className="fsm-avatar" src={e.avatarUrl} alt="" />
+                      : <span className="fsm-avatar fsm-avatar--placeholder">{(e.name || '?').slice(0, 1).toUpperCase()}</span>
+                    }
+                    <span className="fsm-result-name">{e.name}</span>
+                    <span className="fsm-type-badge">{e.type === 'group' ? 'Group' : 'User'}</span>
+                  </label>
+                  {existing && (
+                    <select
+                      className="fsm-perm-select fsm-roster-perm"
+                      value={existing.permission}
+                      onChange={(ev) => void handleUpdatePermission(existing.id, ev.target.value as Permission)}
+                    >
+                      <option value="edit">Full Edit</option>
+                      <option value="comment">Comment Only</option>
+                    </select>
+                  )}
+                </li>
+              );
+            })
+          )}
+        </ul>
       </div>
     </div>
   );

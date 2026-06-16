@@ -55,8 +55,8 @@ Permission is resolved server-side by the `resolve_note_permission(note_id, user
 **Editor enforcement:** when `effectivePermission === 'comment'`, TipTap's `editable` is set to `false`; all formatting toolbar controls are hidden; a read-only banner appears; the comment button stays visible.
 
 **Share UI:**
-- `SharePanel` (`src/apps/tasks/components/SharePanel.tsx`) — slide-in panel from the right, triggered by the share button in the Editor toolbar (owners only). Shows existing shares with permission select + remove; type-ahead search via `searchShareTargets` across profiles and groups; `onMouseDown` prevents blur-before-add.
-- `FolderShareModal` (`src/apps/tasks/components/FolderShareModal.tsx`) — modal opened from the folder `⋯` context menu ("Share folder"). Same type-ahead pattern.
+- `SharePanel` (`src/apps/tasks/components/SharePanel.tsx`) — slide-in panel from the right, triggered by the share button in the Editor toolbar (owners only). **Checkbox roster:** loads all `listProfiles()` (minus the owner) + `listGroups()` into one list; each row has a checkbox (already-shared float to the top), a filter box narrows by name/email, checking adds a share at the "New shares get" default permission, unchecking removes it, and shared rows show an inline Full Edit / Comment Only select. Chosen for non-technical users (see CLAUDE.md "UX mandate") — no type-ahead.
+- `FolderShareModal` (`src/apps/tasks/components/FolderShareModal.tsx`) — modal opened from the folder `⋯` context menu ("Share folder"). Same checkbox-roster pattern as `SharePanel`.
 
 **Sidebar views:**
 - `Mine` — only docs owned by current user; owned folder tree shown
@@ -81,4 +81,5 @@ Share functions: `listNoteShares(noteId)`, `addNoteShare(...)`, `updateNoteShare
 - **PDF export**: browser print dialog, no server-side PDF.
 - **No Sidebar.css**: sidebar styles live in `TasksApp.css` (scoped under `.tasks-app`).
 - **`as unknown as NoteRow[]` cast in `listDocs`**: Supabase's join return type doesn't match the manually typed `NoteRow` with nested `owner` profile — the cast is intentional (same pattern as `listDocComments`).
-- **Share grantee name resolution**: PostgREST can't FK-join polymorphic `grantee_id` (references either profiles or groups). `SharePanel` and `FolderShareModal` load `listProfiles()` + `listGroups()` on mount and build a `nameMap: Map<id, name>` client-side for display.
+- **Share grantee name resolution**: PostgREST can't FK-join polymorphic `grantee_id` (references either profiles or groups). `SharePanel` and `FolderShareModal` load `listProfiles()` + `listGroups()` on mount; the roster rows already carry display names, and existing shares are matched by `granteeId` against that combined list.
+- **`searchShareTargets` is currently unused by the UI** — the share components moved to a full checkbox roster, so the type-ahead search RPC has no caller. Kept in `db.ts` as a reusable export.
