@@ -1,0 +1,173 @@
+.share-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  box-shadow: -4px 0 16px rgba(0,0,0,0.08);
+  animation: slideInLeft 0.2s ease;
+}
+
+.share-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.share-panel-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.share-panel-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.share-panel-error {
+  color: var(--error);
+  font-size: 0.85rem;
+  padding: 0 var(--spacing-lg);
+}
+
+.share-panel-owner-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.share-panel-owner-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.share-panel-owner-name {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: var(--font-weight-heading);
+}
+
+.share-list {
+  list-style: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+}
+
+.share-grantee-type-badge {
+  font-size: 0.7rem;
+  background: var(--bg-alt);
+  border-radius: var(--rounded-sm);
+  padding: 1px 5px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.share-grantee-id {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-perm-select {
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+  padding: 2px 4px;
+}
+
+.share-remove-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  transition: color 0.15s;
+}
+.share-remove-btn:hover { color: var(--error); }
+
+.share-add-section { padding: var(--spacing-lg); display: flex; flex-direction: column; gap: var(--spacing-md); }
+
+.share-perm-row { display: flex; align-items: center; gap: var(--spacing-sm); }
+
+.share-perm-label { font-size: 0.8rem; color: var(--muted); flex-shrink: 0; }
+
+.share-search-wrap { position: relative; }
+
+.share-search-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  padding: var(--spacing-sm);
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+}
+.share-search-input:focus { outline: none; border-color: var(--accent); }
+
+.share-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  list-style: none;
+  padding: var(--spacing-xs) 0;
+  margin: 2px 0 0 0;
+  z-index: 10;
+}
+
+.share-result-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.share-result-item:hover { background: var(--accent-soft); }
+
+.share-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.share-avatar--placeholder {
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: var(--font-weight-heading);
+}
+
+.share-result-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.share-result-type { font-size: 0.75rem; color: var(--muted); }
