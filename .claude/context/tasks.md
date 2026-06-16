@@ -5,10 +5,12 @@ App id `tasks`; displayed as "DohDocs" via `CompanyInfo.md` `appNames`.
 ## Entry point & state
 
 `src/apps/tasks/TasksApp.tsx` — doc list, folder tree, active doc. No global state manager; plain `useState`.
-- `docs: DocMeta[]` — filtered by `search` (250 ms debounce, full-text via `listDocs(query)`)
+- `docs: DocMeta[]` — filtered by `search` (250 ms debounce) and `view` (Mine/Shared/All), via `listDocs(query, view, userId)`
 - `folders: Folder[]` — full tree
-- `active: DohDoc | null` — open document
+- `active: DohDoc | null` — open document; carries `effectivePermission: 'owner'|'edit'|'comment'` propagated from `DocMeta`
 - `sort: "edited" | "name"` — persisted to `localStorage`
+- `view: ViewMode` (`'mine'|'shared'|'all'`) — persisted to `localStorage` as `dohdash-tasks-view`
+- `sharedFolderIds: Set<string>` — owned folder IDs that have active shares (for the share icon in sidebar)
 
 ## Editor
 
@@ -42,11 +44,34 @@ Format registry: `data/formattingSelectors.ts` — P1/P2/P3/Comment/Math are ent
 
 Google-Docs-style threads. `doc_comments` table; `CommentMark.ts` anchors them in the doc, `components/CommentsPanel.tsx` is the side panel. Threaded replies cascade via `parent_id`. Caller supplies the comment `id` (`crypto.randomUUID()`) so the editor can place the mark before the row exists. `db.ts`: `listDocComments`, `createDocComment`, `updateDocComment`, `setDocCommentResolved`, `deleteDocComment`.
 
+## Sharing & permissions
+
+Notes and folders are **private to their owner by default**. Access is granted via `note_shares` / `folder_shares` rows (polymorphic grantee: `user` or `group`). Permission tiers: `'edit'` (full write) or `'comment'` (read + thread only).
+
+Permission is resolved server-side by the `resolve_note_permission(note_id, user_id)` SQL `SECURITY DEFINER` function — RLS on `notes` calls it directly. Resolution order: (1) owner → `'owner'`; (2) note-level grants (direct user + group expansion, most permissive); (3) folder-level grants (same); note-level overrides folder-level entirely.
+
+`DocMeta` carries `effectivePermission: 'owner'|'edit'|'comment'|null`, `ownerName`, `ownerAvatarUrl` for display in the sidebar and editor.
+
+**Editor enforcement:** when `effectivePermission === 'comment'`, TipTap's `editable` is set to `false`; all formatting toolbar controls are hidden; a read-only banner appears; the comment button stays visible.
+
+**Share UI:**
+- `SharePanel` (`src/apps/tasks/components/SharePanel.tsx`) — slide-in panel from the right, triggered by the share button in the Editor toolbar (owners only). Shows existing shares with permission select + remove; type-ahead search via `searchShareTargets` across profiles and groups; `onMouseDown` prevents blur-before-add.
+- `FolderShareModal` (`src/apps/tasks/components/FolderShareModal.tsx`) — modal opened from the folder `⋯` context menu ("Share folder"). Same type-ahead pattern.
+
+**Sidebar views:**
+- `Mine` — only docs owned by current user; owned folder tree shown
+- `Shared` — docs shared with current user, grouped by owner with permission badge
+- `All` — owned docs + folder tree, then a "Shared with me" flat section
+
+Folders owned by current user that have active shares show a faint share icon (SVG) in the sidebar.
+
 ## Storage
 
-All via `src/storage/db.ts`. Tables: `notes (id, title, markdown, updated_at, folder_id, owner_id)`, `folders (id, name, parent_id, created_at, owner_id)`, `doc_comments`.
+All via `src/storage/db.ts`. Tables: `notes (id, title, markdown, updated_at, folder_id, owner_id)`, `folders (id, name, parent_id, created_at, owner_id)`, `doc_comments`, `note_shares`, `folder_shares`.
 
-Docs/folders: `listDocs(query?)`, `getDoc(id)`, `createDoc(folderId, ownerId)`, `saveDoc(doc)`, `deleteDoc(id)`, `moveDoc(docId, folderId)`, `listFolders()`, `createFolder(name, parentId, ownerId)`, `renameFolder(id, name)`, `deleteFolder(id)`.
+Docs/folders: `listDocs(query?, view?, userId?)`, `getDoc(id)`, `createDoc(folderId, ownerId)`, `saveDoc(doc)`, `deleteDoc(id)`, `moveDoc(docId, folderId)`, `listFolders()`, `createFolder(name, parentId, ownerId)`, `renameFolder(id, name)`, `deleteFolder(id)`.
+
+Share functions: `listNoteShares(noteId)`, `addNoteShare(...)`, `updateNoteShare(id, permission)`, `removeNoteShare(id)`, `listFolderShares(folderId)`, `addFolderShare(...)`, `updateFolderShare(id, permission)`, `removeFolderShare(id)`, `searchShareTargets(query)` (returns `ShareTarget[]` combining profiles + groups), `listAllVisibleFolderShares()` (for sidebar share icons).
 
 ## Gotchas
 
@@ -54,3 +79,6 @@ Docs/folders: `listDocs(query?)`, `getDoc(id)`, `createDoc(folderId, ownerId)`, 
 - **Recursive folder tree**: `Sidebar.tsx` builds a `Map<parentId, Folder[]>` and renders recursively, not a flat list.
 - **Rich clipboard**: `share.ts` copies both HTML and Markdown so paste into Word/Gmail keeps formatting.
 - **PDF export**: browser print dialog, no server-side PDF.
+- **No Sidebar.css**: sidebar styles live in `TasksApp.css` (scoped under `.tasks-app`).
+- **`as unknown as NoteRow[]` cast in `listDocs`**: Supabase's join return type doesn't match the manually typed `NoteRow` with nested `owner` profile — the cast is intentional (same pattern as `listDocComments`).
+- **Share grantee name resolution**: PostgREST can't FK-join polymorphic `grantee_id` (references either profiles or groups). `SharePanel` and `FolderShareModal` load `listProfiles()` + `listGroups()` on mount and build a `nameMap: Map<id, name>` client-side for display.

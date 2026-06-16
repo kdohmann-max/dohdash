@@ -22,7 +22,7 @@ type AuthState =
 
 ## Admin panel
 
-`src/admin/` — `AdminDashboard.tsx` (3 tabs: Users / App Access / `AppAccessPanel.tsx` / Activity / `ActivityPanel.tsx`).
+`src/admin/` — `AdminDashboard.tsx` (4 tabs: Users / App Access / `AppAccessPanel.tsx` / Activity / `ActivityPanel.tsx` / Groups / `GroupsPanel.tsx`).
 
 **Provisioning (email pre-authorization):**
 1. Admin enters email → `provisionUserByEmail()` → `admin_provision_user` RPC
@@ -47,9 +47,18 @@ type AuthState =
 
 **All Supabase DB calls go through `src/storage/db.ts` only.** Permitted exceptions: `supabase.auth` in `useAuthState.ts`, `supabase.functions.invoke` in Chicken Scratch, and `src/storage/realtime.ts` (Realtime broadcast for DohDocs presence/live-refresh — shares db.ts's client; components use its typed subscribe helpers, never supabase directly).
 
-Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`.
+Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`, `groups`, `group_members`, `note_shares`, `folder_shares`.
 
 `app_id` is a code-defined string key into `APP_REGISTRY` (`src/apps/registry.tsx`) — apps are not DB rows.
+
+## Platform Groups
+
+Admin-managed groups (`groups` + `group_members` tables) live at the DohDash shell level so any app can use them for sharing.
+
+- **SELECT** on both tables: any authenticated user (needed for share-target search)
+- **INSERT/UPDATE/DELETE**: `is_admin()` only; `group_members` has no UPDATE policy (add/remove only)
+- `db.ts` exports: `listGroups`, `createGroup`, `updateGroup`, `deleteGroup`, `listGroupMembers`, `addGroupMember`, `removeGroupMember`, `listMyGroups`
+- Admin UI: `src/admin/GroupsPanel.tsx` — left column list + right detail pane (editable name/description, member management with type-ahead, delete with confirmation)
 
 ## Dev auth bypass & browser testing
 
