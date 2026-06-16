@@ -26,6 +26,12 @@
   font-style: normal;
 }
 
+.shell-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
 .shell-nav {
   display: flex;
   gap: var(--spacing-sm);
@@ -59,24 +65,6 @@
   color: var(--muted);
 }
 
-.shell-theme {
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--border);
-  border-radius: var(--rounded-sm);
-  background: var(--bg);
-  cursor: pointer;
-  font-size: 15px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-.shell-theme:hover {
-  border-color: var(--accent);
-}
 
 .shell-signout {
   padding: var(--spacing-xs) var(--spacing-sm);
