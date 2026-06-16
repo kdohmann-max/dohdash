@@ -746,3 +746,33 @@
     padding: 16px 12px 80px;
   }
 }
+
+/* ---- View toggle (Mine / Shared / All) ---- */
+
+.tasks-app .view-toggle {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--spacing-sm);
+  background: var(--bg-alt);
+  border-radius: var(--rounded-sm);
+  padding: 2px;
+}
+
+.tasks-app .view-toggle-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: var(--rounded-sm);
+  padding: 4px 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.tasks-app .view-toggle-btn.active {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: var(--font-weight-heading);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}

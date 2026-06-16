@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { DocMeta, Folder } from "../../../storage/db";
+import type { ViewMode } from "../TasksApp";
 
 export type SortMode = "edited" | "name";
 
@@ -25,6 +26,8 @@ interface Props {
   onToggleSelectMode: () => void;
   onToggleSelect: (id: string) => void;
   onBulkDelete: () => void;
+  view: ViewMode;
+  onViewChange: (v: ViewMode) => void;
 }
 
 type Tree = Map<string | null, Folder[]>;
@@ -342,6 +345,7 @@ export function Sidebar({
   onCreateFolder, onRenameFolder, onDeleteFolder,
   isOpen, onClose,
   selectMode, selectedIds, onToggleSelectMode, onToggleSelect, onBulkDelete,
+  view, onViewChange,
 }: Props) {
   const [addingRoot, setAddingRoot] = useState(false);
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
@@ -396,6 +400,17 @@ export function Sidebar({
       </div>
 
       <div className="sidebar-controls">
+        <div className="view-toggle">
+          {(['mine', 'shared', 'all'] as ViewMode[]).map((v) => (
+            <button
+              key={v}
+              className={`view-toggle-btn${view === v ? ' active' : ''}`}
+              onClick={() => onViewChange(v)}
+            >
+              {v === 'mine' ? 'Mine' : v === 'shared' ? 'Shared' : 'All'}
+            </button>
+          ))}
+        </div>
         <input
           className="search-input"
           type="search"

@@ -23,6 +23,8 @@ import "./TasksApp.css";
 import "./styles/formatting-selectors.css";
 import "./styles/comments.css";
 
+export type ViewMode = 'mine' | 'shared' | 'all';
+
 const EXAMPLE_NOTE = `# DohDocs Formatting Guide
 
 A complete tour of every formatting type the editor supports.
@@ -103,6 +105,9 @@ export function TasksApp() {
   const [sort, setSort] = useState<SortMode>(
     () => (localStorage.getItem("dohdash-tasks-sort") as SortMode) || "edited"
   );
+  const [view, setView] = useState<ViewMode>(
+    () => (localStorage.getItem('dohdash-tasks-view') as ViewMode) || 'mine'
+  );
   const [remoteDeleted, setRemoteDeleted] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -115,9 +120,9 @@ export function TasksApp() {
 
   const loadDocs = useCallback(async (q = search) => {
     const seq = ++loadSeq.current;
-    const list = await listDocs(q);
+    const list = await listDocs(q, view, ownerId ?? undefined);
     if (seq === loadSeq.current) setDocs(list);
-  }, [search]);
+  }, [search, view, ownerId]);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -170,6 +175,10 @@ export function TasksApp() {
     localStorage.setItem("dohdash-tasks-sort", sort);
   }, [sort]);
 
+  useEffect(() => {
+    localStorage.setItem('dohdash-tasks-view', view);
+  }, [view]);
+
   const sortedDocs = useMemo(() => {
     const list = [...docs];
     if (sort === "name") {
@@ -181,14 +190,17 @@ export function TasksApp() {
   }, [docs, sort]);
 
   async function handleSelect(id: string) {
-    setActive((await getDoc(id)) ?? null);
+    const meta = docs.find((d) => d.id === id);
+    const doc = await getDoc(id);
+    if (doc) setActive({ ...doc, effectivePermission: meta?.effectivePermission ?? 'owner' });
+    else setActive(null);
     setRemoteDeleted(false);
     setSidebarOpen(false);
   }
 
   async function handleCreateInFolder(folderId: string | null) {
     const doc = await createDoc(folderId, ownerId);
-    setActive(doc);
+    setActive({ ...doc, effectivePermission: 'owner' });
     setRemoteDeleted(false);
     await loadDocs();
     notifyDocsListChanged();
@@ -318,6 +330,8 @@ export function TasksApp() {
         onToggleSelectMode={handleToggleSelectMode}
         onToggleSelect={handleToggleSelect}
         onBulkDelete={() => void handleBulkDelete()}
+        view={view}
+        onViewChange={setView}
       />
       <main className="main">
         {active && remoteDeleted ? (
