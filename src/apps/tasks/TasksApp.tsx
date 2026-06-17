@@ -88,7 +88,11 @@ Apply these with the **F** button in the toolbar:
 
 function deriveTitle(markdown: string): string {
   for (const raw of markdown.split("\n")) {
-    const line = raw.replace(/^#+\s*/, "").trim();
+    const line = raw
+      .replace(/<!--[\s\S]*?-->/g, "") // drop HTML comments (e.g. the user-tag list)
+      .replace(/<[^>]+>/g, "")         // drop inline HTML tags (e.g. fmt-* spans)
+      .replace(/^#+\s*/, "")           // drop heading markers
+      .trim();
     if (line) return line.slice(0, 80);
   }
   return "Untitled";
