@@ -147,8 +147,8 @@ async function main() {
     .channel("remote-sessions-agent")
     .on(
       "postgres_changes",
-      { event: "INSERT", schema: "public", table: "remote_sessions", filter: "status=eq.pending" },
-      (payload) => handleSession(payload.new),
+      { event: "INSERT", schema: "public", table: "remote_sessions" },
+      (payload) => { if (payload.new.status === "pending") handleSession(payload.new); },
     )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") console.log("Listening for session requests…");
