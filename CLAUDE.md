@@ -1,4 +1,6 @@
 # DohDash — Claude Context
+## Claude context Maintenance
+When things change relevant to claude context reccomend updating the claude.md with the new information 
 
 ## Token Discipline & Diff Constraints
 - **Diff-Only Output:** You must provide all code modifications strictly as standard unified diffs or targeted function replacements. Do not rewrite unaffected code block blocks, surrounding boilerplate, or entire files.
@@ -51,6 +53,7 @@ When a flow feels like it needs a tutorial, redesign it. If unsure whether somet
 - `npm run dev` — dev server at `localhost:5173` (next free port if taken)
 - `npm run build` — `tsc -b` typecheck, then Vite build to `dist/`
 - `.env.local` (gitignored) needs `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
+- **Config/env files:** create them directly with the Write tool (pre-filling any known values) rather than instructing terminal commands — never ask the user to copy/paste into a terminal.
 
 ## Deploy workflow
 

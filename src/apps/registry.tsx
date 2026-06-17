@@ -10,6 +10,7 @@ import {
   CleanUpIcon,
   ChickenScratchIcon,
   FractionCalculatorIcon,
+  RemoteClaudeIcon,
 } from "../icons";
 
 export interface AppDef {
@@ -83,6 +84,13 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <FractionCalculatorIcon />,
     description: "Calculate with fractions, decimals, and measurements.",
     route: "/dashboard/app/fraction-calculator",
+  },
+  {
+    id: "remote-claude",
+    name: "Remote Claude",
+    icon: <RemoteClaudeIcon />,
+    description: "Start a remote Claude Code session on your PC from your phone.",
+    route: "/dashboard/app/remote-claude",
   },
 ];
 

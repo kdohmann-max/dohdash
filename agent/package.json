@@ -1,0 +1,13 @@
+{
+  "name": "remote-claude-agent",
+  "version": "1.0.0",
+  "description": "Listens for Remote Claude session requests from DohDash and opens VS Code + Claude on the local machine.",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.0",
+    "dotenv": "^16.0.0"
+  }
+}

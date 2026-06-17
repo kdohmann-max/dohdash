@@ -32,6 +32,9 @@ supabase/.temp
 .agentsroom/handoff-transcript-*.txt
 .agentsroom/handoff-summary-*.md
 
+# Agent credentials
+agent/.env
+
 # Playwright dev auth/test artifacts
 playwright/.auth/
 playwright/output/

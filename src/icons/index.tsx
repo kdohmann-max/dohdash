@@ -175,6 +175,17 @@ export function MoonIcon({ size }: { size?: number } = {}) {
   );
 }
 
+export function RemoteClaudeIcon({ size }: { size?: number } = {}) {
+  return (
+    <svg {...svgProps(size)}>
+      <rect x="2" y="3" width="20" height="13" rx="2" />
+      <path d="M8 21h8M12 17v4" />
+      <path d="M6 9l3 2-3 2" />
+      <path d="M13 13h3" />
+    </svg>
+  );
+}
+
 export function FractionCalculatorIcon({ size }: { size?: number } = {}) {
   return (
     <svg {...svgProps(size)}>

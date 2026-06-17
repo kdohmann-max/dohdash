@@ -9,6 +9,7 @@ import { AppStubPage } from "./apps/AppStubPage";
 import { TasksApp } from "./apps/tasks/TasksApp";
 import { ChickenScratchApp } from "./apps/chicken-scratch/ChickenScratchApp";
 import { FractionCalculatorApp } from "./apps/fraction-calculator/FractionCalculatorApp";
+import { RemoteClaudeApp } from "./apps/remote-claude/RemoteClaudeApp";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import "./App.css";
 
@@ -27,6 +28,7 @@ function AppRoute() {
   if (appId === "tasks") return <TasksApp />;
   if (appId === "chicken-scratch") return <ChickenScratchApp />;
   if (appId === "fraction-calculator") return <FractionCalculatorApp />;
+  if (appId === "remote-claude") return <RemoteClaudeApp />;
   return <AppStubPage />;
 }
 
