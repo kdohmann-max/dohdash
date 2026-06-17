@@ -92,7 +92,7 @@ function launchSession(projectPath) {
 
   // Open a new cmd window in the project directory running `claude`.
   // Type /remote inside Claude to expose the session to the Claude mobile app.
-  exec(`start "" cmd /k "cd /d "${projectPath}" && claude"`, { shell: true }, (err) => {
+  exec(`start "" cmd /k "cd /d "${projectPath}" && claude --dangerously-skip-permissions"`, { shell: true }, (err) => {
     if (err) console.error("Claude launch error:", err.message);
   });
 }
