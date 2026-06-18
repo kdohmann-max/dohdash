@@ -1,0 +1,49 @@
+.app-stub {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.app-stub-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: var(--muted);
+}
+
+.app-stub-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.app-stub h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  margin: 0;
+}
+
+.app-stub-description {
+  color: var(--muted);
+}
+
+.app-stub-badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: var(--font-weight-heading);
+}
+
+.app-stub-back {
+  margin-top: var(--spacing-md);
+  color: var(--accent);
+}

@@ -1,0 +1,229 @@
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.admin-dashboard h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  margin: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-tab {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: var(--font-weight-heading);
+}
+
+.admin-tab:hover {
+  color: var(--accent);
+}
+
+.admin-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.admin-status {
+  color: var(--muted);
+}
+
+.admin-error {
+  color: var(--accent);
+}
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.admin-section h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.admin-provision-form {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-provision-form input,
+.admin-provision-form select {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.admin-provision-form button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+}
+
+.admin-provision-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.admin-pending-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.admin-pending-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+}
+
+.admin-pending-row span:first-child {
+  flex: 1;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: var(--font-weight-heading);
+  font-size: 0.85rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-person {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.admin-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-avatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: var(--font-weight-heading);
+}
+
+.admin-role-badge {
+  display: inline-block;
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--rounded-sm);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-heading);
+  background: var(--bg-alt);
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.admin-role-badge--admin {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.admin-link-button {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-link-button:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.admin-request-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+}
+
+.admin-request-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-accept-button,
+.admin-reject-button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  cursor: pointer;
+  background: var(--bg);
+}
+
+.admin-accept-button {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.admin-accept-button:hover {
+  background: var(--accent-soft);
+}
+
+.admin-reject-button {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.admin-reject-button:hover {
+  background: var(--accent-soft);
+}
+

@@ -1,0 +1,101 @@
+.fsm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+
+.fsm-modal {
+  background: var(--bg);
+  border-radius: var(--rounded-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 380px;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.fsm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.fsm-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.fsm-close {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--muted); font-size: 1rem; padding: 4px;
+}
+
+.fsm-error { color: var(--error); font-size: 0.85rem; padding: 0 var(--spacing-lg); }
+
+.fsm-type-badge {
+  font-size: 0.7rem; background: var(--bg-alt); border-radius: var(--rounded-sm);
+  padding: 1px 5px; color: var(--muted); flex-shrink: 0;
+}
+
+.fsm-perm-select {
+  border: 1px solid var(--border); border-radius: var(--rounded-sm);
+  background: var(--bg); color: var(--text); font-size: 0.8rem; padding: 2px 4px;
+}
+
+.fsm-add-section { padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-md); }
+.fsm-perm-row { display: flex; align-items: center; gap: var(--spacing-sm); }
+.fsm-perm-label { font-size: 0.8rem; color: var(--muted); flex-shrink: 0; }
+
+.fsm-search-input {
+  width: 100%; border: 1px solid var(--border); border-radius: var(--rounded-sm);
+  padding: var(--spacing-sm); font-size: 0.9rem; background: var(--bg); color: var(--text); box-sizing: border-box;
+}
+.fsm-search-input:focus { outline: none; border-color: var(--accent); }
+
+.fsm-roster {
+  list-style: none;
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  margin: 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.fsm-roster-empty { color: var(--muted); font-size: 0.85rem; padding: var(--spacing-md) 0; text-align: center; }
+
+.fsm-roster-row {
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+}
+.fsm-roster-row:last-child { border-bottom: none; }
+
+.fsm-roster-label {
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  flex: 1; min-width: 0; padding: var(--spacing-sm) 0; cursor: pointer;
+}
+
+.fsm-roster-check {
+  width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+}
+
+.fsm-roster-perm { flex-shrink: 0; }
+
+.fsm-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.fsm-avatar--placeholder {
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: var(--font-weight-heading);
+}
+
+.fsm-result-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; color: var(--text); }

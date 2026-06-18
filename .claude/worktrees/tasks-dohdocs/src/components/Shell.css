@@ -1,0 +1,99 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+
+.shell-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  font-variant: small-caps;
+  color: var(--text);
+}
+
+.shell-nav {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.shell-link {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--rounded-sm);
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.shell-link:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.shell-link--active {
+  color: var(--accent);
+  font-weight: var(--font-weight-heading);
+}
+
+.shell-user {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.shell-user-name {
+  color: var(--muted);
+}
+
+.shell-theme {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.shell-theme:hover {
+  border-color: var(--accent);
+}
+
+.shell-signout {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.shell-signout:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.shell-content {
+  flex: 1;
+  padding: var(--spacing-xl);
+}

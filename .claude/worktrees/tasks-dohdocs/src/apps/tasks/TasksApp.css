@@ -1,0 +1,696 @@
+/* DohDocs (Tasks app) — scoped under .tasks-app so nothing leaks into the
+   rest of the dashboard. Colors/fonts come from DohDash's CompanyInfo-driven
+   CSS custom properties on :root (--bg, --bg-alt, --border, --text, --muted,
+   --accent, --accent-soft) — this app intentionally does NOT redefine them,
+   so it follows the dashboard's light/dark theme rather than dohdocs' own
+   fixed dark palette. */
+
+.tasks-app {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--text);
+}
+
+/* ---- Sidebar ---- */
+.tasks-app .sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--bg-alt);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-app .sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.tasks-app .brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.tasks-app .head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.tasks-app .new-doc {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.tasks-app .new-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  width: auto;
+  padding: 0 6px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.tasks-app .sidebar-close {
+  display: none;
+}
+
+/* ---- Sidebar controls (search + sort) ---- */
+.tasks-app .sidebar-controls {
+  padding: var(--spacing-sm) var(--spacing-sm);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tasks-app .search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.tasks-app .sort-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tasks-app .sort-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.tasks-app .sort-control select {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.tasks-app .doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tasks-app .doc-list li {
+  display: flex;
+  align-items: center;
+  border-radius: var(--rounded-sm);
+  font-size: 14px;
+  color: var(--text);
+  list-style: none;
+}
+
+.tasks-app .doc-list .empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 12px 10px;
+}
+
+/* ---- Doc items ---- */
+.tasks-app .doc-item {
+  justify-content: space-between;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.tasks-app .doc-item:hover { background: var(--bg); }
+
+.tasks-app .doc-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tasks-app .doc-item .doc-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.tasks-app .doc-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+}
+
+.tasks-app .doc-item:hover .doc-actions { opacity: 1; }
+
+.tasks-app .doc-menu-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+/* ---- Folder items ---- */
+.tasks-app .folder-item {
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 6px 10px;
+  cursor: default;
+  user-select: none;
+}
+
+.tasks-app .folder-item:hover { background: var(--bg); }
+
+.tasks-app .folder-toggle {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 9px;
+  padding: 0 2px;
+  width: 16px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.tasks-app .folder-name {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tasks-app .folder-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+}
+
+.tasks-app .folder-item:hover .folder-actions { opacity: 1; }
+
+.tasks-app .folder-add-btn,
+.tasks-app .folder-menu-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+/* ---- Folder / doc ⋯ menus + inline inputs ---- */
+.tasks-app .folder-menu,
+.tasks-app .doc-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 2px);
+  z-index: 30;
+  min-width: 150px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tasks-app .folder-menu button,
+.tasks-app .doc-menu button {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.tasks-app .folder-menu button:hover,
+.tasks-app .doc-menu button:hover { background: var(--bg-alt); }
+
+.tasks-app .folder-menu-delete,
+.tasks-app .doc-menu-delete { color: var(--error) !important; }
+
+.tasks-app .folder-menu-label,
+.tasks-app .doc-menu-label {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px 14px 4px;
+  pointer-events: none;
+}
+
+.tasks-app .doc-menu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+.tasks-app .inline-input-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+}
+
+.tasks-app .inline-input,
+.tasks-app .folder-rename-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--rounded-sm);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  outline: none;
+  min-width: 0;
+}
+
+/* ---- Main / Editor ---- */
+.tasks-app .main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-app .editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.tasks-app .empty-main {
+  margin: auto;
+  color: var(--muted);
+}
+
+/* ---- View toggle (Rich / Markdown source) ---- */
+.tasks-app .view-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 11;
+  display: flex;
+  gap: 4px;
+  padding: 8px var(--spacing-md);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.tasks-app .view-toggle button {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--rounded-sm);
+  padding: 4px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tasks-app .view-toggle button.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tasks-app .print-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+}
+
+.tasks-app .share-wrap {
+  position: relative;
+  margin-left: auto;
+}
+
+.tasks-app .share-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.tasks-app .share-menu button {
+  border: none;
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  padding: 9px 14px;
+  border-radius: 0;
+}
+
+.tasks-app .share-menu button:hover {
+  background: var(--accent-soft);
+}
+
+.tasks-app .source-surface {
+  flex: 1;
+  width: 100%;
+  max-width: 792px;
+  margin: 0 auto;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 32px 16px 96px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ---- Toolbar ---- */
+.tasks-app .toolbar {
+  position: sticky;
+  top: 41px;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.tasks-app .ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 8px var(--spacing-md);
+}
+
+.tasks-app .sub-ribbon {
+  border-top: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+
+.tasks-app .control {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tasks-app .control-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  line-height: 1;
+  font-weight: 500;
+}
+
+.tasks-app .control select {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+}
+
+.tasks-app .control select:hover { border-color: var(--muted); }
+
+.tasks-app .control select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
+.tasks-app .ribbon button {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--rounded-sm);
+  padding: 6px 10px;
+  min-width: 34px;
+}
+
+.tasks-app .ribbon button.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tasks-app .ribbon .f-button,
+.tasks-app .ribbon .image-btn,
+.tasks-app .ribbon .archive-btn {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.tasks-app .ribbon .f-button:hover,
+.tasks-app .ribbon .image-btn:hover,
+.tasks-app .ribbon .archive-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tasks-app .ribbon .f-button.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tasks-app .ribbon .f-button:focus-visible,
+.tasks-app .ribbon .image-btn:focus-visible,
+.tasks-app .ribbon .archive-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tasks-app .f-button {
+  padding: 0 10px;
+  font-weight: 700;
+  font-style: italic;
+  min-width: 30px;
+}
+
+.tasks-app .image-btn { padding: 0 8px; }
+
+.tasks-app .archive-btn {
+  padding: 0 12px;
+  margin-left: auto;
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tasks-app .ribbon .f-button,
+  .tasks-app .ribbon .image-btn,
+  .tasks-app .ribbon .archive-btn,
+  .tasks-app .control select { transition: none; }
+}
+
+/* ---- Editor surface (ProseMirror content) ---- */
+.tasks-app .editor-surface {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px 96px;
+}
+
+.tasks-app .editor-surface .ProseMirror {
+  width: 100%;
+  max-width: 760px;
+  outline: none;
+  line-height: 1.35;
+  font-size: 16px;
+  font-family: var(--font-body);
+}
+
+.tasks-app .ProseMirror p { margin: 0.25em 0; }
+.tasks-app .ProseMirror ul,
+.tasks-app .ProseMirror ol { margin: 0.25em 0; }
+.tasks-app .ProseMirror li { margin: 0.1em 0; }
+.tasks-app .ProseMirror li > p { margin: 0; }
+
+.tasks-app .ProseMirror h1,
+.tasks-app .ProseMirror h2,
+.tasks-app .ProseMirror h3,
+.tasks-app .ProseMirror h4 {
+  margin: 0.6em 0 0.3em;
+  font-family: var(--font-heading);
+  font-variant: small-caps;
+  letter-spacing: 0.015em;
+}
+
+.tasks-app .ProseMirror:focus { outline: none; }
+
+.tasks-app .ProseMirror h1 { font-size: 2em; }
+.tasks-app .ProseMirror h2 { font-size: 1.6em; }
+.tasks-app .ProseMirror h3 { font-size: 1.3em; }
+.tasks-app .ProseMirror h4 { font-size: 1.1em; }
+
+.tasks-app .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Nested-list emphasis: bold a first-level item's own line when it has
+   nested children — `:not(li li)` keeps deeper items unformatted. Task
+   items hold content (and any nested list) inside a <div>. */
+.tasks-app .ProseMirror li:not(li li):has(> ul, > ol) > p,
+.tasks-app .ProseMirror li:not(li li):has(> div > ul, > div > ol) > div > p:first-child {
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.015em;
+  font-size: 1.3em;
+}
+
+.tasks-app .ProseMirror img {
+  max-width: 350px;
+  width: 100%;
+  height: auto;
+  border-radius: var(--rounded-sm);
+  vertical-align: bottom;
+}
+
+.tasks-app .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+}
+
+/* Task lists */
+.tasks-app ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tasks-app ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tasks-app ul[data-type="taskList"] li > label { margin-top: 4px; }
+.tasks-app ul[data-type="taskList"] li > div { flex: 1; }
+
+.tasks-app .unarchive-btn {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 0 6px;
+  margin-right: 6px;
+  color: var(--accent);
+}
+
+/* ---- Hamburger / close: hidden on desktop, shown on mobile drawer ---- */
+.tasks-app .menu-btn {
+  display: none;
+}
+
+/* ---- Responsive: phones / tablets ---- */
+@media (max-width: 720px) {
+  .tasks-app .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 80vw;
+    max-width: 300px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .tasks-app .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .tasks-app .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 49;
+  }
+
+  .tasks-app .menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 28px;
+    font-size: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--rounded-sm);
+    background: var(--bg);
+    padding: 0;
+    margin-right: 4px;
+  }
+
+  .tasks-app .sidebar-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--rounded-sm);
+    background: var(--bg);
+    font-size: 18px;
+    padding: 0;
+  }
+
+  .tasks-app .ribbon {
+    padding: 6px 8px;
+  }
+
+  .tasks-app .editor-surface {
+    padding: 16px 12px 80px;
+  }
+}
