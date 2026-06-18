@@ -12,6 +12,7 @@ export function AppTile({ app }: { app: AppDef }) {
       </span>
       <span className="app-tile-name">{resolveAppName(app, companyInfo)}</span>
       <span className="app-tile-description">{app.description}</span>
+      {app.status === "stub" && <span className="app-tile-soon">Coming soon</span>}
     </Link>
   );
 }

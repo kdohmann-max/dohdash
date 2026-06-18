@@ -17,6 +17,7 @@ App id `tasks`; displayed as "DohDocs" via `CompanyInfo.md` `appNames`.
 `src/apps/tasks/components/Editor.tsx` — TipTap + `tiptap-markdown`; rich editor and raw Markdown stay in sync via the markdown plugin. Extensions assembled in `editor/extensions.ts` (`buildExtensions()`).
 - `sourceMode: boolean` — WYSIWYG ↔ raw Markdown toggle
 - **Auto-save: 400 ms debounce per keystroke** → `saveDoc()`. No manual save button.
+- **Save-state indicator** (`saveStatus: "idle"|"saving"|"saved"|"error"`): shown in the `.view-toggle` bar ("Saving…" → "Saved" → "Offline — will retry"). On failure, the latest markdown is stashed to `localStorage` key `dohdash-doc-backup:<docId>` (`{markdown, updatedAt}`) and retried with exponential backoff (1s→30s cap); `pendingMarkdownRef` guards stale retries. On open, a backup newer than the server `updatedAt` is restored and re-flushed; otherwise dropped.
 - Images: base64 data URLs, no Storage bucket — `uploadImage()` in `db.ts` just encodes.
 
 ## Custom TipTap extensions

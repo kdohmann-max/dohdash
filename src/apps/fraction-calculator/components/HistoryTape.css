@@ -1,4 +1,29 @@
 /* src/apps/fraction-calculator/components/HistoryTape.css */
+.fc-history-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.fc-history-clear {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  border-radius: var(--rounded-sm);
+  padding: 2px var(--spacing-sm);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.fc-history-clear:hover {
+  color: var(--error);
+  background: var(--accent-soft);
+}
+
 .fc-history {
   display: flex;
   flex-direction: column;

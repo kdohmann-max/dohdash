@@ -45,9 +45,21 @@ type AuthState =
 
 ## Storage constraint
 
-**All Supabase DB calls go through `src/storage/db.ts` only.** Permitted exceptions: `supabase.auth` in `useAuthState.ts`, `supabase.functions.invoke` in Chicken Scratch, and `src/storage/realtime.ts` (Realtime broadcast for DohDocs presence/live-refresh — shares db.ts's client; components use its typed subscribe helpers, never supabase directly).
+**All Supabase DB calls go through `src/storage/` only.** The single client lives in `src/storage/client.ts`; every domain module imports it from there. Permitted exceptions: `supabase.auth` in `useAuthState.ts`, `supabase.functions.invoke` in Chicken Scratch, and `src/storage/realtime.ts` (Realtime broadcast for DohDocs presence/live-refresh — shares the same client from `client.ts`; components use its typed subscribe helpers, never supabase directly).
 
-Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`, `groups`, `group_members`, `note_shares`, `folder_shares`.
+**Folder layout** (split by domain so the file stopped being a merge-conflict magnet):
+- `client.ts` — the one `supabase` client.
+- `db.ts` — **barrel only**: `export * from` each domain module. Consumers still import `from ".../storage/db"`, so the split needed zero consumer changes.
+- `profiles.ts` — `Profile`/`Role` + `getProfile`/`listProfiles`/`updateProfileRole`.
+- `appAccess.ts` — `app_access` reads/writes.
+- `admin.ts` — provisioning, access requests, user removal/activity, audit log (imports `Role` from `profiles.ts`).
+- `groups.ts` — groups + members.
+- `notes.ts` — docs/folders CRUD + `uploadImage`.
+- `shares.ts` — `note_shares`/`folder_shares` + `searchShareTargets`.
+- `comments.ts` — `doc_comments` CRUD.
+- `remote.ts` — Remote Claude projects/sessions + `subscribeToRemoteSession`.
+
+Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`, `groups`, `group_members`, `note_shares`, `folder_shares`, `remote_projects`, `remote_sessions`.
 
 `app_id` is a code-defined string key into `APP_REGISTRY` (`src/apps/registry.tsx`) — apps are not DB rows.
 

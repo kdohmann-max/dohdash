@@ -13,7 +13,7 @@
 //                client refreshes its sidebar.
 
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { supabase } from "./db";
+import { supabase } from "./client";
 
 export interface PresenceIdentity {
   userId: string;

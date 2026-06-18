@@ -397,6 +397,23 @@
   color: var(--accent);
 }
 
+.tasks-app .save-status {
+  margin-left: auto;
+  align-self: center;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.tasks-app .save-status--saved {
+  color: var(--accent-secondary);
+}
+
+.tasks-app .save-status--error {
+  color: var(--error);
+}
+
 .tasks-app .print-btn {
   display: flex;
   align-items: center;
@@ -869,6 +886,21 @@
 
   .tasks-app .editor-surface {
     padding: 16px 12px 80px;
+  }
+
+  /* Top editor bar must wrap on narrow phones instead of clipping its
+     buttons (Rich / MD / Print / Export / save-status / comments). */
+  .tasks-app .view-toggle {
+    flex-wrap: wrap;
+  }
+
+  /* Comfortable touch targets (≥44px) for the toolbars on phones. */
+  .tasks-app .view-toggle button,
+  .tasks-app .ribbon .f-button,
+  .tasks-app .ribbon .image-btn,
+  .tasks-app .ribbon .archive-btn {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 

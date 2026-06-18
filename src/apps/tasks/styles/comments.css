@@ -7,6 +7,9 @@
   display: flex;
   min-height: 0;
   align-items: stretch;
+  /* Positioned ancestor for the absolute share/comments panels (esp. the
+     full-width phone overlays). */
+  position: relative;
 }
 
 .tasks-app .editor-content-wrap {

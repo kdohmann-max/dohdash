@@ -41,3 +41,17 @@
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+.app-tile-soon {
+  align-self: flex-start;
+  margin-top: var(--spacing-xs);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--rounded-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

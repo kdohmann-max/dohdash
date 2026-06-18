@@ -30,6 +30,43 @@ function getMarkdown(editor: TiptapEditor): string {
 
 const EDITING_IDLE_MS = 3000;
 
+// Auto-save status shown near the doc title so field users on poor
+// connectivity can see their work is safe.
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+// On save failure we stash the latest markdown locally so a refresh (or a
+// closed tab) doesn't lose edits; restored on open if newer than the server.
+const BACKUP_PREFIX = "dohdash-doc-backup:";
+interface LocalBackup {
+  markdown: string;
+  updatedAt: number;
+}
+
+function readBackup(docId: string): LocalBackup | null {
+  try {
+    const raw = localStorage.getItem(BACKUP_PREFIX + docId);
+    return raw ? (JSON.parse(raw) as LocalBackup) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeBackup(docId: string, backup: LocalBackup): void {
+  try {
+    localStorage.setItem(BACKUP_PREFIX + docId, JSON.stringify(backup));
+  } catch {
+    // Quota/unavailable — best-effort only.
+  }
+}
+
+function clearBackup(docId: string): void {
+  try {
+    localStorage.removeItem(BACKUP_PREFIX + docId);
+  } catch {
+    // ignore
+  }
+}
+
 interface Props {
   note: DohDoc;
   onChange: (markdown: string) => Promise<void>;
@@ -46,6 +83,12 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
   const editingTimerRef = useRef<number | undefined>(undefined);
   const dirtyRef = useRef(false);
   const lastUpdatedRef = useRef(note.updatedAt);
+  // Retry/backoff for failed saves; pendingMarkdownRef tracks the latest text
+  // a retry should attempt (so a stale retry skips itself after a new edit).
+  const retryTimerRef = useRef<number | undefined>(undefined);
+  const retryAttemptRef = useRef(0);
+  const pendingMarkdownRef = useRef<string | null>(null);
+  const savedRevertRef = useRef<number | undefined>(undefined);
   const channelRef = useRef<DocChannelHandle | null>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +105,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
   const [peers, setPeers] = useState<DocPeer[]>([]);
   const [remoteUpdate, setRemoteUpdate] = useState<DocUpdatePayload | null>(null);
   const [sharePanelOpen, setSharePanelOpen] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   // Always call the latest onChange (TasksApp recreates it as `active`
   // changes; the useEditor onUpdate closure is frozen at editor creation).
@@ -79,14 +122,37 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     editingTimerRef.current = window.setTimeout(() => channelRef.current?.setEditing(false), EDITING_IDLE_MS);
   }
 
+  function scheduleRetry(markdown: string) {
+    window.clearTimeout(retryTimerRef.current);
+    const attempt = (retryAttemptRef.current += 1);
+    const delay = Math.min(30000, 1000 * 2 ** (attempt - 1)); // 1s,2s,4s… cap 30s
+    retryTimerRef.current = window.setTimeout(() => {
+      if (pendingMarkdownRef.current === markdown) flushSave(markdown);
+    }, delay);
+  }
+
   function flushSave(markdown: string) {
     dirtyRef.current = false;
     const updatedAt = Date.now();
     lastUpdatedRef.current = updatedAt;
-    setSaveError(null);
-    onChangeRef.current(markdown).catch((err: unknown) => {
-      setSaveError(err instanceof Error ? err.message : "Save failed");
-    });
+    pendingMarkdownRef.current = markdown;
+    window.clearTimeout(savedRevertRef.current);
+    setSaveStatus("saving");
+    onChangeRef.current(markdown)
+      .then(() => {
+        // Only resolve to "saved" if no newer edit superseded this attempt.
+        if (pendingMarkdownRef.current !== markdown) return;
+        retryAttemptRef.current = 0;
+        clearBackup(note.id);
+        setSaveStatus("saved");
+        savedRevertRef.current = window.setTimeout(() => setSaveStatus("idle"), 1500);
+      })
+      .catch(() => {
+        // Stash locally and keep retrying so edits survive a refresh.
+        writeBackup(note.id, { markdown, updatedAt });
+        setSaveStatus("error");
+        scheduleRetry(markdown);
+      });
     channelRef.current?.broadcastUpdate({ markdown, updatedAt });
     // A local save makes local state authoritative — the remote change the
     // banner pointed at has been overwritten anyway.
@@ -132,8 +198,33 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     setRemoteUpdate(null);
     setPendingThread(null);
     setActiveThreadId(null);
+
+    window.clearTimeout(retryTimerRef.current);
+    retryAttemptRef.current = 0;
+    pendingMarkdownRef.current = null;
+    setSaveStatus("idle");
+
+    // Recover unsaved edits from a prior session if the local copy is newer
+    // than what the server has, then immediately try to flush it.
+    const backup = readBackup(note.id);
+    if (backup && backup.updatedAt > note.updatedAt) {
+      if (editor) editor.commands.setContent(backup.markdown, { emitUpdate: false });
+      setSource(backup.markdown);
+      dirtyRef.current = true;
+      flushSave(backup.markdown);
+    } else if (backup) {
+      clearBackup(note.id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note.id, editor]);
+
+  // Tidy save timers on unmount.
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(retryTimerRef.current);
+      window.clearTimeout(savedRevertRef.current);
+    };
+  }, []);
 
   // ---- presence + live refresh ----
 
@@ -380,6 +471,14 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
           )}
         </div>
 
+        {saveStatus !== "idle" ? (
+          <span className={`save-status save-status--${saveStatus}`} role="status">
+            {saveStatus === "saving" && "Saving…"}
+            {saveStatus === "saved" && "Saved"}
+            {saveStatus === "error" && "Offline — will retry"}
+          </span>
+        ) : null}
+
         <PresenceBar peers={peers} />
         <button
           className={`comments-toggle ${panelOpen ? "active" : ""}`}
@@ -390,13 +489,6 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
           {openThreadCount > 0 ? openThreadCount : ""}
         </button>
       </div>
-
-      {saveError ? (
-        <div className="editor-remote-banner editor-save-error">
-          <span>Save failed: {saveError}</span>
-          <button className="banner-dismiss" onClick={() => setSaveError(null)}>✕</button>
-        </div>
-      ) : null}
 
       {remoteUpdate ? (
         <div className="editor-remote-banner">

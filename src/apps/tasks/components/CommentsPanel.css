@@ -228,3 +228,14 @@
     width: 240px;
   }
 }
+
+/* On phones the in-flow panel would crush the editor — overlay it full-width
+   instead (it has its own close button). */
+@media (max-width: 480px) {
+  .comments-panel {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    z-index: 20;
+  }
+}

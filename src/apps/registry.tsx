@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { lazy, type ComponentType, type ReactNode } from "react";
 import type { CompanyInfo } from "../company/types";
+import { AppStubPage } from "./AppStubPage";
 import {
   JobFilesIcon,
   TasksIcon,
@@ -13,12 +14,30 @@ import {
   RemoteClaudeIcon,
 } from "../icons";
 
+// Functional apps are lazy-loaded so their heavy deps (TipTap for DohDocs, the
+// Gemini path for Chicken Scratch) stay out of the launcher's initial bundle.
+// React.lazy needs a default export; these apps are named exports, so map them.
+const TasksApp = lazy(() => import("./tasks/TasksApp").then((m) => ({ default: m.TasksApp })));
+const ChickenScratchApp = lazy(() =>
+  import("./chicken-scratch/ChickenScratchApp").then((m) => ({ default: m.ChickenScratchApp })),
+);
+const FractionCalculatorApp = lazy(() =>
+  import("./fraction-calculator/FractionCalculatorApp").then((m) => ({ default: m.FractionCalculatorApp })),
+);
+const RemoteClaudeApp = lazy(() =>
+  import("./remote-claude/RemoteClaudeApp").then((m) => ({ default: m.RemoteClaudeApp })),
+);
+
 export interface AppDef {
   id: string;
   name: string;
   icon: ReactNode;
   description: string;
   route: string;
+  /** Root component rendered at the app's route. Stubs use `AppStubPage`. */
+  component: ComponentType;
+  /** Drives launcher treatment + whether a real app mounts vs. the placeholder. */
+  status: "functional" | "stub";
 }
 
 export const APP_REGISTRY: AppDef[] = [
@@ -28,6 +47,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <JobFilesIcon />,
     description: "Browse and manage job-related documents and folders.",
     route: "/dashboard/app/job-files",
+    component: AppStubPage,
+    status: "stub",
   },
   {
     id: "tasks",
@@ -35,6 +56,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <TasksIcon />,
     description: "Track to-dos and assignments across the team.",
     route: "/dashboard/app/tasks",
+    component: TasksApp,
+    status: "functional",
   },
   {
     id: "calendar",
@@ -42,6 +65,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <CalendarIcon />,
     description: "See upcoming events, deadlines, and schedules.",
     route: "/dashboard/app/calendar",
+    component: AppStubPage,
+    status: "stub",
   },
   {
     id: "contacts",
@@ -49,6 +74,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <ContactsIcon />,
     description: "Look up coworkers, clients, and vendor contacts.",
     route: "/dashboard/app/contacts",
+    component: AppStubPage,
+    status: "stub",
   },
   {
     id: "time-tracker",
@@ -56,6 +83,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <TimeTrackerIcon />,
     description: "Log hours worked against jobs and projects.",
     route: "/dashboard/app/time-tracker",
+    component: AppStubPage,
+    status: "stub",
   },
   {
     id: "expense-tracker",
@@ -63,6 +92,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <ExpensesIcon />,
     description: "Submit and review expense reports.",
     route: "/dashboard/app/expense-tracker",
+    component: AppStubPage,
+    status: "stub",
   },
   {
     id: "clean-up",
@@ -70,6 +101,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <CleanUpIcon />,
     description: "Coordinate cleaning schedules and checklists.",
     route: "/dashboard/app/clean-up",
+    component: AppStubPage,
+    status: "stub",
   },
   {
     id: "chicken-scratch",
@@ -77,6 +110,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <ChickenScratchIcon />,
     description: "Convert handwriting and sketches into clean digital text and diagrams.",
     route: "/dashboard/app/chicken-scratch",
+    component: ChickenScratchApp,
+    status: "functional",
   },
   {
     id: "fraction-calculator",
@@ -84,6 +119,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <FractionCalculatorIcon />,
     description: "Calculate with fractions, decimals, and measurements.",
     route: "/dashboard/app/fraction-calculator",
+    component: FractionCalculatorApp,
+    status: "functional",
   },
   {
     id: "remote-claude",
@@ -91,6 +128,8 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <RemoteClaudeIcon />,
     description: "Start a remote Claude Code session on your PC from your phone.",
     route: "/dashboard/app/remote-claude",
+    component: RemoteClaudeApp,
+    status: "functional",
   },
 ];
 

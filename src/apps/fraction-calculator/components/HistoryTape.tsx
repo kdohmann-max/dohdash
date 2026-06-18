@@ -23,9 +23,11 @@ function formatResult(entry: HistoryEntry, state: CalcState): string {
 export function HistoryTape({
   state,
   onSelect,
+  onClear,
 }: {
   state: CalcState;
   onSelect: (entry: HistoryEntry) => void;
+  onClear: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -39,18 +41,23 @@ export function HistoryTape({
   }
 
   return (
-    <div className="fc-history" ref={ref}>
-      {state.history.map((entry, i) => (
-        <button
-          key={i}
-          type="button"
-          className="fc-history-item"
-          onClick={() => onSelect(entry)}
-        >
-          <span className="fc-history-expr">{entry.expression}</span>
-          <span className="fc-history-result">= {formatResult(entry, state)}</span>
-        </button>
-      ))}
+    <div className="fc-history-wrap">
+      <button type="button" className="fc-history-clear" onClick={onClear}>
+        Clear history
+      </button>
+      <div className="fc-history" ref={ref}>
+        {state.history.map((entry, i) => (
+          <button
+            key={i}
+            type="button"
+            className="fc-history-item"
+            onClick={() => onSelect(entry)}
+          >
+            <span className="fc-history-expr">{entry.expression}</span>
+            <span className="fc-history-result">= {formatResult(entry, state)}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

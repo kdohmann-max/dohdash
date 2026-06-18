@@ -57,7 +57,8 @@ export type CalcAction =
   | { type: "setDisplay"; value: DisplayMode }
   | { type: "setUnitsMode"; value: UnitsMode }
   | { type: "setAccuracy"; value: Accuracy }
-  | { type: "recallResult"; value: Rational };
+  | { type: "recallResult"; value: Rational }
+  | { type: "clearHistory" };
 
 const EMPTY_ENTRY: EntryValue = { feet: 0, whole: 0, num: 0, den: null };
 
@@ -260,6 +261,9 @@ export function dispatch(state: CalcState, action: CalcAction): CalcState {
         activeField: fieldOrder(state.unitsMode)[0],
         error: false,
       };
+
+    case "clearHistory":
+      return { ...state, history: [] };
 
     default:
       return state;

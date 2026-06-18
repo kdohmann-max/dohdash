@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { listAppAccessForUser } from "../storage/db";
 import { APP_REGISTRY } from "../apps/registry";
@@ -11,6 +12,8 @@ function errorMessage(err: unknown): string {
 
 export function Launcher() {
   const { state } = useAuth();
+  const location = useLocation();
+  const deniedApp = (location.state as { deniedApp?: string } | null)?.deniedApp ?? null;
   const [grantedIds, setGrantedIds] = useState<Set<string> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,24 +39,48 @@ export function Launcher() {
     };
   }, [userId]);
 
+  const notice = deniedApp ? (
+    <p className="launcher-status launcher-status--err">
+      You don't have access to {deniedApp}. Ask your admin to grant it.
+    </p>
+  ) : null;
+
   if (error) {
-    return <p className="launcher-status launcher-status--err">Couldn't load your apps: {error}</p>;
+    return (
+      <>
+        {notice}
+        <p className="launcher-status launcher-status--err">Couldn't load your apps: {error}</p>
+      </>
+    );
   }
   if (grantedIds === null) {
-    return <p className="launcher-status">Loading your apps…</p>;
+    return (
+      <>
+        {notice}
+        <p className="launcher-status">Loading your apps…</p>
+      </>
+    );
   }
 
   const apps = APP_REGISTRY.filter((app) => grantedIds.has(app.id));
 
   if (apps.length === 0) {
-    return <p className="launcher-status">No apps available yet. Contact your admin to request access.</p>;
+    return (
+      <>
+        {notice}
+        <p className="launcher-status">No apps available yet. Contact your admin to request access.</p>
+      </>
+    );
   }
 
   return (
-    <div className="launcher-grid">
-      {apps.map((app) => (
-        <AppTile key={app.id} app={app} />
-      ))}
-    </div>
+    <>
+      {notice}
+      <div className="launcher-grid">
+        {apps.map((app) => (
+          <AppTile key={app.id} app={app} />
+        ))}
+      </div>
+    </>
   );
 }
