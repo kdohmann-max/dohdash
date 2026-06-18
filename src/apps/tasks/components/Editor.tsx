@@ -32,7 +32,7 @@ const EDITING_IDLE_MS = 3000;
 
 interface Props {
   note: DohDoc;
-  onChange: (markdown: string) => void;
+  onChange: (markdown: string) => Promise<void>;
   /** A collaborator saved this doc and the local editor was clean — content was applied silently. */
   onRemoteUpdate?: (markdown: string, updatedAt: number) => void;
   onOpenSidebar?: () => void;
@@ -62,6 +62,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
   const [peers, setPeers] = useState<DocPeer[]>([]);
   const [remoteUpdate, setRemoteUpdate] = useState<DocUpdatePayload | null>(null);
   const [sharePanelOpen, setSharePanelOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Always call the latest onChange (TasksApp recreates it as `active`
   // changes; the useEditor onUpdate closure is frozen at editor creation).
@@ -82,7 +83,10 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     dirtyRef.current = false;
     const updatedAt = Date.now();
     lastUpdatedRef.current = updatedAt;
-    onChangeRef.current(markdown);
+    setSaveError(null);
+    onChangeRef.current(markdown).catch((err: unknown) => {
+      setSaveError(err instanceof Error ? err.message : "Save failed");
+    });
     channelRef.current?.broadcastUpdate({ markdown, updatedAt });
     // A local save makes local state authoritative — the remote change the
     // banner pointed at has been overwritten anyway.
@@ -386,6 +390,13 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
           {openThreadCount > 0 ? openThreadCount : ""}
         </button>
       </div>
+
+      {saveError ? (
+        <div className="editor-remote-banner editor-save-error">
+          <span>Save failed: {saveError}</span>
+          <button className="banner-dismiss" onClick={() => setSaveError(null)}>✕</button>
+        </div>
+      ) : null}
 
       {remoteUpdate ? (
         <div className="editor-remote-banner">

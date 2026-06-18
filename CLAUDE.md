@@ -80,3 +80,4 @@ When a flow feels like it needs a tutorial, redesign it. If unsure whether somet
 @.claude/context/tasks.md
 @.claude/context/chicken-scratch.md
 @.claude/context/fraction-calculator.md
+@.claude/context/remote-claude.md

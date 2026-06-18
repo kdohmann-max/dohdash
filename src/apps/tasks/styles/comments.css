@@ -74,6 +74,16 @@
   color: var(--accent);
 }
 
+.tasks-app .editor-save-error {
+  background: rgba(220, 38, 38, 0.08);
+  border-bottom-color: var(--error);
+  color: var(--error);
+}
+
+.tasks-app .editor-save-error button.banner-dismiss {
+  color: var(--error);
+}
+
 .tasks-app .comments-toggle {
   display: flex;
   align-items: center;
