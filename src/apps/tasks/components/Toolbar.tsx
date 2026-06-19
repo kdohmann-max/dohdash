@@ -8,7 +8,6 @@ import {
   FORMATTING_SELECTORS,
   type FormattingSelector,
 } from "../data/formattingSelectors";
-import { evaluateMath } from "../editor/math";
 import { archiveDone } from "../editor/archive";
 import { uploadImage, listProfiles, type Profile } from "../../../storage/db";
 import { CommentIcon } from "../../../icons";
@@ -91,10 +90,6 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
 
   function applySelector(sel: FormattingSelector) {
     if (!editor) return;
-    if (sel.kind === "math") {
-      runMath();
-      return;
-    }
     if (sel.kind === "user") {
       openUserPicker();
       return;
@@ -141,23 +136,6 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
       .setUserTag(names.join(", "))
       .run();
     setUserPickerOpen(false);
-    setShowFormat(false);
-  }
-
-  function runMath() {
-    if (!editor) return;
-    const { from, to } = editor.state.selection;
-    const text = editor.state.doc.textBetween(from, to, " ");
-    const result = evaluateMath(text);
-    if (result === null) {
-      window.alert(`"${text}" is not a valid expression.`);
-      return;
-    }
-    editor
-      .chain()
-      .focus()
-      .insertContentAt(to, `\n= ${result}`)
-      .run();
     setShowFormat(false);
   }
 

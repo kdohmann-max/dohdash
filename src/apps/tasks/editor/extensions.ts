@@ -10,6 +10,7 @@ import { DocCommentMark } from "./CommentMark";
 import { ArchiveDecorations } from "./archive";
 import { AutoTask } from "./autoTask";
 import { HeadingFormat } from "./headingFormat";
+import { InlineMath } from "./inlineMath";
 
 export function buildExtensions() {
   return [
@@ -24,6 +25,7 @@ export function buildExtensions() {
     DocCommentMark,
     AutoTask,
     HeadingFormat,
+    InlineMath,
     ArchiveDecorations,
     Placeholder.configure({
       placeholder: "Start writing… use the toolbar — no Markdown knowledge needed.",
