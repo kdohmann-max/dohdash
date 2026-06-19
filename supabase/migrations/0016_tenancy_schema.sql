@@ -13,6 +13,24 @@ create table public.tenants (
 
 alter table public.tenants enable row level security;
 
+-- Add tenant_id (nullable in this phase) to every tenant-owned table FIRST, so
+-- current_tenant_id()'s SQL body -- which references profiles.tenant_id --
+-- validates at creation time. Backfill + NOT NULL + RLS come in 0017/0018.
+alter table public.profiles          add column tenant_id uuid references public.tenants(id);
+alter table public.app_access        add column tenant_id uuid references public.tenants(id);
+alter table public.pending_profiles  add column tenant_id uuid references public.tenants(id);
+alter table public.access_requests   add column tenant_id uuid references public.tenants(id);
+alter table public.admin_audit_log   add column tenant_id uuid references public.tenants(id);
+alter table public.notes             add column tenant_id uuid references public.tenants(id);
+alter table public.folders           add column tenant_id uuid references public.tenants(id);
+alter table public.doc_comments      add column tenant_id uuid references public.tenants(id);
+alter table public.groups            add column tenant_id uuid references public.tenants(id);
+alter table public.group_members     add column tenant_id uuid references public.tenants(id);
+alter table public.note_shares       add column tenant_id uuid references public.tenants(id);
+alter table public.folder_shares     add column tenant_id uuid references public.tenants(id);
+alter table public.remote_projects   add column tenant_id uuid references public.tenants(id);
+alter table public.remote_sessions   add column tenant_id uuid references public.tenants(id);
+
 -- Returns the calling user's tenant. SECURITY DEFINER to avoid RLS recursion,
 -- mirroring is_admin() in 0001.
 create or replace function public.current_tenant_id()
@@ -76,19 +94,3 @@ values (
   $config$::jsonb,
   extract(epoch from now())::bigint
 );
-
--- Add tenant_id nullable to every tenant-owned table.
-alter table public.profiles          add column tenant_id uuid references public.tenants(id);
-alter table public.app_access        add column tenant_id uuid references public.tenants(id);
-alter table public.pending_profiles  add column tenant_id uuid references public.tenants(id);
-alter table public.access_requests   add column tenant_id uuid references public.tenants(id);
-alter table public.admin_audit_log   add column tenant_id uuid references public.tenants(id);
-alter table public.notes             add column tenant_id uuid references public.tenants(id);
-alter table public.folders           add column tenant_id uuid references public.tenants(id);
-alter table public.doc_comments      add column tenant_id uuid references public.tenants(id);
-alter table public.groups            add column tenant_id uuid references public.tenants(id);
-alter table public.group_members     add column tenant_id uuid references public.tenants(id);
-alter table public.note_shares       add column tenant_id uuid references public.tenants(id);
-alter table public.folder_shares     add column tenant_id uuid references public.tenants(id);
-alter table public.remote_projects   add column tenant_id uuid references public.tenants(id);
-alter table public.remote_sessions   add column tenant_id uuid references public.tenants(id);
