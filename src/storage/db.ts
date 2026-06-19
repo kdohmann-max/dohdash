@@ -11,3 +11,4 @@ export * from "./notes";
 export * from "./shares";
 export * from "./comments";
 export * from "./remote";
+export * from "./tenants";

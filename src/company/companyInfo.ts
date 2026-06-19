@@ -1,25 +1,14 @@
-// Loads public/CompanyInfo.md at runtime (not bundled) and applies its style
-// guide as CSS custom properties. Swapping that one file re-brands the app —
-// no rebuild, no source edits.
+// Loads the active tenant's branding config and applies its style guide as CSS
+// custom properties. Config now comes from the tenants table (resolved by
+// hostname via the anon-safe get_tenant_public_config RPC) instead of the
+// runtime CompanyInfo.md fetch — public/CompanyInfo.md is now just the seed
+// template for tenant #1. Swapping a tenant row re-brands the app per-host.
 
-import { load } from "js-yaml";
 import type { CompanyInfo } from "./types";
-
-// gray-matter checks `Buffer.isBuffer` internally, which doesn't exist in
-// browsers and crashes the production bundle ("Buffer is not defined"). The
-// frontmatter shape here is fixed and simple, so split it ourselves and parse
-// the YAML block with js-yaml — a pure-JS parser with no Node dependencies.
-const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
+import { getTenantPublicConfig } from "../storage/db";
 
 export async function loadCompanyInfo(): Promise<CompanyInfo> {
-  const res = await fetch("/CompanyInfo.md");
-  if (!res.ok) throw new Error(`Failed to load CompanyInfo.md (${res.status})`);
-  const raw = await res.text();
-  const match = FRONTMATTER.exec(raw);
-  if (!match) throw new Error("CompanyInfo.md is missing YAML frontmatter");
-  const [, frontmatter, body] = match;
-  const data = load(frontmatter) as Omit<CompanyInfo, "about">;
-  return { ...data, about: body.trim() };
+  return getTenantPublicConfig(window.location.hostname);
 }
 
 export function applyCompanyTheme(info: CompanyInfo): void {
