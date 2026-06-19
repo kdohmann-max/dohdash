@@ -1,5 +1,6 @@
 import { supabase } from "./client";
 import type { Role } from "./profiles";
+import { getTenantIdForHost, TENANT_NOT_FOUND } from "./tenants";
 
 // ---- user provisioning (admin-only; see migration 0003_pending_profiles) ----
 
@@ -90,6 +91,12 @@ export async function createAccessRequest(req: {
   displayName: string | null;
   avatarUrl: string | null;
 }): Promise<void> {
+  // Stamp the tenant of the host the user is requesting access to (they have no
+  // profile yet, so tenant_id can't come from current_tenant_id()). Required:
+  // access_requests.tenant_id is NOT NULL (migration 0017).
+  const tenantId = await getTenantIdForHost(window.location.hostname);
+  if (!tenantId) throw new Error(TENANT_NOT_FOUND);
+
   const { error } = await supabase
     .from("access_requests")
     .upsert(
@@ -99,6 +106,7 @@ export async function createAccessRequest(req: {
         display_name: req.displayName,
         avatar_url: req.avatarUrl,
         requested_at: Date.now(),
+        tenant_id: tenantId,
       },
       { onConflict: "id", ignoreDuplicates: true },
     );

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase, getProfile, type Profile } from "../storage/db";
+import { supabase, getProfile, getTenantIdForHost, type Profile } from "../storage/db";
 
 export type AuthState =
   | { status: "loading" }
@@ -21,10 +21,22 @@ type ProfileOutcome =
  * including the not-found-vs-error branch that getProfile's PGRST116
  * handling makes possible.
  */
-export function deriveAuthState(session: Session, outcome: ProfileOutcome | null): AuthState {
+export function deriveAuthState(
+  session: Session,
+  outcome: ProfileOutcome | null,
+  // The tenant this host serves (resolved from the hostname). null = not yet
+  // resolved or unresolvable → the membership check is skipped (fail-open;
+  // RLS is the real wall, this guard is a UX redirect).
+  expectedTenantId: string | null = null,
+): AuthState {
   if (outcome === null) return { status: "loading" };
   switch (outcome.kind) {
     case "found":
+      // User belongs to a different tenant than this host → they aren't a
+      // member here. Treat as signed-out for this host.
+      if (expectedTenantId !== null && outcome.profile.tenantId !== expectedTenantId) {
+        return { status: "signed-out" };
+      }
       return { status: "authenticated", session, profile: outcome.profile };
     case "not-found":
       return { status: "pending-access", session };
@@ -43,6 +55,24 @@ export function useAuthState() {
   // undefined = initial sign-in status not yet known; null = signed out
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [profileState, setProfileState] = useState<{ userId: string; outcome: ProfileOutcome } | null>(null);
+  // The tenant id this host maps to; null until resolved (or if it fails).
+  const [hostTenantId, setHostTenantId] = useState<string | null>(null);
+
+  // Resolve the host → tenant id once. Fail-open: on error we leave it null so
+  // the membership guard is skipped (RLS still isolates data regardless).
+  useEffect(() => {
+    let cancelled = false;
+    getTenantIdForHost(window.location.hostname)
+      .then((id) => {
+        if (!cancelled) setHostTenantId(id);
+      })
+      .catch(() => {
+        if (!cancelled) setHostTenantId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Single source of truth: onAuthStateChange fires INITIAL_SESSION immediately
   // with whatever session currently exists (or null), plus every subsequent
@@ -83,8 +113,8 @@ export function useAuthState() {
     // just-signed-out-then-back-in user can never be mistaken for the
     // current one.
     const outcome = profileState && profileState.userId === session.user.id ? profileState.outcome : null;
-    return deriveAuthState(session, outcome);
-  }, [session, profileState]);
+    return deriveAuthState(session, outcome, hostTenantId);
+  }, [session, profileState, hostTenantId]);
 
   async function signInWithGoogle() {
     // Stash the destination before the OAuth round-trip so AuthGate can

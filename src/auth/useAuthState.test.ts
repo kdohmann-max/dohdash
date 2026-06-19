@@ -21,6 +21,7 @@ function fakeProfile(): Profile {
     avatarUrl: null,
     role: "member",
     createdAt: 0,
+    tenantId: "tenant-built",
   };
 }
 
@@ -53,6 +54,34 @@ describe("deriveAuthState", () => {
     expect(deriveAuthState(session, { kind: "error", message: "network down" })).toEqual({
       status: "error",
       message: "network down",
+    });
+  });
+
+  test("profile found on matching host tenant -> authenticated", () => {
+    const session = fakeSession();
+    const profile = fakeProfile(); // tenantId: "tenant-built"
+    expect(deriveAuthState(session, { kind: "found", profile }, "tenant-built")).toEqual({
+      status: "authenticated",
+      session,
+      profile,
+    });
+  });
+
+  test("profile from a different tenant than the host -> signed-out", () => {
+    const session = fakeSession();
+    const profile = fakeProfile(); // tenantId: "tenant-built"
+    expect(deriveAuthState(session, { kind: "found", profile }, "tenant-acme")).toEqual({
+      status: "signed-out",
+    });
+  });
+
+  test("unresolved host tenant (null) -> membership check skipped (authenticated)", () => {
+    const session = fakeSession();
+    const profile = fakeProfile();
+    expect(deriveAuthState(session, { kind: "found", profile }, null)).toEqual({
+      status: "authenticated",
+      session,
+      profile,
     });
   });
 });

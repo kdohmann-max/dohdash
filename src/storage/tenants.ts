@@ -13,3 +13,12 @@ export async function getTenantPublicConfig(hostname: string): Promise<CompanyIn
   if (!data) throw new Error(TENANT_NOT_FOUND); // no tenant for this host
   return data as CompanyInfo;
 }
+
+// Resolves a hostname to its tenant id (anon-safe; id is not sensitive). Returns
+// null when no tenant matches the host. Used by the auth guard (compare against
+// the signed-in user's tenant) and by access_requests insert (stamp host tenant).
+export async function getTenantIdForHost(hostname: string): Promise<string | null> {
+  const { data, error } = await supabase.rpc("get_tenant_id_for_host", { p_hostname: hostname });
+  if (error) throw error;
+  return (data as string | null) ?? null;
+}

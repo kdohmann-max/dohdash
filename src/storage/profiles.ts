@@ -11,6 +11,7 @@ export interface Profile {
   avatarUrl: string | null;
   role: Role;
   createdAt: number;
+  tenantId: string;
 }
 
 interface ProfileRow {
@@ -20,6 +21,7 @@ interface ProfileRow {
   avatar_url: string | null;
   role: Role;
   created_at: number;
+  tenant_id: string;
 }
 
 function profileRowToProfile(row: ProfileRow): Profile {
@@ -30,6 +32,7 @@ function profileRowToProfile(row: ProfileRow): Profile {
     avatarUrl: row.avatar_url,
     role: row.role,
     createdAt: row.created_at,
+    tenantId: row.tenant_id,
   };
 }
 
