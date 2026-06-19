@@ -38,3 +38,5 @@ agent/.env
 # Playwright dev auth/test artifacts
 playwright/.auth/
 playwright/output/
+
+.env.test

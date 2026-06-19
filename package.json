@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "auth:mint": "node --env-file=.env.local scripts/mint-session.mjs"
+    "auth:mint": "node --env-file=.env.local scripts/mint-session.mjs",
+    "verify:isolation": "node --env-file=.env.test scripts/dev/verify-tenant-isolation.mjs",
+    "verify:migration": "node --env-file=.env.test scripts/dev/verify-migration.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
