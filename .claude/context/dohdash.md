@@ -43,6 +43,20 @@ type AuthState =
 
 `src/company/companyInfo.ts` — `loadCompanyInfo()` fetches `/CompanyInfo.md` at runtime; `applyCompanyTheme()` writes `styleGuide` as CSS vars on `document.documentElement` (token list: `styleguide.md`). `CompanyInfoContext` exposes `companyName`, `dashboardName`, `adminContact`, `logo`, `appNames`. `data-theme` on `<html>` toggles light/dark via `src/theme.ts` (localStorage + `prefers-color-scheme`). To port: see `CLAUDE.md`.
 
+## Multi-tenancy
+
+DohDash is a shared multi-tenant platform: one Vercel deployment + one Supabase project serve all customers. Doh Built Inc. (`slug='built'`) is tenant #1. Migrations `0016`–`0021`.
+
+- **`tenants` table** (`0016`): `id, slug, custom_domain, name, config jsonb, created_at`. `config` holds the public `CompanyInfo` branding (frontmatter + `about` body) — `public/CompanyInfo.md` is now just the **seed template** for tenant #1, no longer fetched at runtime.
+- **`tenant_id` on every tenant-owned table** (the 14 listed below; `scratch_cache` stays global). Lifecycle: nullable (`0016`) → backfilled to `built` + `NOT NULL` (`0017`) → `DEFAULT current_tenant_id()` (`0021`) so existing client inserts auto-stamp the tenant with no call-site changes.
+- **`current_tenant_id()`** — `SECURITY DEFINER` helper returning the caller's `profiles.tenant_id` (mirrors `is_admin()`; avoids RLS recursion). Created **after** the `tenant_id` columns in 0016 (a `language sql` body is validated at creation time).
+- **RLS (`0018`)**: every policy on every tenant-owned table ANDs `tenant_id = current_tenant_id()` onto its existing predicate; `resolve_note_permission`/`resolve_folder_permission` also carry an explicit tenant guard. The old "profiles: app members read directory" policy was folded into a tenant-scoped same-tenant read. `access_requests` INSERT is **not** tenant-predicated (requester has no profile yet). Proven isolated by `scripts/dev/verify-tenant-isolation.mjs`.
+- **Hostname resolution**: `src/company/tenantResolver.ts` maps host → subdomain slug / custom domain / dev (`VITE_DEV_TENANT_SLUG`). `loadCompanyInfo()` calls anon RPC `get_tenant_public_config(hostname)` (`0019`) instead of fetching the file; `CompanyInfoContext` exposes `notFound` for an unrecognized host. `get_tenant_id_for_host(hostname)` (`0020`) resolves host → tenant id (the `tenants` table has no authenticated SELECT policy).
+- **Provisioning (`0020`)** stamps `tenant_id`: `admin_provision_user`/`handle_new_user`/`admin_accept_access_request` use the admin's / pending row's / request row's tenant. `access_requests` is stamped client-side from the host. Reserved `profiles.super_admin` column exists for the operator (unused by app logic yet).
+- **Auth guard**: `deriveAuthState(session, outcome, expectedTenantId)` → `signed-out` when `profile.tenantId` ≠ the host's tenant (fail-open if the host can't be resolved — RLS is the real wall).
+- **Storage**: tenant reads in `src/storage/tenants.ts` (`getTenantPublicConfig`, `getTenantIdForHost`, `TENANT_NOT_FOUND`), re-exported via `db.ts`.
+- **Local testing**: `supabase start` (needs Docker + `config.toml` from `supabase init`); `supabase status -o env > .env.test`; then `npm run verify:migration` / `npm run verify:isolation`. Never run the seeding isolation script against prod (guarded by `VERIFY_ALLOW_REMOTE`).
+
 ## Storage constraint
 
 **All Supabase DB calls go through `src/storage/` only.** The single client lives in `src/storage/client.ts`; every domain module imports it from there. Permitted exceptions: `supabase.auth` in `useAuthState.ts`, `supabase.functions.invoke` in Chicken Scratch, and `src/storage/realtime.ts` (Realtime broadcast for DohDocs presence/live-refresh — shares the same client from `client.ts`; components use its typed subscribe helpers, never supabase directly).

@@ -51,6 +51,8 @@ Google-Docs-style threads. `doc_comments` table; `CommentMark.ts` anchors them i
 
 Notes and folders are **private to their owner by default**. Access is granted via `note_shares` / `folder_shares` rows (polymorphic grantee: `user` or `group`). Permission tiers: `'edit'` (full write) or `'comment'` (read + thread only).
 
+> **Tenant-scoped (multi-tenancy):** all DohDocs tables carry `tenant_id` and every RLS policy requires `tenant_id = current_tenant_id()`, so share-target lists (`listProfiles()` + `listGroups()` in `SharePanel`/`FolderShareModal`) and the comment-author directory now return **only same-tenant** rows — a user can never see or share with anyone outside their tenant. `resolve_note_permission`/`resolve_folder_permission` also short-circuit to `null` across tenants. Inserts auto-stamp `tenant_id` via the column default. See `dohdash.md` → Multi-tenancy.
+
 Permission is resolved server-side by the `resolve_note_permission(note_id, user_id)` SQL `SECURITY DEFINER` function — RLS on `notes` calls it directly. Resolution order: (1) owner → `'owner'`; (2) note-level grants (direct user + group expansion, most permissive); (3) folder-level grants (same); note-level overrides folder-level entirely.
 
 `DocMeta` carries `effectivePermission: 'owner'|'edit'|'comment'|null`, `ownerName`, `ownerAvatarUrl` for display in the sidebar and editor.

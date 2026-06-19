@@ -40,13 +40,14 @@ When a flow feels like it needs a tutorial, redesign it. If unsure whether somet
 - **Auth is a discriminated-union state machine** in `src/auth/useAuthState.ts`. Full type + the `pending-access` vs `error` distinction: `dohdash.md`.
 - **User provisioning is email pre-authorization** — admin grants by email before first sign-in; flow + `pending_profiles` trigger detail: `dohdash.md`.
 - **App permissions**: `app_access (user_id, app_id, granted_by, created_at)` is the coarse open-this-app gate. `app_id` is a string key into the code-defined `APP_REGISTRY` — apps are not DB rows.
+- **Multi-tenant**: one deployment + one Supabase project serve all customers via a `tenants` table; Doh Built (`slug='built'`) is tenant #1. **Every new tenant-owned table MUST get a `tenant_id uuid not null default current_tenant_id()` column and AND `tenant_id = current_tenant_id()` into every RLS policy** (`scratch_cache` is the one documented global exception). Tenant is resolved from hostname; per-tenant branding lives in `tenants.config` (so `CompanyInfo.md` is now only a seed template). Full detail: `dohdash.md`.
 - **Per-component CSS**: every `.tsx` imports a co-located `.css` consuming the CompanyInfo-driven CSS custom properties on `:root`. Tokens + dark-mode mechanism: `styleguide.md`.
 
 ## CompanyInfo.md — portability
 
-`public/CompanyInfo.md` is fetched **at runtime** (`fetch("/CompanyInfo.md")`, never bundled) and parsed via `gray-matter` into typed `CompanyInfo` (`src/company/types.ts`). `applyCompanyTheme()` writes `styleGuide` as CSS vars; `CompanyInfoContext` exposes `companyName`/`dashboardName`/`adminContact`/`logo`/`appNames`.
+Typed `CompanyInfo` (`src/company/types.ts`) drives all branding. **Since multi-tenancy, the live config comes from `tenants.config` (a jsonb column) resolved by hostname via the anon RPC `get_tenant_public_config`, not from `public/CompanyInfo.md`** — that file is now just the **seed template** for tenant #1. `loadCompanyInfo()` calls the RPC; `applyCompanyTheme()` writes `styleGuide` as CSS vars; `CompanyInfoContext` exposes `companyName`/`dashboardName`/`adminContact`/`logo`/`appNames` (+ `notFound` for an unrecognized host). See `dohdash.md` → Multi-tenancy.
 
-**To port:** (1) swap `public/CompanyInfo.md` + its `logo` file; (2) point `.env.local` / Vercel env vars at a different Supabase project; (3) `supabase db push` the migrations. No source edits, no rebuild. `CLAUDE.md` and `PRODUCT.md` travel with the source and are *not* part of the swap.
+**To onboard a new tenant** (multi-tenant model): insert a `tenants` row (slug + `config` JSON in the `CompanyInfo` shape) and provision its first admin; set up the subdomain/custom-domain + OAuth redirect. No source edits, no rebuild. (Single-tenant porting to a *separate* Supabase project — swap `CompanyInfo.md` seed + `.env`/Vercel vars + `supabase db push` — still works for a standalone fork.)
 
 ## Dev workflow
 
