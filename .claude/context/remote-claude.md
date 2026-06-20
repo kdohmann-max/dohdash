@@ -30,7 +30,12 @@ the PC is left running.
 
 - **Config** in `agent/.env` (gitignored): `SUPABASE_URL`,
   `SUPABASE_SERVICE_KEY` (service role — bypasses RLS so the agent can write),
-  `AI_FOLDER` (default `~/iCloudDrive/Ai`).
+  `AI_FOLDER` (default `~/iCloudDrive/Ai`), `AGENT_TENANT_SLUG` (default `built`).
+- **Multi-tenancy**: `remote_projects.tenant_id` is NOT NULL and the service
+  role bypasses RLS (so the `current_tenant_id()` column default is null for the
+  agent) — the agent resolves `AGENT_TENANT_SLUG` → tenant id once and stamps it
+  on every upsert. `remote_sessions` rows are created by the web app (tenant
+  auto-stamped); the agent only UPDATEs their status, so no stamping needed there.
 - **Project discovery:** scans `AI_FOLDER` subdirs; a dir counts as a project if
   it has `.git`, `CLAUDE.md`, or `package.json`. Upserts to `remote_projects`
   every 5 min (`SYNC_INTERVAL_MS`).

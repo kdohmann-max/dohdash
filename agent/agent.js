@@ -14,6 +14,7 @@
  *   SUPABASE_URL            — from Supabase project settings
  *   SUPABASE_SERVICE_KEY    — service role key (bypasses RLS so agent can write)
  *   AI_FOLDER               — path to scan for projects (default: ~/iCloudDrive/Ai)
+ *   AGENT_TENANT_SLUG       — tenant these projects belong to (default: built)
  */
 
 require("dotenv").config();
@@ -26,6 +27,10 @@ const os = require("os");
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const AI_FOLDER = process.env.AI_FOLDER || path.join(os.homedir(), "iCloudDrive", "Ai");
+// Which tenant this agent's projects belong to. DohDash is multi-tenant, so
+// remote_projects.tenant_id is NOT NULL; the agent uses the service role (RLS
+// bypassed) and thus must stamp tenant_id itself. Defaults to Doh Built.
+const AGENT_TENANT_SLUG = process.env.AGENT_TENANT_SLUG || "built";
 const SYNC_INTERVAL_MS = 5 * 60 * 1000; // re-scan every 5 minutes
 const POLL_INTERVAL_MS = 4 * 1000; // poll for pending sessions every 4 seconds
 
@@ -41,6 +46,24 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
 });
+
+// Resolved once and cached: the tenant id for AGENT_TENANT_SLUG, stamped onto
+// every remote_projects upsert (NOT NULL since the multi-tenancy migration).
+let tenantId = null;
+async function resolveTenantId() {
+  if (tenantId) return tenantId;
+  const { data, error } = await supabase
+    .from("tenants")
+    .select("id")
+    .eq("slug", AGENT_TENANT_SLUG)
+    .single();
+  if (error || !data) {
+    console.error(`Cannot resolve tenant '${AGENT_TENANT_SLUG}':`, error ? error.message : "no row");
+    return null;
+  }
+  tenantId = data.id;
+  return tenantId;
+}
 
 // Pre-trust a project path in ~/.claude.json so Claude Code never shows the
 // "trust this folder?" prompt for agent-launched sessions.
@@ -97,6 +120,13 @@ function discoverProjects() {
 async function syncProjects() {
   const projects = discoverProjects();
   if (projects.length === 0) return;
+
+  const tid = await resolveTenantId();
+  if (!tid) {
+    console.error("Project sync skipped: tenant id unresolved.");
+    return;
+  }
+  for (const p of projects) p.tenant_id = tid;
 
   const { error } = await supabase
     .from("remote_projects")
