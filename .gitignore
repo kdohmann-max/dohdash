@@ -40,3 +40,5 @@ playwright/.auth/
 playwright/output/
 
 .env.test
+
+backups/
