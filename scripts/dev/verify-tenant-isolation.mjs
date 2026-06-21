@@ -35,6 +35,7 @@ const TENANT_OWNED = [
   "note_shares", "folder_shares", "app_access", "profiles",
   "access_requests", "admin_audit_log", "remote_projects", "remote_sessions",
   "pending_profiles",
+  "time_entries", "time_jobs", "time_rates",
 ];
 
 const admin = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
