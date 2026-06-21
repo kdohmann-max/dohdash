@@ -11,7 +11,9 @@ When things change relevant to claude context reccomend updating the claude.md w
 
 DohDash is a "company OS" dashboard: employees sign in (Google OAuth via Supabase Auth) to a launcher of company apps, gated by admin-controlled per-app permissions. Also serves a public landing page. **Portable to another company** by swapping `public/CompanyInfo.md` (+ logo + Supabase credentials) — no source edits, no rebuild.
 
-Apps (`APP_REGISTRY`, `src/apps/registry.tsx`): Job Files, Tasks (a.k.a. DohDocs), Calendar, Contacts, Time Tracker, Expense Tracker, Clean Up, Chicken Scratch. **Functional: Tasks/DohDocs + Chicken Scratch. The rest are stubs.** `resolveAppName()` lets `CompanyInfo.md`'s `appNames` map rename an app per-deployment (that's how "Tasks" displays as "DohDocs").
+Apps (`APP_REGISTRY`, `src/apps/registry.tsx`): Job Files, Tasks (a.k.a. DohDocs), Calendar, Contacts, Time Tracker, Time Dashboard, Expense Tracker, Clean Up, Chicken Scratch. **Functional: Tasks/DohDocs + Chicken Scratch + Time Tracker + Time Dashboard. The rest are stubs.** `resolveAppName()` lets `CompanyInfo.md`'s `appNames` map rename an app per-deployment (that's how "Tasks" displays as "DohDocs").
+
+> **Jobs-app note:** When the Job Files / Jobs app is built, the Time Tracker job-tag dropdown must source jobs from it, replacing the interim `time_jobs` table. Keep `job_label` denormalized on `time_entries` — no migration needed at that point. See `.claude/context/time-tracking.md`.
 
 ## UX mandate — built for non-technical users
 
@@ -91,3 +93,4 @@ agents by name). Two cross-cutting rules that aren't visible in any single file:
 @.claude/context/chicken-scratch.md
 @.claude/context/fraction-calculator.md
 @.claude/context/remote-claude.md
+@.claude/context/time-tracking.md

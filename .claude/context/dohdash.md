@@ -37,7 +37,7 @@ type AuthState =
 
 **Audit log** (`admin_audit_log`, `AuditAction` union): dual-write — direct-table actions (grant/revoke app access, role change, reject, cancel pending) log client-side via `logAdminAction`; RPC-backed actions (provision, accept, remove) log inside SQL.
 
-`is_admin()` is a `SECURITY DEFINER` function — avoids RLS self-referential recursion from a plain `exists (select ... from profiles where role = 'admin')` policy on `profiles` itself.
+`is_admin()` is a `SECURITY DEFINER` function — avoids RLS self-referential recursion from a plain `exists (select ... from profiles where role = 'admin')` policy on `profiles` itself. `can_view_all_time()` (`SECURITY DEFINER`, migration `0023`) is a similar helper: `is_admin() OR has_app_access('time-dashboard')` — gates all time-tracking dashboard access (read all entries, manage pay, rates). App id `time-dashboard` is the `app_access` grant that promotes a non-admin to dashboard-level visibility.
 
 ## CompanyInfo portability
 
@@ -100,8 +100,9 @@ URL/OAuth-redirect checklist). The key facts the skill encodes:
 - `shares.ts` — `note_shares`/`folder_shares` + `searchShareTargets`.
 - `comments.ts` — `doc_comments` CRUD.
 - `remote.ts` — Remote Claude projects/sessions + `subscribeToRemoteSession`.
+- `time.ts` — `time_entries`/`time_jobs`/`time_rates` CRUD + `setEntriesPaid`/`setTimeRate`. See `time-tracking.md`.
 
-Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`, `groups`, `group_members`, `note_shares`, `folder_shares`, `remote_projects`, `remote_sessions`.
+Tables: `profiles`, `app_access`, `pending_profiles`, `access_requests`, `admin_audit_log`, `notes`, `folders`, `doc_comments`, `groups`, `group_members`, `note_shares`, `folder_shares`, `remote_projects`, `remote_sessions`, `time_entries`, `time_jobs`, `time_rates`.
 
 `app_id` is a code-defined string key into `APP_REGISTRY` (`src/apps/registry.tsx`) — apps are not DB rows.
 
