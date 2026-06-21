@@ -31,7 +31,9 @@ interface Props {
 }
 
 function authorLabel(comment: DocComment): string {
-  return comment.authorName ?? "Removed user";
+  if (comment.authorName) return comment.authorName;
+  if (comment.authorEmail) return comment.authorEmail;
+  return "Removed user";
 }
 
 function timeLabel(ms: number): string {
@@ -44,11 +46,12 @@ function timeLabel(ms: number): string {
 }
 
 function Avatar({ comment }: { comment: DocComment }) {
+  const label = authorLabel(comment);
   return comment.authorAvatarUrl ? (
     <img className="comment-avatar" src={comment.authorAvatarUrl} alt="" />
   ) : (
     <span className="comment-avatar comment-avatar--placeholder" aria-hidden="true">
-      {authorLabel(comment).slice(0, 1).toUpperCase()}
+      {label.slice(0, 1).toUpperCase()}
     </span>
   );
 }

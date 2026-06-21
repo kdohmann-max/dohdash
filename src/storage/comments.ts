@@ -13,6 +13,7 @@ export interface DocComment {
   createdAt: number;
   updatedAt: number | null;
   authorName: string | null;
+  authorEmail: string | null;
   authorAvatarUrl: string | null;
 }
 
@@ -26,7 +27,7 @@ interface DocCommentRow {
   resolved_at: number | null;
   created_at: number;
   updated_at: number | null;
-  author: { display_name: string | null; avatar_url: string | null } | null;
+  author: { display_name: string | null; email: string | null; avatar_url: string | null } | null;
 }
 
 function docCommentRowToDocComment(row: DocCommentRow): DocComment {
@@ -41,6 +42,7 @@ function docCommentRowToDocComment(row: DocCommentRow): DocComment {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     authorName: row.author?.display_name ?? null,
+    authorEmail: row.author?.email ?? null,
     authorAvatarUrl: row.author?.avatar_url ?? null,
   };
 }
@@ -48,7 +50,7 @@ function docCommentRowToDocComment(row: DocCommentRow): DocComment {
 export async function listDocComments(docId: string): Promise<DocComment[]> {
   const { data, error } = await supabase
     .from("doc_comments")
-    .select("*, author:profiles!author_id(display_name, avatar_url)")
+    .select("*, author:profiles!author_id(display_name, email, avatar_url)")
     .eq("doc_id", docId)
     .order("created_at", { ascending: true });
   if (error) throw error;
