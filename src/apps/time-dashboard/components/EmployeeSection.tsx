@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { TimeEntry } from "../../../storage/db";
 import {
   minutesToDecimalHours,
@@ -28,6 +28,11 @@ export function EmployeeSection({
     rate !== null ? String(rate) : ""
   );
   const [rateSaving, setRateSaving] = useState(false);
+
+  // Sync input when the rate prop changes (e.g. after parent reloads rates)
+  useEffect(() => {
+    setRateInput(rate !== null ? String(rate) : "");
+  }, [rate]);
 
   const totalNetHours = entries.reduce(
     (sum, e) => sum + minutesToDecimalHours(e.netMinutes),

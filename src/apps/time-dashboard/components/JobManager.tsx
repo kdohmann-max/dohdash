@@ -14,6 +14,7 @@ export function JobManager({ jobs, onChanged }: JobManagerProps) {
   const [addError, setAddError] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [renameError, setRenameError] = useState<string | null>(null);
   const [archiveConfirmId, setArchiveConfirmId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -37,11 +38,14 @@ export function JobManager({ jobs, onChanged }: JobManagerProps) {
     const name = renameValue.trim();
     if (!name) return;
     setSavingId(id);
+    setRenameError(null);
     try {
       await renameTimeJob(id, name);
       setRenamingId(null);
       setRenameValue("");
       onChanged();
+    } catch (err) {
+      setRenameError(err instanceof Error ? err.message : "Failed to rename job.");
     } finally {
       setSavingId(null);
     }
@@ -112,41 +116,46 @@ export function JobManager({ jobs, onChanged }: JobManagerProps) {
               {activeJobs.map((job) => (
                 <li key={job.id} className="td-job-item">
                   {renamingId === job.id ? (
-                    <div className="td-job-rename-row">
-                      <input
-                        type="text"
-                        className="td-input td-job-rename-input"
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleRename(job.id);
-                          if (e.key === "Escape") {
+                    <>
+                      <div className="td-job-rename-row">
+                        <input
+                          type="text"
+                          className="td-input td-job-rename-input"
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleRename(job.id);
+                            if (e.key === "Escape") {
+                              setRenamingId(null);
+                              setRenameValue("");
+                              setRenameError(null);
+                            }
+                          }}
+                          autoFocus
+                          maxLength={80}
+                        />
+                        <button
+                          type="button"
+                          className="td-btn td-btn--secondary td-btn--sm"
+                          onClick={() => handleRename(job.id)}
+                          disabled={savingId === job.id || !renameValue.trim()}
+                        >
+                          {savingId === job.id ? "Saving…" : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          className="td-btn td-btn--ghost td-btn--sm"
+                          onClick={() => {
                             setRenamingId(null);
                             setRenameValue("");
-                          }
-                        }}
-                        autoFocus
-                        maxLength={80}
-                      />
-                      <button
-                        type="button"
-                        className="td-btn td-btn--secondary td-btn--sm"
-                        onClick={() => handleRename(job.id)}
-                        disabled={savingId === job.id || !renameValue.trim()}
-                      >
-                        {savingId === job.id ? "Saving…" : "Save"}
-                      </button>
-                      <button
-                        type="button"
-                        className="td-btn td-btn--ghost td-btn--sm"
-                        onClick={() => {
-                          setRenamingId(null);
-                          setRenameValue("");
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                            setRenameError(null);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      {renameError && <p className="td-job-error">{renameError}</p>}
+                    </>
                   ) : archiveConfirmId === job.id ? (
                     <div className="td-job-confirm-row">
                       <span className="td-job-confirm-text">

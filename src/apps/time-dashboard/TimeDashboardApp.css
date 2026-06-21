@@ -371,7 +371,9 @@
 }
 
 .time-dashboard-app .td-employee-card:hover {
-  border-color: var(--accent);
+  border-top-color: var(--accent);
+  border-right-color: var(--accent);
+  border-bottom-color: var(--accent);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -646,11 +648,6 @@
     grid-row: 3;
     text-align: right;
     display: none;
-  }
-
-  .time-dashboard-app .td-cell--net {
-    grid-column: 2;
-    grid-row: 3;
   }
 }
 

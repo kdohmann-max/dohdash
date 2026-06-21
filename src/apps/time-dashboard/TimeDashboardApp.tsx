@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
 import {
   listAllTimeEntries,
@@ -101,8 +101,10 @@ export function TimeDashboardApp() {
       .finally(() => setLoading(false));
   }, [loadEntries, loadRates, loadJobs, loadProfiles]);
 
-  // Reload entries when filters change (after initial mount)
+  // Reload entries when filters change (skip the initial mount — covered by the Promise.all above)
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
     loadEntries();
   }, [loadEntries]);
 
