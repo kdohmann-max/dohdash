@@ -56,7 +56,8 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
       } else {
         setStartTime("");
         setEndTime("");
-        setHoursField(String(minutesToDecimalHours(editing.netMinutes + editing.breakMinutes)));
+        // hoursField is seeded after break reconstruction below (Fix 1)
+        setHoursField("");
       }
       // Restore job selection
       const matchedJob = jobs.find((j) => j.id === editing.jobId);
@@ -77,6 +78,15 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
         }
       }
       setCheckedBreaks(newChecked);
+      // Fix 1: seed gross hours from net + the checkboxes' actual sum so that
+      // saving an unchanged entry always round-trips netMinutes exactly.
+      if (editing.entryMode === "hours") {
+        const restoredBreakMins = Array.from(newChecked).reduce((sum, id) => {
+          const opt = BREAK_OPTIONS.find((b) => b.id === id);
+          return sum + (opt?.minutes ?? 0);
+        }, 0);
+        setHoursField(String(minutesToDecimalHours(editing.netMinutes + restoredBreakMins)));
+      }
       setNote(editing.note ?? "");
     } else {
       resetForm();
@@ -128,6 +138,11 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
     }
   }
 
+  // Fix 3: zero net hours must be rejected even when the raw value is non-null
+  if (netMinutes !== null && netMinutes === 0 && !validationHint) {
+    validationHint = "Net hours can't be zero — your breaks use up all the time.";
+  }
+
   const jobLabel =
     selectedJobId === "__other"
       ? customJobName.trim()
@@ -135,7 +150,7 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
 
   const canSave =
     netMinutes !== null &&
-    netMinutes >= 0 &&
+    netMinutes > 0 &&
     workDate.length === 10 &&
     jobLabel.length > 0;
 

@@ -374,7 +374,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--spacing-xs);
 }
 
 .time-tracker-app .tt-entry-job {
@@ -430,7 +430,7 @@
   color: var(--bg);
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 2px var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--rounded-sm);
   letter-spacing: 0.03em;
 }
