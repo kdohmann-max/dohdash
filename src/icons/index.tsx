@@ -67,6 +67,15 @@ export function TimeTrackerIcon({ size }: { size?: number } = {}) {
   );
 }
 
+export function TimeDashboardIcon({ size }: { size?: number } = {}) {
+  return (
+    <svg {...svgProps(size)}>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M7 15v-3M12 15V9M17 15v-5" />
+    </svg>
+  );
+}
+
 export function ExpensesIcon({ size }: { size?: number } = {}) {
   return (
     <svg {...svgProps(size)}>

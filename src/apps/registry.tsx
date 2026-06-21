@@ -7,6 +7,7 @@ import {
   CalendarIcon,
   ContactsIcon,
   TimeTrackerIcon,
+  TimeDashboardIcon,
   ExpensesIcon,
   CleanUpIcon,
   ChickenScratchIcon,
@@ -18,6 +19,8 @@ import {
 // Gemini path for Chicken Scratch) stay out of the launcher's initial bundle.
 // React.lazy needs a default export; these apps are named exports, so map them.
 const TasksApp = lazy(() => import("./tasks/TasksApp").then((m) => ({ default: m.TasksApp })));
+const TimeTrackerApp = lazy(() => import("./time-tracker/TimeTrackerApp").then((m) => ({ default: m.TimeTrackerApp })));
+const TimeDashboardApp = lazy(() => import("./time-dashboard/TimeDashboardApp").then((m) => ({ default: m.TimeDashboardApp })));
 const ChickenScratchApp = lazy(() =>
   import("./chicken-scratch/ChickenScratchApp").then((m) => ({ default: m.ChickenScratchApp })),
 );
@@ -83,8 +86,17 @@ export const APP_REGISTRY: AppDef[] = [
     icon: <TimeTrackerIcon />,
     description: "Log hours worked against jobs and projects.",
     route: "/dashboard/app/time-tracker",
-    component: AppStubPage,
-    status: "stub",
+    component: TimeTrackerApp,
+    status: "functional",
+  },
+  {
+    id: "time-dashboard",
+    name: "Time Dashboard",
+    icon: <TimeDashboardIcon />,
+    description: "Review, rate, and export everyone's logged time.",
+    route: "/dashboard/app/time-dashboard",
+    component: TimeDashboardApp,
+    status: "functional",
   },
   {
     id: "expense-tracker",
