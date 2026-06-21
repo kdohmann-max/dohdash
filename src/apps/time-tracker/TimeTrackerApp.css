@@ -1,0 +1,527 @@
+/* Time Tracker — scoped under .time-tracker-app.
+   Colors/spacing/radius/fonts from DohDash CSS custom properties only —
+   no hardcoded hex, no magic px values.
+   Mobile-first, large touch targets for field workers. */
+
+.time-tracker-app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.time-tracker-app .tt-content {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* ---- App title ---- */
+.time-tracker-app .tt-app-title {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: 1.75rem;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* ---- Loading / error states ---- */
+.time-tracker-app .tt-loading,
+.time-tracker-app .tt-load-error {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+
+.time-tracker-app .tt-load-error p {
+  color: var(--error);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+/* ---- Card (form + history sections) ---- */
+.time-tracker-app .tt-form-card,
+.time-tracker-app .tt-history {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-secondary);
+  border-radius: var(--rounded-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ---- Section headings ---- */
+.time-tracker-app .tt-form-title,
+.time-tracker-app .tt-section-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+/* ---- Field layout ---- */
+.time-tracker-app .tt-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.time-tracker-app .tt-label {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.time-tracker-app .tt-optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* ---- Inputs ---- */
+.time-tracker-app .tt-input {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-height: 44px; /* large touch target */
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.time-tracker-app .tt-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.time-tracker-app .tt-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.time-tracker-app .tt-custom-job {
+  margin-top: var(--spacing-xs);
+}
+
+/* ---- Side-by-side time inputs ---- */
+.time-tracker-app .tt-time-row {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.time-tracker-app .tt-field--half {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Mode toggle (segmented control) ---- */
+.time-tracker-app .tt-mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  overflow: hidden;
+}
+
+.time-tracker-app .tt-mode-btn {
+  flex: 1;
+  min-height: 44px;
+  background: var(--bg);
+  color: var(--text);
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.time-tracker-app .tt-mode-btn + .tt-mode-btn {
+  border-left: 1px solid var(--border);
+}
+
+.time-tracker-app .tt-mode-btn--active {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.time-tracker-app .tt-mode-btn:not(.tt-mode-btn--active):hover {
+  background: var(--accent-soft);
+}
+
+/* ---- Break checkboxes ---- */
+.time-tracker-app .tt-breaks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.time-tracker-app .tt-break-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: var(--spacing-xs) 0;
+  min-height: 36px;
+}
+
+.time-tracker-app .tt-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ---- Net hours readout ---- */
+.time-tracker-app .tt-net-hours {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.time-tracker-app .tt-net-hours--invalid {
+  background: var(--bg);
+  border-color: var(--error);
+}
+
+.time-tracker-app .tt-validation-hint {
+  color: var(--error);
+}
+
+.time-tracker-app .tt-net-value {
+  color: var(--text);
+}
+
+.time-tracker-app .tt-net-decimal {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.time-tracker-app .tt-net-placeholder {
+  color: var(--muted);
+}
+
+/* ---- Save error ---- */
+.time-tracker-app .tt-save-error {
+  color: var(--error);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ---- Form actions ---- */
+.time-tracker-app .tt-form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* ---- Buttons ---- */
+.time-tracker-app .tt-btn {
+  min-height: 44px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--rounded-md);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.time-tracker-app .tt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.time-tracker-app .tt-btn--primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.time-tracker-app .tt-btn--primary:not(:disabled):hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.2);
+}
+
+.time-tracker-app .tt-btn--secondary {
+  background: transparent;
+  color: var(--accent-secondary);
+  border: 1.5px solid var(--accent-secondary);
+}
+
+.time-tracker-app .tt-btn--secondary:hover {
+  background: rgba(30, 64, 175, 0.08);
+}
+
+/* ---- History section ---- */
+.time-tracker-app .tt-history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+/* ---- Date filter ---- */
+.time-tracker-app .tt-date-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.time-tracker-app .tt-filter-input {
+  width: auto;
+  min-width: 140px;
+}
+
+/* ---- Empty state ---- */
+.time-tracker-app .tt-empty-state {
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+
+/* ---- Entry groups ---- */
+.time-tracker-app .tt-entry-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.time-tracker-app .tt-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.time-tracker-app .tt-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.time-tracker-app .tt-date-label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.time-tracker-app .tt-date-total {
+  color: var(--muted);
+}
+
+/* ---- Entry rows ---- */
+.time-tracker-app .tt-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.time-tracker-app .tt-entry-row {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.time-tracker-app .tt-entry-row:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.time-tracker-app .tt-entry-row--paid {
+  opacity: 0.75;
+}
+
+.time-tracker-app .tt-entry-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-tracker-app .tt-entry-job {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.time-tracker-app .tt-entry-note {
+  font-family: var(--font-body);
+  font-size: 0.825rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time-tracker-app .tt-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.time-tracker-app .tt-entry-times {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.time-tracker-app .tt-entry-times--hours {
+  font-family: var(--font-body);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.time-tracker-app .tt-entry-break {
+  color: var(--muted);
+}
+
+.time-tracker-app .tt-entry-net {
+  color: var(--text);
+}
+
+/* ---- Paid badge ---- */
+.time-tracker-app .tt-paid-badge {
+  display: inline-block;
+  background: var(--accent-secondary);
+  color: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--rounded-sm);
+  letter-spacing: 0.03em;
+}
+
+/* ---- Entry actions ---- */
+.time-tracker-app .tt-entry-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.time-tracker-app .tt-entry-actions--locked {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.time-tracker-app .tt-paid-lock {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.time-tracker-app .tt-action-btn {
+  min-height: 36px;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--rounded-sm);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.time-tracker-app .tt-action-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.time-tracker-app .tt-action-btn--danger {
+  color: var(--error);
+}
+
+.time-tracker-app .tt-action-btn--danger:hover {
+  background: var(--error);
+  color: var(--bg);
+  border-color: var(--error);
+}
+
+.time-tracker-app .tt-delete-confirm {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* ---- Mobile adjustments ---- */
+@media (max-width: 480px) {
+  .time-tracker-app .tt-content {
+    padding: var(--spacing-md);
+  }
+
+  .time-tracker-app .tt-time-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .time-tracker-app .tt-history-head {
+    flex-direction: column;
+  }
+
+  .time-tracker-app .tt-date-filter {
+    width: 100%;
+  }
+
+  .time-tracker-app .tt-filter-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .time-tracker-app .tt-entry-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .time-tracker-app .tt-form-actions {
+    justify-content: stretch;
+  }
+
+  .time-tracker-app .tt-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
