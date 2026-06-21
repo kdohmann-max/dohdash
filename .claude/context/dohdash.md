@@ -56,6 +56,34 @@ DohDash is a shared multi-tenant platform: one Vercel deployment + one Supabase 
 - **Auth guard**: `deriveAuthState(session, outcome, expectedTenantId)` → `signed-out` when `profile.tenantId` ≠ the host's tenant (fail-open if the host can't be resolved — RLS is the real wall).
 - **Storage**: tenant reads in `src/storage/tenants.ts` (`getTenantPublicConfig`, `getTenantIdForHost`, `TENANT_NOT_FOUND`), re-exported via `db.ts`.
 - **Local testing**: `supabase start` (needs Docker + `config.toml` from `supabase init`); `supabase status -o env > .env.test`; then `npm run verify:migration` / `npm run verify:isolation`. Never run the seeding isolation script against prod (guarded by `VERIFY_ALLOW_REMOTE`).
+- **`dohdash.vercel.app` mapping** (`0022`): `custom_domain = 'dohdash.vercel.app'` set on the `built` tenant so the existing Vercel URL resolves branding from DB. Temporary — remove/replace when `dohdash.app` is registered.
+
+## Tenant onboarding (current process — all manual SQL)
+
+No admin UI exists yet for cross-tenant management. Until the super admin panel
+is built, onboard new tenants via the Supabase SQL editor. **Use the
+`/new-tenant` skill** — it's the single source for the onboarding procedure
+(generates the `tenants` insert from the *live* `built` config so the branding
+shape never drifts, plus the first-admin `pending_profiles` insert and the
+URL/OAuth-redirect checklist). The key facts the skill encodes:
+
+- The `tenants.config` jsonb follows the `CompanyInfo` shape; derive a new
+  tenant's config from the live `built` row (`select config from tenants where
+  slug='built'`) or the `0016` seed block — never a hand-written template.
+- First admin can't go through `admin_provision_user` (it scopes to the caller's
+  tenant); insert into `pending_profiles` directly with the new tenant's id,
+  `granted_by` = the operator's profile. `handle_new_user` promotes it on first
+  sign-in.
+- Give them a URL (dev `VITE_DEV_TENANT_SLUG`, prod `custom_domain`, or a
+  `*.dohdash.app` subdomain), then add `https://<their-domain>/**` to Supabase
+  Auth redirect URLs and register the origin + redirect URI in Google OAuth.
+
+## What still needs building (multi-tenancy roadmap)
+
+- **Super admin panel** (`profiles.super_admin = true` gates it; column exists, unused): cross-tenant tenant list, create tenant (name/slug/branding config), provision first admin cross-tenant, set/update `custom_domain`. The cross-tenant provision RPC would check `super_admin` instead of `is_admin()` and accept an explicit `p_tenant_id` arg.
+- **`dohdash.app` domain registration**: buy the domain → add `dohdash.app` + `*.dohdash.app` in Vercel → DNS records at registrar (A `@` → `76.76.21.21`, CNAME `*` → `cname.vercel-dns.com`) → update Supabase Auth redirect URLs to `https://*.dohdash.app/**` → add origins/redirects in Google OAuth → update `built` tenant `custom_domain` to `built.dohdash.app` (and remove `dohdash.vercel.app` mapping from 0022).
+- **Wildcard subdomains** (`*.dohdash.app`): once domain is registered, each tenant gets `<slug>.dohdash.app` automatically — Vercel wildcard + `split_part` SQL already handles it, no code changes needed.
+- **Tenant branding editor**: UI for a tenant's own admin to update their `config` JSON (colors, company name, logo) without needing SQL access.
 
 ## Storage constraint
 

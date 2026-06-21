@@ -49,6 +49,15 @@ Typed `CompanyInfo` (`src/company/types.ts`) drives all branding. **Since multi-
 
 **To onboard a new tenant** (multi-tenant model): insert a `tenants` row (slug + `config` JSON in the `CompanyInfo` shape) and provision its first admin; set up the subdomain/custom-domain + OAuth redirect. No source edits, no rebuild. (Single-tenant porting to a *separate* Supabase project — swap `CompanyInfo.md` seed + `.env`/Vercel vars + `supabase db push` — still works for a standalone fork.)
 
+## Project skills & agents
+
+Project-specific helpers live in `.claude/skills/` and `.claude/agents/` — read
+their frontmatter for what each does and how to invoke (skills via `/<name>`,
+agents by name). Two cross-cutting rules that aren't visible in any single file:
+
+- **Review is hybrid:** reach for the `dohdash-review` agent when a diff touches tenancy/RLS/migrations, the `src/storage` layer, styling, or user-facing pickers; use `/code-review` for general logic/correctness; both when a change spans both; neither for tiny/doc changes.
+- **Commits/pushes are manual** (a push auto-deploys live to Vercel) — see `/commit-and-push`; never commit or push without explicit per-change approval.
+
 ## Dev workflow
 
 - `npm run dev` — dev server at `localhost:5173` (next free port if taken)
