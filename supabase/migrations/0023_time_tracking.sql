@@ -86,18 +86,21 @@ create policy "time_entries: worker insert own"
               and user_id = auth.uid()
               and public.has_app_access('time-tracker'));
 
--- Worker edits own; dashboard users can correct/mark paid on anyone's (same tenant).
+-- Paid rows are LOCKED for the worker (pay integrity): a worker may only
+-- update/delete their own UNPAID rows, and the update with-check forbids a
+-- worker flipping their own row to paid. Dashboard users (admin/granted)
+-- retain full control via can_view_all_time().
 create policy "time_entries: own or dashboard update"
   on public.time_entries for update
   using (tenant_id = public.current_tenant_id()
-         and (user_id = auth.uid() or public.can_view_all_time()))
+         and ((user_id = auth.uid() and paid = false) or public.can_view_all_time()))
   with check (tenant_id = public.current_tenant_id()
-              and (user_id = auth.uid() or public.can_view_all_time()));
+              and ((user_id = auth.uid() and paid = false) or public.can_view_all_time()));
 
 create policy "time_entries: own or dashboard delete"
   on public.time_entries for delete
   using (tenant_id = public.current_tenant_id()
-         and (user_id = auth.uid() or public.can_view_all_time()));
+         and ((user_id = auth.uid() and paid = false) or public.can_view_all_time()));
 
 -- ============================ time_rates ============================
 create table public.time_rates (

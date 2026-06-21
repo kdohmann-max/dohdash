@@ -55,6 +55,27 @@
   margin: 0 0 var(--spacing-lg) 0;
 }
 
+/* Inline action error (non-fatal: toggle-paid / set-rate failures).
+   Reuses td-load-error for error text color but sits inline rather than
+   filling the whole viewport. */
+.time-dashboard-app .td-action-error {
+  background: var(--bg-alt);
+  border: 1px solid var(--error);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.time-dashboard-app .td-action-error p {
+  margin: 0;
+  flex: 1;
+  font-size: 0.9rem;
+}
+
 /* ---- Buttons ---- */
 .time-dashboard-app .td-btn {
   display: inline-flex;

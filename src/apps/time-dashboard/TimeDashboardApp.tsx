@@ -48,6 +48,8 @@ export function TimeDashboardApp() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const actionErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Build a map of userId → hourlyRate
   const rateMap = new Map<string, number | null>(
@@ -124,13 +126,20 @@ export function TimeDashboardApp() {
     return p?.displayName ?? p?.email ?? userId;
   }
 
+  function showActionError(msg: string) {
+    setActionError(msg);
+    if (actionErrorTimerRef.current) clearTimeout(actionErrorTimerRef.current);
+    actionErrorTimerRef.current = setTimeout(() => setActionError(null), 6000);
+  }
+
   async function handleTogglePaid(ids: string[], paid: boolean) {
     if (!currentUserId) return;
     try {
       await setEntriesPaid(ids, paid, currentUserId);
+      setActionError(null);
       await loadEntries();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update paid status.");
+      showActionError(err instanceof Error ? err.message : "Could not update paid status. Please try again.");
     }
   }
 
@@ -138,9 +147,10 @@ export function TimeDashboardApp() {
     if (!currentUserId) return;
     try {
       await setTimeRate(userId, rate, currentUserId);
+      setActionError(null);
       await loadRates();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to save rate.");
+      showActionError(err instanceof Error ? err.message : "Could not save rate. Please try again.");
     }
   }
 
@@ -226,6 +236,18 @@ export function TimeDashboardApp() {
   return (
     <div className="time-dashboard-app">
       <div className="td-content">
+        {actionError && (
+          <div className="td-load-error td-action-error">
+            <p>{actionError}</p>
+            <button
+              type="button"
+              className="td-btn td-btn--ghost td-btn--sm"
+              onClick={() => setActionError(null)}
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
         <div className="td-top-bar">
           <h1 className="td-app-title">Time Dashboard</h1>
           <button

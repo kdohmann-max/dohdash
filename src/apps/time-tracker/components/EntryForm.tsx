@@ -31,6 +31,8 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
   const [hoursField, setHoursField] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<string>("__other");
   const [customJobName, setCustomJobName] = useState("");
+  // Track whether the user has made an explicit job selection (used for default-seeding below).
+  const [jobDefaulted, setJobDefaulted] = useState(false);
   const [checkedBreaks, setCheckedBreaks] = useState<Set<string>>(new Set());
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
@@ -94,6 +96,19 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing]);
 
+  // When jobs load (or change) and we are NOT editing an existing entry and the
+  // user hasn't made an explicit selection yet, pre-select the first active job
+  // so the happy path requires zero typing.
+  useEffect(() => {
+    if (editing) return;
+    if (jobDefaulted) return;
+    const firstActive = jobs.find((j) => !j.archived);
+    if (firstActive) {
+      setSelectedJobId(firstActive.id);
+      setJobDefaulted(true);
+    }
+  }, [jobs, editing, jobDefaulted]);
+
   function resetForm() {
     setWorkDate(todayString());
     setMode("range");
@@ -105,6 +120,7 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
     setCheckedBreaks(new Set());
     setNote("");
     setSaveError(null);
+    setJobDefaulted(false);
   }
 
   const breakMinutes = Array.from(checkedBreaks).reduce((sum, id) => {
@@ -222,7 +238,7 @@ export function EntryForm({ userId, jobs, editing, onSaved, onCancelEdit }: Entr
           id="tt-job-select"
           className="tt-input tt-select"
           value={selectedJobId}
-          onChange={(e) => { setSelectedJobId(e.target.value); setCustomJobName(""); }}
+          onChange={(e) => { setSelectedJobId(e.target.value); setCustomJobName(""); setJobDefaulted(true); }}
         >
           {jobs.map((j) => (
             <option key={j.id} value={j.id}>{j.name}</option>
