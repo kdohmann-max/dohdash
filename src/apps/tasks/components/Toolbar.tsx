@@ -145,21 +145,19 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
             {!isReadOnly && (
               <>
                 <label className="control">
-                  <span className="control-label">Heading</span>
-                  <select value={headingValue} onChange={(e) => setHeading(e.target.value)}>
-                    <option value="p">Normal text</option>
+                  <select aria-label="Text style" title="Text style" value={headingValue} onChange={(e) => setHeading(e.target.value)}>
+                    <option value="p">Normal</option>
                     {HEADING_LEVELS.map((l) => (
-                      <option key={l} value={l}>Heading {l}</option>
+                      <option key={l} value={l}>H{l}</option>
                     ))}
                   </select>
                 </label>
                 <label className="control">
-                  <span className="control-label">List</span>
-                  <select value={listValue} onChange={(e) => setList(e.target.value)}>
-                    <option value="none">None</option>
+                  <select aria-label="List type" title="List type" value={listValue} onChange={(e) => setList(e.target.value)}>
+                    <option value="none">List</option>
                     <option value="bullet">Bulleted</option>
                     <option value="ordered">Numbered</option>
-                    <option value="task">Task (checkbox)</option>
+                    <option value="task">Checklist</option>
                   </select>
                 </label>
                 <button className={`f-button ${showFormat ? "active" : ""}`} onClick={() => setShowFormat((v) => !v)} title="Tag / formatting selectors">TAG</button>
@@ -175,7 +173,7 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
               </button>
             ) : null}
             {!isReadOnly && (
-              <button className="archive-btn" onClick={() => archiveDone(editor)}>Archive Done</button>
+              <button className="archive-btn" onClick={() => archiveDone(editor)} title="Move completed tasks to an archived section">Archive</button>
             )}
             {onShareOpen && (
               <button

@@ -20,6 +20,10 @@ type AuthState =
 
 `src/App.tsx` — `BrowserRouter`; `AuthGate` is a layout route guarding `/dashboard/*`. After the OAuth round-trip, `REDIRECT_STORAGE_KEY` (`dohdash:redirect` in `sessionStorage`) restores the original deep-link destination.
 
+## Shell layout contract
+
+`src/components/Shell.tsx` (+ `Shell.css`) — `.shell` is `height:100dvh; overflow:hidden` with a fixed (`flex-shrink:0`) topbar, so the page itself never scrolls. **`.shell-content` is the bounded scroll box** (`flex:1; min-height:0; overflow:auto`, with `--spacing-xl` padding). Two valid patterns for an app mounted in the outlet: (1) **flow-scroll** — just render content and let `.shell-content` scroll it (Launcher, Admin, Time Dashboard); or (2) **own-height** — set `height:100%` + `overflow:hidden` and manage internal scroll regions yourself (DohDocs/`tasks`: fixed sidebar + Ribbon 1/2, only the document body scrolls). This contract is load-bearing — an app that assumes the page scrolls will clip.
+
 ## Admin panel
 
 `src/admin/` — `AdminDashboard.tsx` (4 tabs: Users / App Access / `AppAccessPanel.tsx` / Activity / `ActivityPanel.tsx` / Groups / `GroupsPanel.tsx`).

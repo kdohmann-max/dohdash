@@ -1,10 +1,13 @@
 .shell {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .shell-topbar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
@@ -82,7 +85,12 @@
   background: var(--accent-soft);
 }
 
+/* Bounded scroll area: the topbar stays fixed; each app scrolls inside here.
+   Apps that manage their own height (e.g. the DohDocs editor with body-only
+   scroll) fill 100% of this box and scroll internally instead. */
 .shell-content {
   flex: 1;
+  min-height: 0;
+  overflow: auto;
   padding: var(--spacing-xl);
 }

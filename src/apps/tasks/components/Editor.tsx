@@ -492,11 +492,25 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     <div className="editor">
       <div className="ribbon-1">
         <button className="menu-btn" onClick={onOpenSidebar} title="Open menu">☰</button>
-        <button className={!sourceMode ? "active" : ""} onClick={() => sourceMode ? exitSource() : undefined} title="Rich text view">
-          Rich
-        </button>
-        <button className={sourceMode ? "active" : ""} onClick={() => !sourceMode ? enterSource() : undefined} title="Markdown source">
-          {"</> MD"}
+        <PresenceBar peers={peers} />
+
+        <span className="ribbon-spacer" />
+
+        {saveStatus !== "idle" ? (
+          <span className={`save-status save-status--${saveStatus}`} role="status">
+            {saveStatus === "saving" && "Saving…"}
+            {saveStatus === "saved" && "Saved"}
+            {saveStatus === "error" && "Offline"}
+          </span>
+        ) : null}
+
+        <button
+          className={`comments-toggle ${panelOpen ? "active" : ""}`}
+          onClick={() => setPanelOpen((v) => !v)}
+          title="Comments"
+        >
+          <CommentIcon size={16} />
+          {openThreadCount > 0 ? openThreadCount : ""}
         </button>
 
         <button className="print-btn" onClick={sharePdf} title="Print / Save as PDF">
@@ -515,22 +529,12 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
           )}
         </div>
 
-        {saveStatus !== "idle" ? (
-          <span className={`save-status save-status--${saveStatus}`} role="status">
-            {saveStatus === "saving" && "Saving…"}
-            {saveStatus === "saved" && "Saved"}
-            {saveStatus === "error" && "Offline — will retry"}
-          </span>
-        ) : null}
-
-        <PresenceBar peers={peers} />
         <button
-          className={`comments-toggle ${panelOpen ? "active" : ""}`}
-          onClick={() => setPanelOpen((v) => !v)}
-          title="Comments"
+          className="mode-toggle"
+          onClick={() => (sourceMode ? exitSource() : enterSource())}
+          title={sourceMode ? "Switch to rich text editing" : "Switch to Markdown source"}
         >
-          <CommentIcon size={16} />
-          {openThreadCount > 0 ? openThreadCount : ""}
+          {sourceMode ? "Rich text" : "</> Markdown"}
         </button>
       </div>
 

@@ -383,7 +383,7 @@
   align-items: center;
   flex-wrap: nowrap;
   gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-md);
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
@@ -397,7 +397,7 @@
   border: 1px solid var(--border);
   background: var(--bg);
   border-radius: var(--rounded-sm);
-  padding: 4px 12px;
+  padding: 4px 10px;
   font-size: 13px;
   color: var(--muted);
 }
@@ -408,8 +408,27 @@
   color: var(--accent);
 }
 
+/* Pushes the document-action group (save/comments/print/export/mode) to the
+   right, keeping presence on the far left. Collapses to 0 when the row
+   overflows on phones so everything stays swipe-reachable. */
+.tasks-app .ribbon-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The single Rich/MD switch — accent-outlined so it reads as the mode control;
+   pinned to the far right by the spacer. */
+.tasks-app .ribbon-1 .mode-toggle {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: var(--font-weight-heading);
+  white-space: nowrap;
+}
+
+.tasks-app .ribbon-1 .mode-toggle:hover { background: var(--accent-soft); }
+
 .tasks-app .save-status {
-  margin-left: auto;
+  flex-shrink: 0;
   align-self: center;
   font-size: 12px;
   color: var(--muted);
@@ -434,7 +453,7 @@
 
 .tasks-app .share-wrap {
   position: relative;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .tasks-app .share-menu {
@@ -496,8 +515,8 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
   overflow-x: auto;
   scrollbar-width: none;
 }
