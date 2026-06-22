@@ -354,15 +354,19 @@
 /* ---- Main / Editor ---- */
 .tasks-app .main {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+/* The editor fills .main and is a fixed-header column: Ribbon 1 + Ribbon 2
+   stay put, only .editor-body scrolls (see comments.css). */
 .tasks-app .editor {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
 }
 
 .tasks-app .empty-main {
@@ -370,19 +374,26 @@
   color: var(--muted);
 }
 
-/* ---- View toggle (Rich / Markdown source) ---- */
-.tasks-app .view-toggle {
-  position: sticky;
-  top: 0;
-  z-index: 11;
+/* ---- Ribbon 1: document + collaboration bar (Rich/MD, save status,
+   presence, comments, print, export, share). Fixed; the body scrolls under
+   it. Single row that scrolls sideways when it can't fit (phones). ---- */
+.tasks-app .ribbon-1 {
+  flex-shrink: 0;
   display: flex;
-  gap: 4px;
-  padding: 8px var(--spacing-md);
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg);
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.tasks-app .view-toggle button {
+.tasks-app .ribbon-1::-webkit-scrollbar { display: none; }
+
+.tasks-app .ribbon-1 button {
+  flex-shrink: 0;
   border: 1px solid var(--border);
   background: var(--bg);
   border-radius: var(--rounded-sm);
@@ -391,7 +402,7 @@
   color: var(--muted);
 }
 
-.tasks-app .view-toggle button.active {
+.tasks-app .ribbon-1 button.active {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
@@ -456,6 +467,8 @@
 
 .tasks-app .source-surface {
   flex: 1;
+  min-height: 0;
+  overflow: auto;
   width: 100%;
   max-width: 792px;
   margin: 0 auto;
@@ -470,41 +483,51 @@
   color: var(--text);
 }
 
-/* ---- Toolbar ---- */
+/* ---- Toolbar (fixed container holding Ribbon 2 + the on-demand Ribbon 3) ---- */
 .tasks-app .toolbar {
-  position: sticky;
-  top: 41px;
-  z-index: 10;
+  flex-shrink: 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
 
-.tasks-app .ribbon {
+/* Ribbon 2: text formatting (heading, list, TAG, image, archive, share).
+   One tight row that scrolls sideways on phones rather than wrapping tall. */
+.tasks-app .ribbon-2 {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
-  padding: 8px var(--spacing-md);
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.tasks-app .sub-ribbon {
+.tasks-app .ribbon-2::-webkit-scrollbar { display: none; }
+
+/* Ribbon 3: the format-selector palette under Ribbon 2, shown on demand.
+   Free to wrap since it's a temporary panel, not the always-on bar. */
+.tasks-app .ribbon-3 {
+  flex-wrap: wrap;
   border-top: 1px solid var(--border);
   background: var(--bg-alt);
 }
 
 .tasks-app .control {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
 }
 
 .tasks-app .control-label {
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
   line-height: 1;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .tasks-app .control select {
@@ -528,7 +551,8 @@
   border-color: var(--accent);
 }
 
-.tasks-app .ribbon button {
+.tasks-app .ribbon-2 button {
+  flex-shrink: 0;
   border: 1px solid var(--border);
   background: var(--bg);
   border-radius: var(--rounded-sm);
@@ -536,15 +560,17 @@
   min-width: 34px;
 }
 
-.tasks-app .ribbon button.active {
+.tasks-app .ribbon-2 .control select { flex-shrink: 0; }
+
+.tasks-app .ribbon-2 button.active {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.tasks-app .ribbon .f-button,
-.tasks-app .ribbon .image-btn,
-.tasks-app .ribbon .archive-btn {
+.tasks-app .ribbon-2 .f-button,
+.tasks-app .ribbon-2 .image-btn,
+.tasks-app .ribbon-2 .archive-btn {
   height: 30px;
   display: inline-flex;
   align-items: center;
@@ -558,23 +584,23 @@
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
-.tasks-app .ribbon .f-button:hover,
-.tasks-app .ribbon .image-btn:hover,
-.tasks-app .ribbon .archive-btn:hover {
+.tasks-app .ribbon-2 .f-button:hover,
+.tasks-app .ribbon-2 .image-btn:hover,
+.tasks-app .ribbon-2 .archive-btn:hover {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.tasks-app .ribbon .f-button.active {
+.tasks-app .ribbon-2 .f-button.active {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.tasks-app .ribbon .f-button:focus-visible,
-.tasks-app .ribbon .image-btn:focus-visible,
-.tasks-app .ribbon .archive-btn:focus-visible {
+.tasks-app .ribbon-2 .f-button:focus-visible,
+.tasks-app .ribbon-2 .image-btn:focus-visible,
+.tasks-app .ribbon-2 .archive-btn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -714,9 +740,9 @@
 .tasks-app .tag-user-apply:disabled { opacity: 0.5; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tasks-app .ribbon .f-button,
-  .tasks-app .ribbon .image-btn,
-  .tasks-app .ribbon .archive-btn,
+  .tasks-app .ribbon-2 .f-button,
+  .tasks-app .ribbon-2 .image-btn,
+  .tasks-app .ribbon-2 .archive-btn,
   .tasks-app .control select { transition: none; }
 }
 
@@ -880,25 +906,21 @@
     padding: 0;
   }
 
-  .tasks-app .ribbon {
-    padding: 6px 8px;
+  .tasks-app .ribbon-1,
+  .tasks-app .ribbon-2 {
+    padding: var(--spacing-xs) var(--spacing-sm);
   }
 
   .tasks-app .editor-surface {
     padding: 16px 12px 80px;
   }
 
-  /* Top editor bar must wrap on narrow phones instead of clipping its
-     buttons (Rich / MD / Print / Export / save-status / comments). */
-  .tasks-app .view-toggle {
-    flex-wrap: wrap;
-  }
-
-  /* Comfortable touch targets (≥44px) for the toolbars on phones. */
-  .tasks-app .view-toggle button,
-  .tasks-app .ribbon .f-button,
-  .tasks-app .ribbon .image-btn,
-  .tasks-app .ribbon .archive-btn {
+  /* Ribbons stay one short row and scroll sideways (swipe) instead of
+     wrapping tall — keeps the writing area as large as possible on phones.
+     Comfortable ≥44px touch targets; the bar height follows the targets. */
+  .tasks-app .ribbon-1 button,
+  .tasks-app .ribbon-2 button,
+  .tasks-app .ribbon-2 .control select {
     min-height: 44px;
     min-width: 44px;
   }

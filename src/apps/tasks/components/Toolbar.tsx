@@ -141,7 +141,7 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
 
   return (
     <div className="toolbar">
-      <div className="ribbon">
+      <div className="ribbon-2">
             {!isReadOnly && (
               <>
                 <label className="control">
@@ -189,7 +189,7 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
           </div>
 
       {!isReadOnly && showFormat && (
-        <div className="ribbon sub-ribbon">
+        <div className="ribbon-2 ribbon-3">
           {FORMATTING_SELECTORS.map((sel) => (
             <button
               key={sel.id}

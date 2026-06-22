@@ -490,7 +490,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
 
   return (
     <div className="editor">
-      <div className="view-toggle">
+      <div className="ribbon-1">
         <button className="menu-btn" onClick={onOpenSidebar} title="Open menu">☰</button>
         <button className={!sourceMode ? "active" : ""} onClick={() => sourceMode ? exitSource() : undefined} title="Rich text view">
           Rich
