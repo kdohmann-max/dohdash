@@ -69,7 +69,9 @@ export const FormatSelector = Mark.create<FormatSelectorOptions>({
     return MARK_SELECTOR_IDS.map(
       (id) =>
         new InputRule({
-          find: new RegExp(`(?<!\\w)(${id}) $`),
+          // Case-insensitive so iOS auto-capitalization ("P1 ") still triggers
+          // the rule — the matched text is replaced by the canonical id anyway.
+          find: new RegExp(`(?<!\\w)(${id}) $`, "i"),
           handler: ({ state, range }) => {
             const { tr } = state;
             tr.delete(range.from, range.to);
