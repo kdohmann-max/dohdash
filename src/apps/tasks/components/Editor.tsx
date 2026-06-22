@@ -12,6 +12,7 @@ import { useAuth } from "../../../auth/AuthContext";
 import {
   createDocComment,
   deleteDocComment,
+  getDoc,
   listDocComments,
   setDocCommentResolved,
   type DocComment,
@@ -285,6 +286,42 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     };
     // self is stable for the lifetime of a session
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [note.id]);
+
+  // Broadcast is ephemeral: a backgrounded tab (phone asleep, app switched)
+  // drops the WebSocket and misses live updates with no replay. When the tab
+  // comes back, pull the latest from the server so the user sees current
+  // content without a manual refresh. Skips if local edits are unsaved.
+  const refetchingRef = useRef(false);
+  useEffect(() => {
+    async function refetchIfStale() {
+      // focus + visibilitychange both fire on a single resume — guard against
+      // the duplicate round-trip. Dirty guard: a resume with unsaved local
+      // edits intentionally won't pull remote (don't clobber the user's work).
+      if (document.visibilityState === "hidden" || dirtyRef.current || refetchingRef.current) return;
+      refetchingRef.current = true;
+      try {
+        const fresh = await getDoc(note.id);
+        if (fresh && fresh.updatedAt > lastUpdatedRef.current) {
+          onDocUpdatedRef.current({
+            docId: note.id,
+            markdown: fresh.markdown,
+            updatedAt: fresh.updatedAt,
+            senderId: "",
+          });
+        }
+      } catch {
+        // best-effort; live broadcast will catch the next edit
+      } finally {
+        refetchingRef.current = false;
+      }
+    }
+    document.addEventListener("visibilitychange", refetchIfStale);
+    window.addEventListener("focus", refetchIfStale);
+    return () => {
+      document.removeEventListener("visibilitychange", refetchIfStale);
+      window.removeEventListener("focus", refetchIfStale);
+    };
   }, [note.id]);
 
   const remotePeerName = useMemo(() => {
