@@ -8,6 +8,8 @@ import { SharePanel } from "./SharePanel";
 import { PresenceBar } from "./PresenceBar";
 import { exportPdf, copyRichText } from "../share";
 import { CommentIcon } from "../../../icons";
+import { archiveDone } from "../editor/archive";
+import { uploadImage } from "../../../storage/db";
 import { useAuth } from "../../../auth/AuthContext";
 import {
   createDocComment,
@@ -108,6 +110,8 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
   const [remoteUpdate, setRemoteUpdate] = useState<DocUpdatePayload | null>(null);
   const [sharePanelOpen, setSharePanelOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [showFormat, setShowFormat] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   // Always call the latest onChange (TasksApp recreates it as `active`
   // changes; the useEditor onUpdate closure is frozen at editor creation).
@@ -488,11 +492,89 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     setExportOpen(false);
   }
 
+  const headingValue = (() => {
+    if (!editor) return "p";
+    for (const level of [1, 2, 3, 4] as const) {
+      if (editor.isActive("heading", { level })) return String(level);
+    }
+    return "p";
+  })();
+
+  function setHeading(value: string) {
+    if (!editor) return;
+    const chain = editor.chain().focus();
+    if (value === "p") chain.setParagraph().run();
+    else chain.toggleHeading({ level: Number(value) as 1 | 2 | 3 | 4 }).run();
+  }
+
+  const listValue = !editor
+    ? "none"
+    : editor.isActive("taskList")
+    ? "task"
+    : editor.isActive("bulletList")
+    ? "bullet"
+    : editor.isActive("orderedList")
+    ? "ordered"
+    : "none";
+
+  function setList(value: string) {
+    if (!editor) return;
+    const chain = editor.chain().focus();
+    if (value === "bullet") chain.toggleBulletList().run();
+    else if (value === "ordered") chain.toggleOrderedList().run();
+    else if (value === "task") chain.toggleTaskList().run();
+    else chain.liftListItem("listItem").liftListItem("taskItem").run();
+  }
+
+  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !editor) return;
+    try {
+      const src = await uploadImage(file);
+      editor.chain().focus().setImage({ src, alt: file.name }).run();
+    } catch (err) {
+      alert(`Image upload failed: ${err}`);
+    }
+  }
+
   return (
     <div className="editor">
       <div className="ribbon-1">
         <button className="menu-btn" onClick={onOpenSidebar} title="Open menu">☰</button>
         <PresenceBar peers={peers} />
+
+        {!isCommentOnly && (
+          <>
+            <span className="ribbon-sep" />
+            <label className="control">
+              <select aria-label="Text style" title="Text style" value={headingValue} onChange={(e) => setHeading(e.target.value)}>
+                <option value="p">Normal</option>
+                {[1, 2, 3, 4].map((l) => <option key={l} value={String(l)}>H{l}</option>)}
+              </select>
+            </label>
+            <label className="control">
+              <select aria-label="List type" title="List type" value={listValue} onChange={(e) => setList(e.target.value)}>
+                <option value="none">List</option>
+                <option value="bullet">Bulleted</option>
+                <option value="ordered">Numbered</option>
+                <option value="task">Checklist</option>
+              </select>
+            </label>
+            <button className={`f-button ${showFormat ? "active" : ""}`} onClick={() => setShowFormat((v) => !v)} title="Tag / formatting selectors">TAG</button>
+            <button className="image-btn" onClick={() => fileInput.current?.click()} title="Insert image" aria-label="Insert image">
+              <svg width="16" height="16" aria-hidden="true"><use href="/icons.svg#paperclip-icon" /></svg>
+            </button>
+            <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPickImage} />
+            <button className="image-btn" onClick={handleAddComment} title="Comment on selection" aria-label="Comment on selection">
+              <CommentIcon size={16} />
+            </button>
+            <button className="archive-btn" onClick={() => editor && archiveDone(editor)} title="Move completed tasks to an archived section">Archive</button>
+            {isOwner && (
+              <button className="toolbar-btn" title="Share note" onClick={() => setSharePanelOpen(true)}>Share</button>
+            )}
+          </>
+        )}
 
         <span className="ribbon-spacer" />
 
@@ -559,9 +641,8 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
         <>
           <Toolbar
             editor={editor}
-            onAddComment={handleAddComment}
-            onShareOpen={isOwner ? (() => setSharePanelOpen(true)) : undefined}
-            isReadOnly={isCommentOnly}
+            showFormat={showFormat}
+            setShowFormat={setShowFormat}
           />
           {isCommentOnly && (
             <div className="editor-readonly-banner">

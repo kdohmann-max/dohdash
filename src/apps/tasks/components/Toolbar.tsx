@@ -1,36 +1,23 @@
-// The "MD Toolbar": ribbon-style controls so users can format without knowing
-// Markdown syntax. Heading selector, list-type selector, the "F" formatting
-// ribbon (driven by formattingSelectors.ts), and the Archive Done action.
-
 import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
+import type { Dispatch, SetStateAction } from "react";
 import {
   FORMATTING_SELECTORS,
   type FormattingSelector,
 } from "../data/formattingSelectors";
-import { archiveDone } from "../editor/archive";
-import { uploadImage, listProfiles, type Profile } from "../../../storage/db";
-import { CommentIcon } from "../../../icons";
+import { listProfiles, type Profile } from "../../../storage/db";
 
 interface Props {
   editor: Editor | null;
-  onAddComment?: () => void;
-  onShareOpen?: () => void;
-  isReadOnly?: boolean;
+  showFormat: boolean;
+  setShowFormat: Dispatch<SetStateAction<boolean>>;
 }
 
-const HEADING_LEVELS = [1, 2, 3, 4] as const;
-
-export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props) {
-  const [showFormat, setShowFormat] = useState(false);
-  const fileInput = useRef<HTMLInputElement>(null);
-
-  // "TAG with user" picker state
+export function Toolbar({ editor, showFormat, setShowFormat }: Props) {
   const [userPickerOpen, setUserPickerOpen] = useState(false);
   const [people, setPeople] = useState<Profile[]>([]);
   const [userFilter, setUserFilter] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  // The selection to tag, captured before the picker steals focus.
   const tagRange = useRef<{ from: number; to: number } | null>(null);
 
   useEffect(() => {
@@ -40,53 +27,7 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
   }, [userPickerOpen, people.length]);
 
   if (!editor) return null;
-
-  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-selecting the same file
-    if (!file || !editor) return;
-    try {
-      const src = await uploadImage(file);
-      editor.chain().focus().setImage({ src, alt: file.name }).run();
-    } catch (err) {
-      alert(`Image upload failed: ${err}`);
-    }
-  }
-
-  const headingValue = (() => {
-    for (const level of HEADING_LEVELS) {
-      if (editor.isActive("heading", { level })) return String(level);
-    }
-    return "p";
-  })();
-
-  function setHeading(value: string) {
-    if (!editor) return;
-    const chain = editor.chain().focus();
-    if (value === "p") chain.setParagraph().run();
-    else chain.toggleHeading({ level: Number(value) as 1 | 2 | 3 | 4 }).run();
-  }
-
-  const listValue = editor.isActive("taskList")
-    ? "task"
-    : editor.isActive("bulletList")
-    ? "bullet"
-    : editor.isActive("orderedList")
-    ? "ordered"
-    : "none";
-
-  function setList(value: string) {
-    if (!editor) return;
-    const chain = editor.chain().focus();
-    if (value === "bullet") chain.toggleBulletList().run();
-    else if (value === "ordered") chain.toggleOrderedList().run();
-    else if (value === "task") chain.toggleTaskList().run();
-    else
-      chain
-        .liftListItem("listItem")
-        .liftListItem("taskItem")
-        .run();
-  }
+  if (!showFormat && !userPickerOpen) return null;
 
   function applySelector(sel: FormattingSelector) {
     if (!editor) return;
@@ -141,52 +82,7 @@ export function Toolbar({ editor, onAddComment, onShareOpen, isReadOnly }: Props
 
   return (
     <div className="toolbar">
-      <div className="ribbon-2">
-            {!isReadOnly && (
-              <>
-                <label className="control">
-                  <select aria-label="Text style" title="Text style" value={headingValue} onChange={(e) => setHeading(e.target.value)}>
-                    <option value="p">Normal</option>
-                    {HEADING_LEVELS.map((l) => (
-                      <option key={l} value={l}>H{l}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="control">
-                  <select aria-label="List type" title="List type" value={listValue} onChange={(e) => setList(e.target.value)}>
-                    <option value="none">List</option>
-                    <option value="bullet">Bulleted</option>
-                    <option value="ordered">Numbered</option>
-                    <option value="task">Checklist</option>
-                  </select>
-                </label>
-                <button className={`f-button ${showFormat ? "active" : ""}`} onClick={() => setShowFormat((v) => !v)} title="Tag / formatting selectors">TAG</button>
-                <button className="image-btn" onClick={() => fileInput.current?.click()} title="Insert image" aria-label="Insert image">
-                  <svg width="16" height="16" aria-hidden="true"><use href="/icons.svg#paperclip-icon" /></svg>
-                </button>
-                <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPickImage} />
-              </>
-            )}
-            {onAddComment ? (
-              <button className="image-btn" onClick={onAddComment} title="Comment on selection" aria-label="Comment on selection">
-                <CommentIcon size={16} />
-              </button>
-            ) : null}
-            {!isReadOnly && (
-              <button className="archive-btn" onClick={() => archiveDone(editor)} title="Move completed tasks to an archived section">Archive</button>
-            )}
-            {onShareOpen && (
-              <button
-                className="toolbar-btn"
-                title="Share note"
-                onClick={onShareOpen}
-              >
-                Share
-              </button>
-            )}
-          </div>
-
-      {!isReadOnly && showFormat && (
+      {showFormat && (
         <div className="ribbon-2 ribbon-3">
           {FORMATTING_SELECTORS.map((sel) => (
             <button

@@ -402,6 +402,12 @@
   color: var(--muted);
 }
 
+.tasks-app .ribbon-1 button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .tasks-app .ribbon-1 button.active {
   background: var(--accent-soft);
   border-color: var(--accent);
@@ -502,15 +508,23 @@
   color: var(--text);
 }
 
-/* ---- Toolbar (fixed container holding Ribbon 2 + the on-demand Ribbon 3) ---- */
-.tasks-app .toolbar {
+/* Vertical divider between the presence/meta section and formatting buttons. */
+.tasks-app .ribbon-sep {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: var(--border);
   flex-shrink: 0;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  margin: 0 2px;
 }
 
-/* Ribbon 2: text formatting (heading, list, TAG, image, archive, share).
-   One tight row that scrolls sideways on phones rather than wrapping tall. */
+/* ---- Toolbar (on-demand panels: Ribbon 3 + user picker) ---- */
+.tasks-app .toolbar {
+  flex-shrink: 0;
+}
+
+/* Ribbon 2 class is kept on ribbon-3 so format-selector buttons inherit the
+   same button base styles. */
 .tasks-app .ribbon-2 {
   display: flex;
   flex-wrap: nowrap;
@@ -523,12 +537,15 @@
 
 .tasks-app .ribbon-2::-webkit-scrollbar { display: none; }
 
-/* Ribbon 3: the format-selector palette under Ribbon 2, shown on demand.
-   Free to wrap since it's a temporary panel, not the always-on bar. */
+/* Ribbon 3: the format-selector palette, shown on demand below ribbon-1.
+   Free to wrap. Gets border-bottom as the last visible child of .toolbar. */
 .tasks-app .ribbon-3 {
   flex-wrap: wrap;
-  border-top: 1px solid var(--border);
   background: var(--bg-alt);
+}
+
+.tasks-app .ribbon-3:last-child {
+  border-bottom: 1px solid var(--border);
 }
 
 .tasks-app .control {
@@ -587,9 +604,9 @@
   color: var(--accent);
 }
 
-.tasks-app .ribbon-2 .f-button,
-.tasks-app .ribbon-2 .image-btn,
-.tasks-app .ribbon-2 .archive-btn {
+.tasks-app .f-button,
+.tasks-app .image-btn,
+.tasks-app .archive-btn {
   height: 30px;
   display: inline-flex;
   align-items: center;
@@ -603,23 +620,23 @@
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
-.tasks-app .ribbon-2 .f-button:hover,
-.tasks-app .ribbon-2 .image-btn:hover,
-.tasks-app .ribbon-2 .archive-btn:hover {
+.tasks-app .f-button:hover,
+.tasks-app .image-btn:hover,
+.tasks-app .archive-btn:hover {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.tasks-app .ribbon-2 .f-button.active {
+.tasks-app .f-button.active {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.tasks-app .ribbon-2 .f-button:focus-visible,
-.tasks-app .ribbon-2 .image-btn:focus-visible,
-.tasks-app .ribbon-2 .archive-btn:focus-visible {
+.tasks-app .f-button:focus-visible,
+.tasks-app .image-btn:focus-visible,
+.tasks-app .archive-btn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -635,7 +652,6 @@
 
 .tasks-app .archive-btn {
   padding: 0 12px;
-  margin-left: auto;
   font-size: 13px;
 }
 
@@ -644,6 +660,7 @@
 /* ---- "TAG with user" picker ---- */
 .tasks-app .tag-user-picker {
   border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   background: var(--bg-alt);
   padding: var(--spacing-md);
   display: flex;
@@ -759,9 +776,9 @@
 .tasks-app .tag-user-apply:disabled { opacity: 0.5; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tasks-app .ribbon-2 .f-button,
-  .tasks-app .ribbon-2 .image-btn,
-  .tasks-app .ribbon-2 .archive-btn,
+  .tasks-app .f-button,
+  .tasks-app .image-btn,
+  .tasks-app .archive-btn,
   .tasks-app .control select { transition: none; }
 }
 
@@ -925,8 +942,7 @@
     padding: 0;
   }
 
-  .tasks-app .ribbon-1,
-  .tasks-app .ribbon-2 {
+  .tasks-app .ribbon-1 {
     padding: var(--spacing-xs) var(--spacing-sm);
   }
 
@@ -938,8 +954,10 @@
      wrapping tall — keeps the writing area as large as possible on phones.
      Comfortable ≥44px touch targets; the bar height follows the targets. */
   .tasks-app .ribbon-1 button,
-  .tasks-app .ribbon-2 button,
-  .tasks-app .ribbon-2 .control select {
+  .tasks-app .ribbon-1 .control select,
+  .tasks-app .f-button,
+  .tasks-app .image-btn,
+  .tasks-app .archive-btn {
     min-height: 44px;
     min-width: 44px;
   }
