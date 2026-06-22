@@ -35,10 +35,49 @@
 
 .presence-avatar--editing {
   border-color: var(--accent);
+  animation: presence-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes presence-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); }
+  50% { box-shadow: 0 0 0 3px var(--accent-soft); }
 }
 
 .presence-editing {
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--accent);
   font-size: 0.8rem;
   white-space: nowrap;
+}
+
+/* Chat-style "typing…" dots so the cue reads as live activity. */
+.presence-typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.presence-typing-dots span {
+  width: var(--spacing-xs);
+  height: var(--spacing-xs);
+  border-radius: 50%;
+  background: var(--accent);
+  animation: presence-typing 1.2s ease-in-out infinite;
+}
+
+.presence-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.presence-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes presence-typing {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presence-avatar--editing,
+  .presence-typing-dots span {
+    animation: none;
+  }
 }
