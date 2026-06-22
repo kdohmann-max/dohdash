@@ -79,7 +79,8 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
   const { state } = useAuth();
   const self = state.status === "authenticated" ? state.profile : null;
 
-  const saveTimerRef = useRef<number | undefined>(undefined);
+  const editorFlushRef = useRef<number | undefined>(undefined);
+  const sourceFlushRef = useRef<number | undefined>(undefined);
   const editingTimerRef = useRef<number | undefined>(undefined);
   const dirtyRef = useRef(false);
   const lastUpdatedRef = useRef(note.updatedAt);
@@ -166,10 +167,14 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
       onUpdate: ({ editor }) => {
         dirtyRef.current = true;
         markEditing();
-        window.clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = window.setTimeout(() => {
-          flushSave(getMarkdown(editor));
-        }, 400);
+        const markdown = getMarkdown(editor);
+
+        // Broadcast and save on single 300ms debounce for live collaboration
+        window.clearTimeout(editorFlushRef.current);
+        editorFlushRef.current = window.setTimeout(() => {
+          channelRef.current?.broadcastTyping({ markdown });
+          flushSave(markdown);
+        }, 300);
       },
     },
     [note.id]
@@ -218,9 +223,11 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note.id, editor]);
 
-  // Tidy save timers on unmount.
+  // Tidy timers on unmount.
   useEffect(() => {
     return () => {
+      window.clearTimeout(editorFlushRef.current);
+      window.clearTimeout(sourceFlushRef.current);
       window.clearTimeout(retryTimerRef.current);
       window.clearTimeout(savedRevertRef.current);
     };
@@ -417,7 +424,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
 
   function exitSource() {
     if (editor) editor.commands.setContent(source, { emitUpdate: false });
-    window.clearTimeout(saveTimerRef.current);
+    window.clearTimeout(sourceFlushRef.current);
     flushSave(source);
     setSourceMode(false);
   }
@@ -426,8 +433,8 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
     setSource(value);
     dirtyRef.current = true;
     markEditing();
-    window.clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = window.setTimeout(() => flushSave(value), 400);
+    window.clearTimeout(sourceFlushRef.current);
+    sourceFlushRef.current = window.setTimeout(() => flushSave(value), 400);
   }
 
   async function shareRichText() {

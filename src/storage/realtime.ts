@@ -35,6 +35,9 @@ export interface DocUpdatePayload {
 export interface DocChannelHandle {
   /** Re-tracks presence with the editing flag (3s-idle reset by the caller). */
   setEditing(editing: boolean): void;
+  /** Broadcast live typing (streaming edits before save). */
+  broadcastTyping(payload: { markdown: string }): void;
+  /** Broadcast a saved update. */
   broadcastUpdate(payload: { markdown: string; updatedAt: number }): void;
   unsubscribe(): void;
 }
@@ -71,6 +74,10 @@ export function subscribeDocChannel(
 
   channel
     .on("presence", { event: "sync" }, emitPeers)
+    .on("broadcast", { event: "doc-typing" }, ({ payload }) => {
+      const typing = payload as { markdown: string; senderId: string };
+      if (typing.senderId !== opts.self.userId) opts.onDocUpdated({ ...typing, docId, updatedAt: Date.now() } as DocUpdatePayload);
+    })
     .on("broadcast", { event: "doc-updated" }, ({ payload }) => {
       const update = payload as DocUpdatePayload;
       // self:false only suppresses echoes on this channel ref; another tab of
@@ -86,6 +93,10 @@ export function subscribeDocChannel(
       if (next === editing) return;
       editing = next;
       track();
+    },
+    broadcastTyping({ markdown }) {
+      const payload = { markdown, senderId: opts.self.userId };
+      void channel.send({ type: "broadcast", event: "doc-typing", payload });
     },
     broadcastUpdate({ markdown, updatedAt }) {
       const payload: DocUpdatePayload = { docId, markdown, updatedAt, senderId: opts.self.userId };
