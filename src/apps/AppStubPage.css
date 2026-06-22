@@ -1,6 +1,7 @@
 .app-stub {
   max-width: 480px;
   margin: 0 auto;
+  padding: var(--spacing-xl);
   text-align: center;
   display: flex;
   flex-direction: column;

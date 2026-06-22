@@ -2,11 +2,13 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
   animation: fadeIn 0.5s ease-out;
 }
 
 .launcher-status {
   color: var(--muted);
+  padding: var(--spacing-xl);
 }
 
 .launcher-status--err {

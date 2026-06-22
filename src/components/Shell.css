@@ -6,6 +6,7 @@
   flex-direction: column;
 }
 
+/* Launcher: full bar with brand, nav links, user name, sign-out */
 .shell-topbar {
   flex-shrink: 0;
   display: flex;
@@ -30,7 +31,7 @@
 }
 
 .shell-logo {
-  height: 32px;
+  height: 28px;
   width: auto;
   object-fit: contain;
 }
@@ -68,7 +69,6 @@
   color: var(--muted);
 }
 
-
 .shell-signout {
   padding: var(--spacing-xs) var(--spacing-sm);
   border: 1px solid var(--border);
@@ -83,6 +83,50 @@
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+/* Compact breadcrumb bar shown when inside an app (not on the launcher) */
+.shell-crumb-home {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-decoration: none;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+
+.shell-crumb-home:hover {
+  color: var(--accent);
+}
+
+.shell-logo--sm {
+  height: 20px;
+}
+
+.shell-crumb-brand {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  font-size: 14px;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.shell-crumb-sep {
+  color: var(--border);
+  font-size: 16px;
+  user-select: none;
+}
+
+.shell-crumb-app {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.shell-crumb-actions {
+  margin-left: auto;
 }
 
 /* Bounded scroll area: the topbar stays fixed; each app scrolls inside here.

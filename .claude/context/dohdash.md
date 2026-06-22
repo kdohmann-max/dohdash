@@ -22,7 +22,9 @@ type AuthState =
 
 ## Shell layout contract
 
-`src/components/Shell.tsx` (+ `Shell.css`) — `.shell` is `height:100dvh; overflow:hidden` with a fixed (`flex-shrink:0`) topbar, so the page itself never scrolls. **`.shell-content` is the bounded scroll box** (`flex:1; min-height:0; overflow:auto`, with `--spacing-xl` padding). Two valid patterns for an app mounted in the outlet: (1) **flow-scroll** — just render content and let `.shell-content` scroll it (Launcher, Admin, Time Dashboard); or (2) **own-height** — set `height:100%` + `overflow:hidden` and manage internal scroll regions yourself (DohDocs/`tasks`: fixed sidebar + Ribbon 1/2, only the document body scrolls). This contract is load-bearing — an app that assumes the page scrolls will clip.
+`src/components/Shell.tsx` (+ `Shell.css`) — `.shell` is `height:100dvh; overflow:hidden` with a fixed (`flex-shrink:0`) topbar, so the page itself never scrolls. **`.shell-content` is the bounded scroll box** (`flex:1; min-height:0; overflow:auto; padding:0`). Two valid patterns for an app mounted in the outlet: (1) **flow-scroll** — just render content and let `.shell-content` scroll it (Launcher, Admin, Time Dashboard); or (2) **own-height** — set `height:100%` + `overflow:hidden` and manage internal scroll regions yourself (DohDocs/`tasks`: fixed sidebar + Ribbon 1/2, only the document body scrolls). This contract is load-bearing — an app that assumes the page scrolls will clip. **Each app owns its own padding** — shell-content provides none; flow-scroll apps add `padding: var(--spacing-xl)` to their root element.
+
+**Topbar switches modes based on route:** on `/dashboard` (Launcher) it renders the full bar (brand, nav, user name, sign-out). On any app route (`/dashboard/app/:appId`, `/dashboard/admin`) it collapses to a compact breadcrumb: `[logo] DohDash / App Name` (logo links back to launcher) + sign-out button. This frees ~16px of vertical space inside every app.
 
 ## Admin panel
 
