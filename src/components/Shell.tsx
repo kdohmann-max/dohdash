@@ -32,7 +32,7 @@ export function Shell() {
 
   return (
     <div className="shell">
-      <header className="shell-topbar">
+      <header className="shell-header">
         {isLauncher ? (
           <>
             <div className="shell-brand">
