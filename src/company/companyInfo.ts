@@ -6,9 +6,16 @@
 
 import type { CompanyInfo } from "./types";
 import { getTenantPublicConfig } from "../storage/db";
+import { resolveTenantSlug } from "./tenantResolver";
 
 export async function loadCompanyInfo(): Promise<CompanyInfo> {
-  return getTenantPublicConfig(window.location.hostname);
+  const host = window.location.hostname;
+  const resolution = resolveTenantSlug(host);
+
+  // In dev mode, pass the slug to the RPC; otherwise pass the hostname
+  const lookupHost = resolution.kind === "dev" ? resolution.value : host;
+
+  return getTenantPublicConfig(lookupHost);
 }
 
 export function applyCompanyTheme(info: CompanyInfo): void {
