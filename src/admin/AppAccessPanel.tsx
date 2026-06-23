@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { APP_REGISTRY, resolveAppName } from "../apps/registry";
+import { APP_REGISTRY, isTenantAppEnabled, resolveAppName } from "../apps/registry";
 import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { listAppAccessForUser, grantAppAccess, revokeAppAccess, logAdminAction, type Profile } from "../storage/db";
 import "./AppAccessPanel.css";
@@ -94,27 +94,34 @@ export function AppAccessPanel({
       {grantedIds === null ? (
         <p className="admin-status">Loading…</p>
       ) : (
-        <ul className="app-access-list">
-          {APP_REGISTRY.map((app) => {
-            const granted = grantedIds.has(app.id);
-            return (
-              <li key={app.id} className="app-access-row">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={granted}
-                    disabled={pendingAppId === app.id}
-                    onChange={() => void handleToggle(app.id, granted)}
-                  />
-                  <span className="app-access-icon" aria-hidden="true">
-                    {app.icon}
-                  </span>
-                  <span>{resolveAppName(app, companyInfo)}</span>
-                </label>
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <ul className="app-access-list">
+            {APP_REGISTRY.filter((app) => isTenantAppEnabled(app.id, companyInfo?.enabledApps)).map((app) => {
+              const granted = grantedIds.has(app.id);
+              return (
+                <li key={app.id} className="app-access-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={granted}
+                      disabled={pendingAppId === app.id}
+                      onChange={() => void handleToggle(app.id, granted)}
+                    />
+                    <span className="app-access-icon" aria-hidden="true">
+                      {app.icon}
+                    </span>
+                    <span>{resolveAppName(app, companyInfo)}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+          {APP_REGISTRY.some((app) => !isTenantAppEnabled(app.id, companyInfo?.enabledApps)) ? (
+            <p className="admin-status">
+              Some apps are not shown — they aren't enabled for this organization.
+            </p>
+          ) : null}
+        </>
       )}
     </div>
   );

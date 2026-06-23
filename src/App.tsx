@@ -7,7 +7,7 @@ import { Shell } from "./components/Shell";
 import { LandingPage } from "./components/LandingPage";
 import { Launcher } from "./launcher/Launcher";
 import { AppStubPage } from "./apps/AppStubPage";
-import { getAppDef, resolveAppName } from "./apps/registry";
+import { getAppDef, isTenantAppEnabled, resolveAppName } from "./apps/registry";
 import { listAppAccessForUser } from "./storage/db";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { OperatorDashboard } from "./operator/OperatorDashboard";
@@ -57,6 +57,14 @@ function RequireAppAccess({ appId, children }: { appId: string; children: ReactN
       cancelled = true;
     };
   }, [appId, userId, isAdmin]);
+
+  // Tenant gate (synchronous): check before the async user gate.
+  // Admins do NOT bypass this — it's a platform-level policy set by the operator.
+  if (!isTenantAppEnabled(appId, companyInfo?.enabledApps)) {
+    const def = getAppDef(appId);
+    const name = def ? resolveAppName(def, companyInfo) : "that app";
+    return <Navigate to="/dashboard" replace state={{ tenantDisabled: name }} />;
+  }
 
   if (allowed === null) return <div className="boot-status">Checking access…</div>;
   if (!allowed) {

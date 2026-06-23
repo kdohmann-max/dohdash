@@ -49,4 +49,6 @@ export interface CompanyInfo {
   about: string;
   /** Optional display-name overrides keyed by APP_REGISTRY id, e.g. { tasks: "DohDocs" }. */
   appNames?: Record<string, string>;
+  /** APP_REGISTRY ids enabled for this tenant. Absent/undefined = all apps enabled (backward compat). */
+  enabledApps?: string[];
 }

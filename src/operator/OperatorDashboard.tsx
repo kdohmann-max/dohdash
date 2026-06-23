@@ -8,6 +8,7 @@ import {
   type TenantInput,
 } from "../storage/db";
 import type { CompanyInfo } from "../company/types";
+import { APP_REGISTRY } from "../apps/registry";
 import "./OperatorDashboard.css";
 
 // Platform-operator control plane: list every tenant, create one, edit its
@@ -229,6 +230,42 @@ function BrandingInputs({
   );
 }
 
+// ---- enabled apps ----
+
+function EnabledAppsEditor({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <ul className="operator-apps-list">
+      {APP_REGISTRY.map((app) => {
+        const checked = value.includes(app.id);
+        return (
+          <li key={app.id} className="operator-apps-row">
+            <label>
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => {
+                  if (checked) onChange(value.filter((id) => id !== app.id));
+                  else onChange([...value, app.id]);
+                }}
+              />
+              <span className="operator-apps-name">{app.name}</span>
+              {app.status === "stub" ? (
+                <span className="operator-apps-badge">coming soon</span>
+              ) : null}
+            </label>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 // ---- create ----
 
 function CreateTenantForm({
@@ -362,6 +399,9 @@ function TenantDetail({
   const [slug, setSlug] = useState(tenant.slug);
   const [customDomain, setCustomDomain] = useState(tenant.customDomain ?? "");
   const [branding, setBranding] = useState<BrandingFields>(() => brandingFromConfig(tenant.config));
+  const [enabledApps, setEnabledApps] = useState<string[]>(
+    () => tenant.config.enabledApps ?? APP_REGISTRY.map((a) => a.id),
+  );
   const [configJson, setConfigJson] = useState(() => JSON.stringify(tenant.config, null, 2));
   const [saving, setSaving] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -391,8 +431,8 @@ function TenantDetail({
     setLocalError(null);
     setSaved(false);
     try {
-      // Structured branding fields win over the raw JSON for the keys they own.
-      const config = applyBranding(base, branding);
+      // Structured fields win over the raw JSON for the keys they own.
+      const config = { ...applyBranding(base, branding), enabledApps };
       await updateTenant(tenant.id, {
         name: name.trim(),
         slug: s,
@@ -460,6 +500,14 @@ function TenantDetail({
       <section className="operator-section">
         <h3 className="operator-section-title">Branding</h3>
         <BrandingInputs value={branding} onChange={setBranding} />
+      </section>
+
+      <section className="operator-section">
+        <h3 className="operator-section-title">Enabled apps</h3>
+        <p className="operator-form-hint">
+          Only checked apps appear in this tenant's launcher and can be granted to users.
+        </p>
+        <EnabledAppsEditor value={enabledApps} onChange={setEnabledApps} />
       </section>
 
       <section className="operator-section">

@@ -153,3 +153,9 @@ export function getAppDef(appId: string): AppDef | undefined {
 export function resolveAppName(app: AppDef, companyInfo: CompanyInfo | null): string {
   return companyInfo?.appNames?.[app.id] ?? app.name;
 }
+
+/** True if the app is enabled for the tenant. Undefined/null enabledApps = all enabled (backward compat). */
+export function isTenantAppEnabled(appId: string, enabledApps?: string[] | null): boolean {
+  if (!enabledApps) return true;
+  return enabledApps.includes(appId);
+}

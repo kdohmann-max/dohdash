@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { listAppAccessForUser } from "../storage/db";
-import { APP_REGISTRY } from "../apps/registry";
+import { APP_REGISTRY, isTenantAppEnabled } from "../apps/registry";
 import { AppTile } from "./AppTile";
 import "./Launcher.css";
 
@@ -13,7 +14,10 @@ function errorMessage(err: unknown): string {
 export function Launcher() {
   const { state } = useAuth();
   const location = useLocation();
-  const deniedApp = (location.state as { deniedApp?: string } | null)?.deniedApp ?? null;
+  const { companyInfo } = useCompanyInfo();
+  const locState = location.state as { deniedApp?: string; tenantDisabled?: string } | null;
+  const deniedApp = locState?.deniedApp ?? null;
+  const tenantDisabled = locState?.tenantDisabled ?? null;
   const [grantedIds, setGrantedIds] = useState<Set<string> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +47,10 @@ export function Launcher() {
     <p className="launcher-status launcher-status--err">
       You don't have access to {deniedApp}. Ask your admin to grant it.
     </p>
+  ) : tenantDisabled ? (
+    <p className="launcher-status launcher-status--err">
+      {tenantDisabled} isn't available for your organization.
+    </p>
   ) : null;
 
   if (error) {
@@ -62,7 +70,9 @@ export function Launcher() {
     );
   }
 
-  const apps = APP_REGISTRY.filter((app) => grantedIds.has(app.id));
+  const apps = APP_REGISTRY.filter(
+    (app) => grantedIds.has(app.id) && isTenantAppEnabled(app.id, companyInfo?.enabledApps),
+  );
 
   if (apps.length === 0) {
     return (

@@ -388,6 +388,49 @@
   font-weight: var(--font-weight-heading);
 }
 
+/* ---- enabled apps checklist ---- */
+
+.operator-apps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.operator-apps-row label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
+  padding: var(--spacing-xs) 0;
+}
+
+.operator-apps-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.operator-apps-name {
+  flex: 1;
+}
+
+.operator-apps-badge {
+  font-size: 0.7rem;
+  font-family: var(--font-heading);
+  color: var(--muted);
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  padding: 1px 5px;
+}
+
 /* "required" badge next to a step title. */
 .operator-req {
   display: inline-block;
