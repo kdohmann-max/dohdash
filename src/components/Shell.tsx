@@ -13,8 +13,9 @@ export function Shell() {
   const { state, signOut } = useAuth();
   const appMatch = useMatch("/dashboard/app/:appId");
   const adminMatch = useMatch("/dashboard/admin");
+  const operatorMatch = useMatch("/dashboard/operator");
 
-  const isLauncher = !appMatch && !adminMatch;
+  const isLauncher = !appMatch && !adminMatch && !operatorMatch;
 
   let appName: string | null = null;
   if (appMatch?.params.appId) {
@@ -22,6 +23,8 @@ export function Shell() {
     appName = appDef ? resolveAppName(appDef, companyInfo ?? null) : appMatch.params.appId;
   } else if (adminMatch) {
     appName = "Admin";
+  } else if (operatorMatch) {
+    appName = "Operator";
   }
 
   // AuthGate only mounts <Outlet/> (and therefore Shell) in the
@@ -46,6 +49,11 @@ export function Shell() {
               {profile.role === "admin" ? (
                 <NavLink to="/dashboard/admin" className={navLinkClass}>
                   Admin
+                </NavLink>
+              ) : null}
+              {profile.superAdmin ? (
+                <NavLink to="/dashboard/operator" className={navLinkClass}>
+                  Operator
                 </NavLink>
               ) : null}
             </nav>

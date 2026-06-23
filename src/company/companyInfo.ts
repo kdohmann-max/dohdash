@@ -29,6 +29,8 @@ export function applyCompanyTheme(info: CompanyInfo): void {
   root.setProperty("--muted", colors.muted);
   root.setProperty("--accent", colors.accent);
   root.setProperty("--accent-soft", colors.accentSoft);
+  root.setProperty("--accent-secondary", colors.accentSecondary);
+  root.setProperty("--accent-tertiary", colors.accentTertiary);
   root.setProperty("--error", colors.error);
   root.setProperty("--dark-bg", colors.darkBg);
   root.setProperty("--dark-bg-alt", colors.darkBgAlt);
@@ -37,6 +39,8 @@ export function applyCompanyTheme(info: CompanyInfo): void {
   root.setProperty("--dark-muted", colors.darkMuted);
   root.setProperty("--dark-accent", colors.darkAccent);
   root.setProperty("--dark-accent-soft", colors.darkAccentSoft);
+  root.setProperty("--dark-accent-secondary", colors.darkAccentSecondary);
+  root.setProperty("--dark-accent-tertiary", colors.darkAccentTertiary);
   root.setProperty("--dark-error", colors.darkError);
 
   root.setProperty("--font-display", typography.display.fontFamily);

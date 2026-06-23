@@ -14,6 +14,8 @@ export interface ColorPalette {
   muted: string;
   accent: string;
   accentSoft: string;
+  accentSecondary: string;
+  accentTertiary: string;
   darkBg: string;
   darkBgAlt: string;
   darkBorder: string;
@@ -21,6 +23,8 @@ export interface ColorPalette {
   darkMuted: string;
   darkAccent: string;
   darkAccentSoft: string;
+  darkAccentSecondary: string;
+  darkAccentTertiary: string;
   darkError: string;
   error: string;
 }

@@ -10,6 +10,7 @@ import { AppStubPage } from "./apps/AppStubPage";
 import { getAppDef, resolveAppName } from "./apps/registry";
 import { listAppAccessForUser } from "./storage/db";
 import { AdminDashboard } from "./admin/AdminDashboard";
+import { OperatorDashboard } from "./operator/OperatorDashboard";
 import "./App.css";
 
 // AuthGate guarantees "authenticated" before this can mount.
@@ -18,6 +19,15 @@ function AdminRoute() {
   if (state.status !== "authenticated") return null;
   if (state.profile.role !== "admin") return <Navigate to="/dashboard" replace />;
   return <AdminDashboard />;
+}
+
+// Platform-operator control plane — gated by the super_admin flag (cross-tenant),
+// distinct from the per-tenant admin role above.
+function OperatorRoute() {
+  const { state } = useAuth();
+  if (state.status !== "authenticated") return null;
+  if (!state.profile.superAdmin) return <Navigate to="/dashboard" replace />;
+  return <OperatorDashboard />;
 }
 
 // Coarse "open-this-app" gate (app_access). RLS still protects data, but this
@@ -89,6 +99,7 @@ function AppInner() {
           <Route element={<Shell />}>
             <Route index element={<Launcher />} />
             <Route path="admin" element={<AdminRoute />} />
+            <Route path="operator" element={<OperatorRoute />} />
             <Route path="app/:appId" element={<AppRoute />} />
           </Route>
         </Route>

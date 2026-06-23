@@ -12,6 +12,8 @@ export interface Profile {
   role: Role;
   createdAt: number;
   tenantId: string;
+  /** Platform operator flag (cross-tenant). Gates the Operator control plane. */
+  superAdmin: boolean;
 }
 
 interface ProfileRow {
@@ -22,6 +24,7 @@ interface ProfileRow {
   role: Role;
   created_at: number;
   tenant_id: string;
+  super_admin: boolean;
 }
 
 function profileRowToProfile(row: ProfileRow): Profile {
@@ -33,6 +36,7 @@ function profileRowToProfile(row: ProfileRow): Profile {
     role: row.role,
     createdAt: row.created_at,
     tenantId: row.tenant_id,
+    superAdmin: row.super_admin ?? false,
   };
 }
 

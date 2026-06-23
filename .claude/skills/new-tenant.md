@@ -10,6 +10,13 @@ Onboard a new customer onto the shared multi-tenant DohDash platform (one Vercel
 deploy + one Supabase project serve all tenants). All required knowledge is
 pre-baked here — do **NOT** grep the codebase or read migrations.
 
+> **Prefer the in-app Operator panel.** A super admin (`profiles.super_admin`) can
+> now create tenants, edit branding, and provision the first admin from
+> `/dashboard/operator` (no SQL). Use this skill only as the fallback when the
+> panel isn't usable — e.g. seeding the very first super admin, or recovery. The
+> panel performs the same steps; the go-live URL/OAuth checklist below still
+> applies either way.
+
 ## Goal
 
 Produce a copy-paste-ready SQL block (for the Supabase SQL editor) plus a short

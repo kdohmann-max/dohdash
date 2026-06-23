@@ -1,0 +1,347 @@
+/* Operator control plane — scoped under .operator. Flow-scroll app: the root
+   owns its padding (shell-content provides none). Mirrors the GroupsPanel
+   left-list / right-detail layout. */
+
+.operator {
+  padding: var(--spacing-xl);
+}
+
+.operator h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-display);
+  color: var(--text);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.operator-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.operator-error {
+  color: var(--error);
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.operator-status {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.operator-body {
+  display: flex;
+  gap: var(--spacing-lg);
+  min-height: 400px;
+}
+
+.operator-left {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding-right: var(--spacing-lg);
+}
+
+.operator-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.operator-list-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.operator-new-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--rounded-sm);
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.operator-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.operator-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: var(--spacing-sm) 0;
+}
+
+.operator-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--rounded-sm);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.operator-list-item:hover {
+  background: var(--accent-soft);
+}
+
+.operator-list-item.active {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+}
+
+.operator-list-name {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.operator-list-slug {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.operator-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.operator-no-selection {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: var(--spacing-lg);
+}
+
+.operator-detail-name {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 1.3rem;
+  color: var(--text);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.operator-fields {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin: 0;
+}
+
+.operator-fields dt {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.operator-fields dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.operator-muted {
+  color: var(--muted);
+}
+
+.operator-url {
+  color: var(--accent-secondary);
+  text-decoration: none;
+}
+
+.operator-url:hover {
+  text-decoration: underline;
+}
+
+/* ---- Phase 3: create / edit forms ---- */
+
+.operator-form {
+  max-width: 560px;
+}
+
+.operator-section {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.operator-section:last-child {
+  border-bottom: none;
+}
+
+.operator-section-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.operator-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.operator-field > span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.operator-field input,
+.operator-json {
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.operator-field input:focus,
+.operator-json:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.operator-color-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.operator-color-row input[type="color"] {
+  width: 40px;
+  padding: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.operator-json {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.operator-form-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.operator-form-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.operator-primary-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-heading);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.operator-primary-btn:hover {
+  opacity: 0.9;
+}
+
+.operator-primary-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.operator-secondary-btn {
+  background: transparent;
+  color: var(--accent-secondary);
+  border: 1.5px solid var(--accent-secondary);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.operator-secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.operator-link-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.operator-saved {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.operator-success {
+  color: var(--accent-secondary);
+  font-size: 0.85rem;
+  margin: var(--spacing-sm) 0 0 0;
+}
+
+.operator-provision-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.operator-provision-row input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+  padding: var(--spacing-sm);
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 0;
+}
+
+.operator-checklist ol {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.operator-checklist code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--bg-alt);
+  padding: 1px 4px;
+  border-radius: var(--rounded-sm);
+}

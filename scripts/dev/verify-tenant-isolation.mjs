@@ -116,5 +116,52 @@ const { data: ownNote } = await built.client.from("notes").select("id").eq("id",
 if ((ownNote?.length ?? 0) !== 1) fail("built user cannot see its own note (over-restrictive)");
 else ok("built user sees its own note");
 
+// ---- Operator control plane (migration 0024) ----
+// A non-super-admin must not read the tenants registry nor call the operator RPCs;
+// a super admin must, and must provision into the TARGET tenant, not their own.
+console.log("\nOperator control plane (super_admin gate):");
+
+// 1. Non-super-admin cannot read the tenants table (RLS: super-admin SELECT only).
+const { data: tenantRows } = await acme.client.from("tenants").select("id");
+if ((tenantRows?.length ?? 0) !== 0) fail(`non-super-admin read ${tenantRows.length} tenants row(s)`);
+else ok("non-super-admin sees 0 tenants rows");
+
+// 2. Non-super-admin calling the provision RPC is rejected.
+const rpcDenied = await acme.client.rpc("super_admin_provision_first_admin", {
+  p_tenant_id: builtId,
+  p_email: "should-not-work@test.local",
+});
+if (!rpcDenied.error) fail("non-super-admin was allowed to call super_admin_provision_first_admin");
+else ok("non-super-admin provision RPC rejected");
+
+// 3. Promote the acme user to super_admin, then assert they CAN read tenants and
+//    that provisioning stamps the TARGET tenant (built), not the caller's (acme).
+await admin.from("profiles").update({ super_admin: true }).eq("id", acme.userId);
+const PROVISIONED = "operator-provision-target@test.local";
+await admin.from("pending_profiles").delete().eq("email", PROVISIONED); // idempotent
+const rpcOk = await acme.client.rpc("super_admin_provision_first_admin", {
+  p_tenant_id: builtId,
+  p_email: PROVISIONED,
+});
+if (rpcOk.error) fail(`super admin provision RPC errored (${rpcOk.error.message})`);
+else {
+  const { data: pending } = await admin
+    .from("pending_profiles")
+    .select("tenant_id, role")
+    .eq("email", PROVISIONED)
+    .single();
+  if (!pending) fail("super admin provision did not create a pending row");
+  else if (pending.tenant_id !== builtId)
+    fail(`provisioned row stamped wrong tenant (${pending.tenant_id}, expected built ${builtId})`);
+  else if (pending.role !== "admin") fail(`provisioned row role is '${pending.role}', expected admin`);
+  else ok("super admin provisioned a pending admin stamped with the TARGET tenant");
+}
+const { data: tenantRows2 } = await acme.client.from("tenants").select("id");
+if ((tenantRows2?.length ?? 0) === 0) fail("super admin cannot read tenants (over-restrictive)");
+else ok("super admin can read the tenants registry");
+// Reset the promotion so reruns start from a clean non-super-admin state.
+await admin.from("profiles").update({ super_admin: false }).eq("id", acme.userId);
+await admin.from("pending_profiles").delete().eq("email", PROVISIONED);
+
 console.log(failures === 0 ? "\nPASS: no cross-tenant leaks.\n" : `\nFAIL: ${failures} leak(s).\n`);
 process.exit(failures === 0 ? 0 : 1);

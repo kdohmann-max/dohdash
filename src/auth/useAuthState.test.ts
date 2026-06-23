@@ -22,6 +22,7 @@ function fakeProfile(): Profile {
     role: "member",
     createdAt: 0,
     tenantId: "tenant-built",
+    superAdmin: false,
   };
 }
 

@@ -84,9 +84,38 @@ URL/OAuth-redirect checklist). The key facts the skill encodes:
   `*.dohdash.app` subdomain), then add `https://<their-domain>/**` to Supabase
   Auth redirect URLs and register the origin + redirect URI in Google OAuth.
 
+## Operator control plane (super admin panel) — built
+
+`src/operator/OperatorDashboard.tsx` (+ `.css`), route `/dashboard/operator` guarded
+by `OperatorRoute` (App.tsx) on `profile.superAdmin`; Shell shows a gated "Operator"
+nav link. The platform operator manages tenants from their OWN host
+(`built.dohdash.app`) — no auth-guard change (it reaches other tenants' rows via
+super-admin RLS, never assumes their session). Migration `0024`:
+
+- **`is_super_admin()`** — `SECURITY DEFINER` helper mirroring `is_admin()`, reads
+  `profiles.super_admin`; seeds `super_admin = true` on `kdohmann@gmail.com`.
+- **RLS on `tenants`** — super-admin SELECT/INSERT/UPDATE (no DELETE; deletion is
+  out of scope). `tenants` is the cross-tenant registry, so it is super-admin-gated,
+  **not** `current_tenant_id()`-gated (documented Template-B exception). The anon
+  `get_tenant_*` RPCs are unaffected (they bypass RLS).
+- **`super_admin_provision_first_admin(p_tenant_id, p_email)`** — the only path that
+  stamps a *foreign* tenant_id onto a `pending_profiles` row (checks `is_super_admin()`;
+  `handle_new_user` promotes the admin pending row on first sign-in). No audit write
+  (would mis-stamp the operator's tenant).
+- **Storage**: `tenants.ts` adds `Tenant` + `listTenants`/`createTenant`/`updateTenant`/
+  `provisionFirstAdmin`; `Profile.superAdmin` added.
+- **UI**: tenant list + detail; create clones the live `built` config and overlays
+  structured branding (identity + `accent`/`accentSecondary` pickers); edit is hybrid
+  (structured fields + validated raw-JSON `config` box; structured fields win their
+  keys). Inline go-live checklist (URL + Supabase redirect URL + Google OAuth) for the
+  steps the UI can't do. Replaces the manual-SQL `/new-tenant` skill (now a fallback).
+  Per-tenant **app toggling is NOT here** — that's the separate two-gate model (#2).
+- Shipped alongside: `applyCompanyTheme()` now writes `--accent-secondary`/
+  `--accent-tertiary` (+ dark variants) — previously hardcoded in `index.css` and
+  ignored per-tenant; `ColorPalette` type completed to match the real config shape.
+
 ## What still needs building (multi-tenancy roadmap)
 
-- **Super admin panel** (`profiles.super_admin = true` gates it; column exists, unused): cross-tenant tenant list, create tenant (name/slug/branding config), provision first admin cross-tenant, set/update `custom_domain`. The cross-tenant provision RPC would check `super_admin` instead of `is_admin()` and accept an explicit `p_tenant_id` arg.
 - **`dohdash.app` domain registration**: buy the domain → add `dohdash.app` + `*.dohdash.app` in Vercel → DNS records at registrar (A `@` → `76.76.21.21`, CNAME `*` → `cname.vercel-dns.com`) → update Supabase Auth redirect URLs to `https://*.dohdash.app/**` → add origins/redirects in Google OAuth → update `built` tenant `custom_domain` to `built.dohdash.app` (and remove `dohdash.vercel.app` mapping from 0022).
 - **Wildcard subdomains** (`*.dohdash.app`): once domain is registered, each tenant gets `<slug>.dohdash.app` automatically — Vercel wildcard + `split_part` SQL already handles it, no code changes needed.
 - **Tenant branding editor**: UI for a tenant's own admin to update their `config` JSON (colors, company name, logo) without needing SQL access.
