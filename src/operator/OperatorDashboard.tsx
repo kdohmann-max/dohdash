@@ -506,29 +506,128 @@ function TenantDetail({
         {provisionMsg ? <p className="operator-success">{provisionMsg}</p> : null}
       </section>
 
-      <OnboardingChecklist url={url} slug={slug.trim() || tenant.slug} />
+      <OnboardingChecklist
+        url={url}
+        slug={slug.trim() || tenant.slug}
+        customDomain={customDomain.trim() || null}
+      />
     </div>
   );
 }
 
-// The steps SQL/UI can't do for you — DNS + OAuth wiring per tenant.
-function OnboardingChecklist({ url, slug }: { url: string; slug: string }) {
+// The shared Supabase OAuth callback (one for the whole platform — derived from
+// the project URL so it stays correct if the project is ever swapped).
+const SUPABASE_CALLBACK = `${import.meta.env.VITE_SUPABASE_URL ?? "https://<project>.supabase.co"}/auth/v1/callback`;
+
+// The steps DohDash can't do for you — DNS + OAuth wiring per tenant. Branches on
+// whether the tenant uses a mapped custom domain or a *.dohdash.app subdomain,
+// because the DNS step differs. Steps 2 & 3 are required for sign-in to work.
+function OnboardingChecklist({
+  url,
+  slug,
+  customDomain,
+}: {
+  url: string;
+  slug: string;
+  customDomain: string | null;
+}) {
+  const isApex = customDomain ? !customDomain.includes(".", customDomain.indexOf(".") + 1) : false;
   return (
     <section className="operator-section operator-checklist">
       <h3 className="operator-section-title">Go-live checklist (manual)</h3>
-      <ol>
-        <li>
-          Make <code>{url}</code> reachable — map it in Vercel (custom domain) or rely on{" "}
-          <code>{slug}.dohdash.app</code> once that domain is live.
-        </li>
-        <li>
-          Supabase → Auth → URL Configuration → add redirect URL <code>{url}/**</code>.
-        </li>
-        <li>Google Cloud Console → OAuth credentials → add the origin + redirect URI for this domain.</li>
-      </ol>
       <p className="operator-form-hint">
-        Sign-in fails until the redirect URL + OAuth origin are registered.
+        These three steps happen outside DohDash. The customer can't sign in until steps 2 and 3 are
+        done. Test at the end by opening <code>{url}</code> in a private window.
       </p>
+
+      <ol className="operator-steps">
+        <li>
+          <strong>Point the URL at DohDash</strong>
+          {customDomain ? (
+            <ul>
+              <li>
+                Vercel → the DohDash project → <em>Settings → Domains</em> → add{" "}
+                <code>{customDomain}</code>.
+              </li>
+              <li>
+                At the domain's DNS provider, add the record Vercel shows:
+                <ul>
+                  {isApex ? (
+                    <li>
+                      Apex domain — <code>A</code> record, host <code>@</code>, value{" "}
+                      <code>76.76.21.21</code>.
+                    </li>
+                  ) : (
+                    <li>
+                      Subdomain — <code>CNAME</code> record pointing to{" "}
+                      <code>cname.vercel-dns.com</code>.
+                    </li>
+                  )}
+                </ul>
+              </li>
+              <li>
+                Wait until Vercel shows <em>Valid Configuration</em> and issues the SSL certificate
+                (usually a few minutes, up to ~1 hour for DNS).
+              </li>
+            </ul>
+          ) : (
+            <ul>
+              <li>
+                This tenant uses its subdomain <code>{slug}.dohdash.app</code>. Once the{" "}
+                <code>*.dohdash.app</code> wildcard domain is live in Vercel, the subdomain resolves
+                automatically — no per-tenant DNS.
+              </li>
+              <li>
+                <code>dohdash.app</code> isn't registered yet — until it is, either map a custom domain
+                above, or set <code>VITE_DEV_TENANT_SLUG={slug}</code> in <code>.env.local</code> to test
+                locally at <code>localhost:5173</code>.
+              </li>
+            </ul>
+          )}
+        </li>
+
+        <li>
+          <strong>Allow the redirect in Supabase</strong>
+          <span className="operator-req">required</span>
+          <ul>
+            <li>
+              Supabase Dashboard → the DohDash project → <em>Authentication → URL Configuration</em>.
+            </li>
+            <li>
+              Under <em>Redirect URLs</em>, click <em>Add URL</em> and enter <code>{url}/**</code>. The{" "}
+              <code>/**</code> wildcard covers the post-login callback path.
+            </li>
+            <li>
+              For <code>*.dohdash.app</code> subdomains you can instead add{" "}
+              <code>https://*.dohdash.app/**</code> once, covering every subdomain tenant.
+            </li>
+            <li>Click <em>Save</em>.</li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Authorize the domain in Google</strong>
+          <span className="operator-req">required</span>
+          <ul>
+            <li>
+              Google Cloud Console → <em>APIs &amp; Services → Credentials</em> → the DohDash OAuth 2.0
+              Client ID.
+            </li>
+            <li>
+              Under <em>Authorized JavaScript origins</em>, add <code>{url}</code> (origin only, no
+              path).
+            </li>
+            <li>
+              Under <em>Authorized redirect URIs</em>, confirm the shared Supabase callback is present
+              (add it only if missing — it's the same for every tenant):{" "}
+              <code>{SUPABASE_CALLBACK}</code>.
+            </li>
+            <li>
+              Click <em>Save</em>. Google changes can take 5 minutes to a few hours to take effect.
+            </li>
+          </ul>
+        </li>
+      </ol>
     </section>
   );
 }

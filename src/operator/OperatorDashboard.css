@@ -330,7 +330,7 @@
   min-width: 0;
 }
 
-.operator-checklist ol {
+.operator-steps {
   margin: 0;
   padding-left: var(--spacing-lg);
   font-size: 0.85rem;
@@ -338,10 +338,56 @@
   line-height: 1.6;
 }
 
+/* Top-level steps get breathing room; the numbered title sits on its own line. */
+.operator-steps > li {
+  margin-bottom: var(--spacing-lg);
+}
+
+.operator-steps > li:last-child {
+  margin-bottom: 0;
+}
+
+.operator-steps strong {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+}
+
+/* Nested sub-steps: lighter, tighter, no numbers. */
+.operator-steps ul {
+  list-style: disc;
+  margin: var(--spacing-xs) 0 0 0;
+  padding-left: var(--spacing-lg);
+  color: var(--muted);
+}
+
+.operator-steps ul code,
 .operator-checklist code {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   background: var(--bg-alt);
+  color: var(--text);
   padding: 1px 4px;
   border-radius: var(--rounded-sm);
+  word-break: break-all;
+}
+
+.operator-steps em {
+  font-style: normal;
+  color: var(--text);
+  font-weight: var(--font-weight-heading);
+}
+
+/* "required" badge next to a step title. */
+.operator-req {
+  display: inline-block;
+  margin-left: var(--spacing-sm);
+  padding: 0 6px;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bg);
+  background: var(--accent-secondary);
+  border-radius: var(--rounded-sm);
+  vertical-align: middle;
 }
