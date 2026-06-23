@@ -89,6 +89,7 @@ agents by name). Two cross-cutting rules that aren't visible in any single file:
 @public/CompanyInfo.md
 @.claude/context/styleguide.md
 @.claude/context/dohdash.md
+@.claude/context/operator-control-plane.md
 @.claude/context/tasks.md
 @.claude/context/chicken-scratch.md
 @.claude/context/fraction-calculator.md
