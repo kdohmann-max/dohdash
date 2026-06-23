@@ -33,6 +33,24 @@ export function AuthGate() {
       return <div className="boot-status">Loading…</div>;
     case "signed-out":
       return <LoginPage />;
+    case "wrong-tenant":
+      return (
+        <div className="auth-screen">
+          <div className="auth-card">
+            <h1>Wrong workspace</h1>
+            <p className="muted">
+              You're signed in as <strong>{state.session.user.email}</strong>, but that account isn't a
+              member of this workspace. Each DohDash account belongs to one company — sign out and sign
+              back in with an account for this workspace.
+            </p>
+            <div className="auth-actions">
+              <button className="auth-button" onClick={() => void signOut()}>
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      );
     case "pending-access":
       return <PendingAccessPage />;
     case "authenticated":

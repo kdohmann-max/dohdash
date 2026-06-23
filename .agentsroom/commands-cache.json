@@ -1,0 +1,22 @@
+{
+  "data": {
+    "folders": [],
+    "commands": [
+      {
+        "id": "cmd-1781315940163-ajnyyv",
+        "name": "Terminal",
+        "command": "",
+        "cwd": ".",
+        "kind": "process",
+        "category": "other",
+        "folderId": null,
+        "autoExec": true,
+        "position": 0,
+        "createdAt": "2026-06-13T01:59:00.163Z"
+      }
+    ]
+  },
+  "updatedAt": null,
+  "dirty": true,
+  "projectId": "proj-1781315939986-kidz63"
+}

@@ -1,0 +1,27 @@
+{
+  "data": [
+    {
+      "id": "agent-1781315939986-fydq9x",
+      "role": "fullstack",
+      "model": "opus",
+      "position": 1781315939986,
+      "lastOpenedAt": 1781315969191
+    },
+    {
+      "id": "agent-1781315939987-uxe4yj",
+      "role": "qa",
+      "model": "sonnet",
+      "browserAccess": true,
+      "position": 1781315939987
+    },
+    {
+      "role": "frontend",
+      "model": "opus",
+      "isPersonal": false,
+      "id": "agent-1781316062847-3pxz52"
+    }
+  ],
+  "updatedAt": null,
+  "dirty": true,
+  "projectId": "proj-1781315939986-kidz63"
+}

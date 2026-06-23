@@ -313,6 +313,17 @@
   margin: var(--spacing-sm) 0 0 0;
 }
 
+.operator-warn {
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--rounded-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.5;
+}
+
 .operator-provision-row {
   display: flex;
   gap: var(--spacing-sm);

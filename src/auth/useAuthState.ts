@@ -5,6 +5,10 @@ import { supabase, getProfile, getTenantIdForHost, type Profile } from "../stora
 export type AuthState =
   | { status: "loading" }
   | { status: "signed-out" }
+  // Signed in, but the account belongs to a different tenant than this host
+  // serves — a real session exists, so this is distinct from "signed-out" (which
+  // would just show the login button and loop them through the same mismatch).
+  | { status: "wrong-tenant"; session: Session }
   | { status: "pending-access"; session: Session }
   | { status: "authenticated"; session: Session; profile: Profile }
   | { status: "error"; message: string };
@@ -33,9 +37,11 @@ export function deriveAuthState(
   switch (outcome.kind) {
     case "found":
       // User belongs to a different tenant than this host → they aren't a
-      // member here. Treat as signed-out for this host.
+      // member here. Surface a distinct "wrong-tenant" state (not signed-out) so
+      // the UI can explain it and offer sign-out, instead of silently looping
+      // them back through the login button with the same account.
       if (expectedTenantId !== null && outcome.profile.tenantId !== expectedTenantId) {
-        return { status: "signed-out" };
+        return { status: "wrong-tenant", session };
       }
       return { status: "authenticated", session, profile: outcome.profile };
     case "not-found":

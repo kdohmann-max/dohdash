@@ -68,11 +68,12 @@ describe("deriveAuthState", () => {
     });
   });
 
-  test("profile from a different tenant than the host -> signed-out", () => {
+  test("profile from a different tenant than the host -> wrong-tenant (not signed-out)", () => {
     const session = fakeSession();
     const profile = fakeProfile(); // tenantId: "tenant-built"
     expect(deriveAuthState(session, { kind: "found", profile }, "tenant-acme")).toEqual({
-      status: "signed-out",
+      status: "wrong-tenant",
+      session,
     });
   });
 

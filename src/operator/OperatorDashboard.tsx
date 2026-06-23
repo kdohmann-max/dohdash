@@ -489,6 +489,12 @@ function TenantDetail({
         <p className="operator-form-hint">
           Invite this tenant's first admin by email. They can then manage their own users in-app.
         </p>
+        <p className="operator-warn">
+          ⚠ Use a Google account that has <strong>never signed into DohDash before</strong>. Each
+          account belongs to one workspace, and the invite only activates on a brand-new account's first
+          sign-in — inviting an email that already has a DohDash account elsewhere will silently fail to
+          let them in here.
+        </p>
         <div className="operator-provision-row">
           <input
             value={adminEmail}
