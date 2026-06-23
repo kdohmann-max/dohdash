@@ -111,3 +111,21 @@ export async function provisionFirstAdmin(tenantId: string, email: string): Prom
   });
   if (error) throw error;
 }
+
+// Adds the tenant's domain to Supabase's allowed redirect URL list via the
+// register-tenant-domain Edge Function (requires SUPABASE_ACCESS_TOKEN secret).
+// Returns { added: true } on success, { alreadyPresent: true } if already registered.
+export async function registerTenantDomain(
+  domain: string,
+): Promise<{ added?: boolean; alreadyPresent?: boolean; redirectUrl?: string }> {
+  const { data, error } = await supabase.functions.invoke("register-tenant-domain", {
+    body: { domain },
+  });
+  if (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(msg);
+  }
+  const result = data as { error?: string; added?: boolean; alreadyPresent?: boolean; redirectUrl?: string };
+  if (result.error) throw new Error(result.error);
+  return result;
+}

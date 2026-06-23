@@ -4,6 +4,7 @@ import {
   createTenant,
   updateTenant,
   provisionFirstAdmin,
+  registerTenantDomain,
   type Tenant,
   type TenantInput,
 } from "../storage/db";
@@ -232,6 +233,7 @@ function BrandingInputs({
 
 // ---- enabled apps ----
 
+// Stub apps are shown so the operator can pre-enable them before they ship.
 function EnabledAppsEditor({
   value,
   onChange,
@@ -573,9 +575,12 @@ function TenantDetail({
 // the project URL so it stays correct if the project is ever swapped).
 const SUPABASE_CALLBACK = `${import.meta.env.VITE_SUPABASE_URL ?? "https://<project>.supabase.co"}/auth/v1/callback`;
 
-// The steps DohDash can't do for you — DNS + OAuth wiring per tenant. Branches on
-// whether the tenant uses a mapped custom domain or a *.dohdash.app subdomain,
-// because the DNS step differs. Steps 2 & 3 are required for sign-in to work.
+type RegState = "idle" | "registering" | "done" | "already" | "error";
+
+// Go-live checklist: DNS + OAuth wiring per tenant. Step 2 (Supabase redirect
+// URL) is automated via the Management API. Step 3 (Google origin) is manual
+// but surfaces a one-click copy. Branches on custom domain vs subdomain for
+// the DNS step.
 function OnboardingChecklist({
   url,
   slug,
@@ -585,12 +590,42 @@ function OnboardingChecklist({
   slug: string;
   customDomain: string | null;
 }) {
+  const [regState, setRegState] = useState<RegState>("idle");
+  const [regError, setRegError] = useState<string | null>(null);
+  const [copiedOrigin, setCopiedOrigin] = useState(false);
+  const [copiedCallback, setCopiedCallback] = useState(false);
+
+  // Reset registration state whenever the tenant URL changes.
+  useEffect(() => {
+    setRegState("idle");
+    setRegError(null);
+  }, [url]);
+
+  async function handleRegister() {
+    setRegState("registering");
+    setRegError(null);
+    try {
+      const result = await registerTenantDomain(url);
+      setRegState(result.alreadyPresent ? "already" : "done");
+    } catch (err) {
+      setRegState("error");
+      setRegError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async function copyText(text: string, setCopied: (v: boolean) => void) {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   const isApex = customDomain ? !customDomain.includes(".", customDomain.indexOf(".") + 1) : false;
+
   return (
     <section className="operator-section operator-checklist">
-      <h3 className="operator-section-title">Go-live checklist (manual)</h3>
+      <h3 className="operator-section-title">Go-live checklist</h3>
       <p className="operator-form-hint">
-        These three steps happen outside DohDash. The customer can't sign in until steps 2 and 3 are
+        Step 2 is automated. Steps 1 and 3 are manual. The customer can't sign in until all three are
         done. Test at the end by opening <code>{url}</code> in a private window.
       </p>
 
@@ -643,19 +678,34 @@ function OnboardingChecklist({
         <li>
           <strong>Allow the redirect in Supabase</strong>
           <span className="operator-req">required</span>
+          <div className="operator-register-row">
+            {regState === "done" || regState === "already" ? (
+              <span className="operator-success operator-register-ok">
+                {regState === "done"
+                  ? `✓ Registered ${url}/**`
+                  : `✓ Already registered`}
+              </span>
+            ) : (
+              <button
+                className="operator-secondary-btn operator-register-btn"
+                disabled={regState === "registering"}
+                onClick={() => void handleRegister()}
+              >
+                {regState === "registering" ? "Registering…" : "Register in Supabase"}
+              </button>
+            )}
+            {regState === "error" && regError ? (
+              <p className="operator-error operator-register-error">{regError}</p>
+            ) : null}
+          </div>
           <ul>
             <li>
-              Supabase Dashboard → the DohDash project → <em>Authentication → URL Configuration</em>.
+              This adds <code>{url}/**</code> to the project's allowed redirect URLs automatically.
             </li>
             <li>
-              Under <em>Redirect URLs</em>, click <em>Add URL</em> and enter <code>{url}/**</code>. The{" "}
-              <code>/**</code> wildcard covers the post-login callback path.
+              If the button fails, do it manually: Supabase Dashboard → <em>Authentication → URL
+              Configuration → Redirect URLs → Add URL</em> → enter <code>{url}/**</code> → Save.
             </li>
-            <li>
-              For <code>*.dohdash.app</code> subdomains you can instead add{" "}
-              <code>https://*.dohdash.app/**</code> once, covering every subdomain tenant.
-            </li>
-            <li>Click <em>Save</em>.</li>
           </ul>
         </li>
 
@@ -668,13 +718,29 @@ function OnboardingChecklist({
               Client ID.
             </li>
             <li>
-              Under <em>Authorized JavaScript origins</em>, add <code>{url}</code> (origin only, no
-              path).
+              Under <em>Authorized JavaScript origins</em>, add:
+              <span className="operator-copy-row">
+                <code>{url}</code>
+                <button
+                  className="operator-copy-btn"
+                  onClick={() => void copyText(url, setCopiedOrigin)}
+                >
+                  {copiedOrigin ? "Copied!" : "Copy"}
+                </button>
+              </span>
             </li>
             <li>
               Under <em>Authorized redirect URIs</em>, confirm the shared Supabase callback is present
-              (add it only if missing — it's the same for every tenant):{" "}
-              <code>{SUPABASE_CALLBACK}</code>.
+              (add it only if missing — it's the same for every tenant):
+              <span className="operator-copy-row">
+                <code>{SUPABASE_CALLBACK}</code>
+                <button
+                  className="operator-copy-btn"
+                  onClick={() => void copyText(SUPABASE_CALLBACK, setCopiedCallback)}
+                >
+                  {copiedCallback ? "Copied!" : "Copy"}
+                </button>
+              </span>
             </li>
             <li>
               Click <em>Save</em>. Google changes can take 5 minutes to a few hours to take effect.

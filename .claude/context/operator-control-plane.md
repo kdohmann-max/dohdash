@@ -77,9 +77,16 @@ owns `padding`). Sections:
   *current* full `CompanyInfo` shape — never a hand-written template (same rule the
   `/new-tenant` skill encodes).
 - **Edit** (`TenantDetail`): Identity (name/slug/custom_domain + resolved URL),
-  Branding, and a **hybrid config editor**:
+  Branding, **Enabled apps**, and a **hybrid config editor**:
   - Structured fields for the keys that actually vary per tenant — company/dashboard
     name, admin contact, logo, and `accent` + `accentSecondary` color pickers.
+  - **Enabled apps** (`EnabledAppsEditor`): checkbox list of all `APP_REGISTRY` entries.
+    Defaults to all checked for tenants without an existing `enabledApps` key (backward
+    compat). Stub apps shown so the operator can pre-enable them before they ship.
+    On save, `config.enabledApps` is written as a structured field (wins over raw JSON).
+    Enforcement: `isTenantAppEnabled()` in `registry.tsx` gates the launcher filter,
+    `RequireAppAccess` in `App.tsx` (synchronous, admins do NOT bypass), and the
+    Admin App Access panel (hides disabled apps + shows a note).
   - A validated **raw-JSON `config` box** for everything else (parsed before save;
     save blocked on invalid JSON). Structured fields win their keys on save.
   - **No spacing/radius/typography fields** — design-system identity, not branding
@@ -144,6 +151,24 @@ Manual, outside DohDash (still required — the panel surfaces these as a checkl
 - **`test`** (Test Corp, tenant #2) — `https://test.dohdash.vercel.app` (resolves by
   slug; no custom_domain). Onboarded entirely via the panel + validated end-to-end.
 
+## Supabase redirect URL automation (shipped)
+
+The **`register-tenant-domain` Edge Function** (`supabase/functions/register-tenant-domain/index.ts`)
+calls the Supabase Management API to add `{url}/**` to the project's allowed redirect URLs.
+The operator panel's go-live checklist now has a **"Register in Supabase"** button for step 2 —
+one click, shows ✓ / "Already registered" / error.
+
+- Requires one-time secret: `SUPABASE_ACCESS_TOKEN` — a Supabase Personal Access Token from
+  `supabase.com/dashboard/account/tokens`. Set it with:
+  `supabase secrets set SUPABASE_ACCESS_TOKEN=<pat>`
+- Deploy the function: `supabase functions deploy register-tenant-domain`
+- The project ref is derived at runtime from `SUPABASE_URL`; no extra config needed.
+- Idempotent: re-clicking "Register" on an already-registered domain returns "Already registered".
+
+**Google authorized origin (step 3) remains manual** — Google has no public API for updating
+authorized JavaScript origins on OAuth 2.0 Web Application clients. The checklist now shows
+one-click **Copy** buttons for both the origin URL and the Supabase callback URL to minimize friction.
+
 ## Next steps (prioritized)
 
 **High value:**
@@ -152,33 +177,29 @@ Manual, outside DohDash (still required — the panel surfaces these as a checkl
    are done; the panel's config editor has a `// TODO(two-gate)` seam for the
    per-tenant "enabled apps" checklist. This is what makes "some customers get only
    some apps" real.
-2. **Automate the manual OAuth/redirect step** — the biggest onboarding friction.
-   The Supabase Management API can add redirect URLs programmatically, and Google
-   OAuth origins via API; doing this from the panel (or a server function) would make
-   tenant creation truly one-click. Until then, steps 4–5 are unavoidable manual work.
 
 **Medium:**
-3. **`dohdash.app` domain registration** — buy domain → Vercel `dohdash.app` +
+2. **`dohdash.app` domain registration** — buy domain → Vercel `dohdash.app` +
    `*.dohdash.app` → DNS (A `@ → 76.76.21.21`, CNAME `* → cname.vercel-dns.com`) →
    Supabase redirect `https://*.dohdash.app/**` → Google origins → set `built`
    `custom_domain` to `built.dohdash.app` (remove the `dohdash.vercel.app` mapping).
    Then every tenant gets a clean `<slug>.dohdash.app` automatically.
-4. **Tenant branding editor (self-service)** — distinct from operator editing: a UI
+3. **Tenant branding editor (self-service)** — distinct from operator editing: a UI
    for a tenant's *own* admin to edit their `config` (colors/logo/name) without SQL
    or operator involvement.
-5. **Multi-tenant account support** — let one Google account legitimately belong to
+4. **Multi-tenant account support** — let one Google account legitimately belong to
    more than one tenant (workspace-switcher), removing the "first sign-in only"
    limitation. Today it's "rare, not designed around."
 
 **Lower / hardening:**
-6. **Operator audit log** — operator actions are currently unlogged (the provision
+5. **Operator audit log** — operator actions are currently unlogged (the provision
    RPC skips `log_admin_action` to avoid mis-stamping). A dedicated operator-audit
    table would record create/edit/provision across tenants.
-7. **Super-admin management UI** — granting `super_admin` to another account is
+6. **Super-admin management UI** — granting `super_admin` to another account is
    SQL-only today.
-8. **Tenant deletion** — intentionally absent (cascades across 14 tables); add only
+7. **Tenant deletion** — intentionally absent (cascades across 14 tables); add only
    behind a hard confirmation + required backup gate.
-9. **Run the isolation suite for 0024** — `scripts/dev/verify-tenant-isolation.mjs`
+8. **Run the isolation suite for 0024** — `scripts/dev/verify-tenant-isolation.mjs`
    has assertions (non-super-admin can't read `tenants`/call the RPC; provisioning
    stamps the target tenant) but needs a local Supabase to run; it was not a gate for
    the straight-to-prod push.
