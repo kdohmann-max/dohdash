@@ -64,43 +64,21 @@ DohDash is a shared multi-tenant platform: one Vercel deployment + one Supabase 
 - **Local testing**: `supabase start` (needs Docker + `config.toml` from `supabase init`); `supabase status -o env > .env.test`; then `npm run verify:migration` / `npm run verify:isolation`. Never run the seeding isolation script against prod (guarded by `VERIFY_ALLOW_REMOTE`).
 - **`dohdash.vercel.app` mapping** (`0022`): `custom_domain = 'dohdash.vercel.app'` set on the `built` tenant so the existing Vercel URL resolves branding from DB. Temporary — remove/replace when `dohdash.app` is registered.
 
-## Tenant onboarding (current process — all manual SQL)
-
-No admin UI exists yet for cross-tenant management. Until the super admin panel
-is built, onboard new tenants via the Supabase SQL editor. **Use the
-`/new-tenant` skill** — it's the single source for the onboarding procedure
-(generates the `tenants` insert from the *live* `built` config so the branding
-shape never drifts, plus the first-admin `pending_profiles` insert and the
-URL/OAuth-redirect checklist). The key facts the skill encodes:
-
-- The `tenants.config` jsonb follows the `CompanyInfo` shape; derive a new
-  tenant's config from the live `built` row (`select config from tenants where
-  slug='built'`) or the `0016` seed block — never a hand-written template.
-- First admin can't go through `admin_provision_user` (it scopes to the caller's
-  tenant); insert into `pending_profiles` directly with the new tenant's id,
-  `granted_by` = the operator's profile. `handle_new_user` promotes it on first
-  sign-in.
-- Give them a URL (dev `VITE_DEV_TENANT_SLUG`, prod `custom_domain`, or a
-  `*.dohdash.app` subdomain), then add `https://<their-domain>/**` to Supabase
-  Auth redirect URLs and register the origin + redirect URI in Google OAuth.
-
-## Operator control plane (super admin panel) — built
+## Operator control plane + tenant onboarding (super admin panel) — built
 
 The platform operator (`profiles.super_admin`) manages all tenants in-app at
 `/dashboard/operator` — list/create/edit tenants, edit branding, provision a
-tenant's first admin. Replaces the manual-SQL `/new-tenant` flow. Migration `0024`
-(`is_super_admin()`, super-admin RLS on `tenants`, `super_admin_provision_first_admin`
-RPC). **Full detail — DB, storage, UI, onboarding flow, gotchas, next steps:
+tenant's first admin. This **supersedes the old manual-SQL onboarding**: the
+`/new-tenant` skill (hand-written `tenants` + `pending_profiles` inserts) is now
+only a fallback for recovery or seeding the very first super admin. Migration
+`0024` (`is_super_admin()`, super-admin RLS on `tenants`,
+`super_admin_provision_first_admin` RPC).
+
+**Single source of truth — DB, storage, the OperatorDashboard UI, the full
+onboarding flow (incl. the manual Supabase/Google/DNS steps), gotchas, current
+live tenants, and the prioritized multi-tenancy roadmap/next-steps (two-gate app
+model, `dohdash.app` registration, wildcard subdomains, branding editor, etc.):
 `operator-control-plane.md`.**
-
-## What still needs building (multi-tenancy roadmap)
-
-- **Two-gate app model** (deferred spec item #2) — per-tenant enabled-apps gate on
-  top of per-user `app_access`; the Operator panel config editor has the seam. See
-  `operator-control-plane.md` → Next steps.
-- **`dohdash.app` domain registration**: buy the domain → add `dohdash.app` + `*.dohdash.app` in Vercel → DNS records at registrar (A `@` → `76.76.21.21`, CNAME `*` → `cname.vercel-dns.com`) → update Supabase Auth redirect URLs to `https://*.dohdash.app/**` → add origins/redirects in Google OAuth → update `built` tenant `custom_domain` to `built.dohdash.app` (and remove `dohdash.vercel.app` mapping from 0022).
-- **Wildcard subdomains** (`*.dohdash.app`): once domain is registered, each tenant gets `<slug>.dohdash.app` automatically — Vercel wildcard + `split_part` SQL already handles it, no code changes needed.
-- **Tenant branding editor**: UI for a tenant's own admin to update their `config` JSON (colors, company name, logo) without needing SQL access.
 
 ## Storage constraint
 
