@@ -179,7 +179,7 @@
 }
 
 .admin-role-badge--admin {
-  background: rgba(30, 64, 175, 0.1);
+  background: color-mix(in srgb, var(--accent-secondary) 10%, transparent);
   color: var(--accent-secondary);
   border: 1px solid var(--accent-secondary);
 }
@@ -240,7 +240,7 @@
 }
 
 .admin-reject-button:hover {
-  background: rgba(220, 38, 38, 0.1);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
   border-color: var(--error);
 }
 
@@ -271,7 +271,7 @@
   border: 1px solid var(--error);
   border-radius: var(--rounded-md);
   background: var(--bg-alt);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--error) 12%, transparent);
 }
 
 .admin-confirm-card p {

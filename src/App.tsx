@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { CompanyInfoProvider, useCompanyInfo } from "./company/CompanyInfoContext";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { AuthGate } from "./auth/AuthGate";
 import { Shell } from "./components/Shell";
@@ -118,10 +119,12 @@ function AppInner() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <CompanyInfoProvider>
-        <AppInner />
-      </CompanyInfoProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <CompanyInfoProvider>
+          <AppInner />
+        </CompanyInfoProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

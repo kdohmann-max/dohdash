@@ -58,7 +58,7 @@
 
 .fc-accuracy-chip:hover {
   border-color: var(--accent-secondary);
-  background: rgba(30, 64, 175, 0.05);
+  background: color-mix(in srgb, var(--accent-secondary) 5%, transparent);
 }
 
 .fc-accuracy-chip[aria-pressed="true"] {

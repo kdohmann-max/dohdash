@@ -47,7 +47,9 @@ type AuthState =
 
 ## CompanyInfo portability
 
-`src/company/companyInfo.ts` — `loadCompanyInfo()` fetches `/CompanyInfo.md` at runtime; `applyCompanyTheme()` writes `styleGuide` as CSS vars on `document.documentElement` (token list: `styleguide.md`). `CompanyInfoContext` exposes `companyName`, `dashboardName`, `adminContact`, `logo`, `appNames`. `data-theme` on `<html>` toggles light/dark via `src/theme.ts` (localStorage + `prefers-color-scheme`). To port: see `CLAUDE.md`.
+`src/company/companyInfo.ts` — `loadCompanyInfo()` fetches `/CompanyInfo.md` at runtime; `applyCompanyTheme()` writes `styleGuide` as CSS vars on `document.documentElement` (token list: `styleguide.md`). `CompanyInfoContext` exposes `companyName`, `dashboardName`, `adminContact`, `logo`, `appNames`. To port: see `CLAUDE.md`.
+
+**Light/dark theme:** `data-theme="light"|"dark"` on `<html>` selects the palette (the dark palette is the `--dark-*` vars remapped by the `[data-theme="dark"]` rule in `index.css`). Preference is `"system"|"light"|"dark"` (localStorage `dohdash-theme`, default `"system"`). Pure helpers in `src/theme.ts`; `ThemeProvider` (`src/components/ThemeProvider.tsx`, wraps the app in `App.tsx`) owns the state, persists it, and live-tracks the OS while on `"system"`; `useTheme()` exposes `{ preference, resolved, setPreference }`. An inline `<head>` script in `index.html` sets `data-theme` before first paint (anti-flash). The 3-way control is `<ThemeToggle/>` in the shell header (both modes), sign-in/pending pages, and landing. Mechanism + the `color-mix` tinted-fill rule: `styleguide.md` → Light / dark theme.
 
 ## Multi-tenancy
 

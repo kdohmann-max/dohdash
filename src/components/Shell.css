@@ -127,6 +127,9 @@
 
 .shell-crumb-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 /* Bounded scroll area: the topbar stays fixed; each app scrolls inside here.

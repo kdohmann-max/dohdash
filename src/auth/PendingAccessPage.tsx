@@ -3,6 +3,7 @@ import type { Session } from "@supabase/supabase-js";
 import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { useAuth } from "./AuthContext";
 import { createAccessRequest } from "../storage/db";
+import { ThemeToggle } from "../components/ThemeToggle";
 import "./auth.css";
 
 export function buildPendingAccessRequestInput(session: Session) {
@@ -42,6 +43,9 @@ export function PendingAccessPage() {
 
   return (
     <div className="auth-screen">
+      <div className="auth-theme-toggle">
+        <ThemeToggle />
+      </div>
       <div className="auth-card">
         <h1>Access pending</h1>
         <p className="muted">

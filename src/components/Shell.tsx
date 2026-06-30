@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useMatch } from "react-router-dom";
 import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { useAuth } from "../auth/AuthContext";
 import { getAppDef, resolveAppName } from "../apps/registry";
+import { ThemeToggle } from "./ThemeToggle";
 import "./Shell.css";
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
@@ -58,6 +59,7 @@ export function Shell() {
               ) : null}
             </nav>
             <div className="shell-user">
+              <ThemeToggle />
               <span className="shell-user-name">{profile.displayName ?? profile.email}</span>
               <button className="shell-signout" onClick={() => void signOut()}>
                 Sign out
@@ -75,6 +77,7 @@ export function Shell() {
             <span className="shell-crumb-sep" aria-hidden="true">/</span>
             <span className="shell-crumb-app">{appName}</span>
             <div className="shell-crumb-actions">
+              <ThemeToggle />
               <button className="shell-signout" onClick={() => void signOut()}>
                 Sign out
               </button>

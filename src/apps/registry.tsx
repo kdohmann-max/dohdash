@@ -1,4 +1,4 @@
-import { lazy, type ComponentType, type ReactNode } from "react";
+import { lazy, type ComponentType, type ReactElement } from "react";
 import type { CompanyInfo } from "../company/types";
 import { AppStubPage } from "./AppStubPage";
 import {
@@ -34,7 +34,8 @@ const RemoteClaudeApp = lazy(() =>
 export interface AppDef {
   id: string;
   name: string;
-  icon: ReactNode;
+  /** App icon element from `src/icons`; accepts a `size` prop (launcher resizes it via cloneElement). */
+  icon: ReactElement<{ size?: number }>;
   description: string;
   route: string;
   /** Root component rendered at the app's route. Stubs use `AppStubPage`. */

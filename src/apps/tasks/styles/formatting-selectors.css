@@ -42,3 +42,23 @@
   padding: 0 2px;
   cursor: help;
 }
+
+/* Dark mode: the highlighted text turns light, so the translucent fills are
+   re-tuned (brighter hues, adjusted alpha) to keep the colored band distinct
+   from the near-black surface while the light text stays legible. */
+[data-theme="dark"] .fmt-p1 {
+  background-color: rgba(248, 113, 113, 0.38);
+}
+
+[data-theme="dark"] .fmt-p2 {
+  background-color: rgba(250, 204, 21, 0.30);
+}
+
+[data-theme="dark"] .fmt-p3 {
+  background-color: rgba(96, 165, 250, 0.40);
+}
+
+[data-theme="dark"] .fmt-user-tag {
+  background-color: rgba(74, 222, 128, 0.28);
+  border-bottom-color: rgba(74, 222, 128, 0.75);
+}

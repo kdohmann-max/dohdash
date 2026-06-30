@@ -20,12 +20,14 @@ CSS custom properties written at runtime by `applyCompanyTheme()`. **Never hardc
 | `--accent-secondary` | #1e40af | Secondary actions, important controls (deep blue) |
 | `--accent-tertiary` | #fbbf24 | Highlights, "construction gold" accents |
 | `--error` | #dc2626 | Destructive actions, error states |
+| `--success` | #16a34a | Positive / "online" / success status |
 
 - `--bg` not `#fff`; `--text` not `#000`; `--error` not any hardcoded red.
 - Buttons with white text → `color: var(--bg)` (so dark mode inverts).
 - `--muted` for secondary/helper text, `--text` for primary.
 - `--accent-soft` for hover backgrounds on interactive items; `--accent` for primary focus/active states.
 - `--accent-secondary` (deep blue) for secondary/important controls; `--accent-tertiary` (gold) for highlights and accents.
+- **Tinted fills (faint hover/badge backgrounds): never hardcode `rgba(<token-color>, …)`** — that color won't follow the dark-mode swap and nearly vanishes on a dark surface. Use `color-mix(in srgb, var(--accent-secondary) 8%, transparent)` (or `--error`, `--success`, `--muted`). The token resolves per theme so the tint stays correct in both modes. (`--success` is a built-in semantic color defined only in `index.css`, not written by `applyCompanyTheme()`, so it isn't tenant-brandable.)
 
 ## Typography
 
@@ -53,6 +55,9 @@ Five-step scale only, no magic numbers. Standard pattern: card padding `--spacin
 | `--rounded-sm` | 4px | Badges, tags, chips |
 | `--rounded-md` | 6px | Cards, tiles, inputs, buttons (default) |
 | `--rounded-lg` | 8px | Modals, panels, larger containers |
+| `--rounded-xl` | 16px | Large, friendly tiles (launcher app tiles) |
+
+> `--rounded-xl` is a static global constant in `index.css` (a fixed design-system value, **not** plumbed through per-tenant `CompanyInfo.rounded` — radius is design identity, not branding).
 
 ## Icons
 
@@ -69,7 +74,13 @@ export function MyAppIcon({ size }: { size?: number } = {}) {
 
 ## Light / dark theme
 
-`data-theme` on `<html>` (managed by `src/theme.ts`) swaps in the dark palette. Every color reference **must** work in both modes — test with the shell header toggle. `applyCompanyTheme()` sets the `--dark-*` vars; the `[data-theme="dark"]` rule in `index.css` remaps the un-prefixed vars to them.
+`data-theme="light"|"dark"` on `<html>` swaps in the dark palette. Every color reference **must** work in both modes — test with the theme toggle in the shell header. `applyCompanyTheme()` sets the `--dark-*` vars; the `[data-theme="dark"]` rule in `index.css` remaps the un-prefixed vars to them.
+
+**How the theme is driven (so apps get dark mode for free):**
+- **Preference** is `"system" | "light" | "dark"` (localStorage key `dohdash-theme`, defaults to `"system"`). Pure helpers live in `src/theme.ts`; `ThemeProvider` (`src/components/ThemeProvider.tsx`) holds the state, writes `data-theme`, persists, and — while on `"system"` — live-updates when the OS flips. Read or set it anywhere via `useTheme()` → `{ preference, resolved, setPreference }`.
+- **No flash on load:** an inline script in `index.html` `<head>` sets `data-theme` before the bundle loads (it duplicates the resolve logic in `theme.ts`; keep them in sync).
+- **The control** is `<ThemeToggle/>` (`src/components/ThemeToggle.tsx`) — a 3-way Light/Dark/System segmented control, mounted in the shell header (both launcher + breadcrumb modes), the sign-in / pending pages, and the landing page.
+- **A new app needs to do nothing for dark mode** beyond using the tokens (and the `color-mix` tinted-fill pattern above). It inherits the toggle and the palette swap automatically.
 
 ## Animations
 
@@ -107,7 +118,7 @@ transition: opacity 0.15s, box-shadow 0.15s;
 ```css
 background: transparent; color: var(--accent-secondary); border: 1.5px solid var(--accent-secondary);
 border-radius: var(--rounded-md); padding: var(--spacing-sm) var(--spacing-lg);
-/* hover: */ background: rgba(30, 64, 175, 0.08);
+/* hover: */ background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
 ```
 
 **Destructive (delete/remove only):**

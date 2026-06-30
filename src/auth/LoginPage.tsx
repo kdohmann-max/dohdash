@@ -1,5 +1,6 @@
 import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { useAuth } from "./AuthContext";
+import { ThemeToggle } from "../components/ThemeToggle";
 import "./auth.css";
 
 function GoogleMark() {
@@ -19,6 +20,9 @@ export function LoginPage() {
 
   return (
     <div className="auth-screen">
+      <div className="auth-theme-toggle">
+        <ThemeToggle />
+      </div>
       <div className="auth-card">
         <h1>{companyInfo?.dashboardName ?? "Sign in"}</h1>
         <div className="auth-actions">

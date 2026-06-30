@@ -18,45 +18,63 @@ export async function loadCompanyInfo(): Promise<CompanyInfo> {
   return getTenantPublicConfig(lookupHost);
 }
 
+const TENANT_THEME_STYLE_ID = "tenant-theme";
+
+// Writes the tenant palette into a `:root { … }` rule in an injected <style>
+// rather than inline styles on <html>. This is load-bearing for dark mode:
+// inline styles outrank stylesheet rules, so an inline `--bg` would override
+// index.css's `[data-theme="dark"] { --bg: var(--dark-bg) }` remap and pin the
+// app to the light palette. A `:root` stylesheet rule is correctly beaten by
+// the higher-specificity `[data-theme="dark"]` selector, so the palette swaps.
 export function applyCompanyTheme(info: CompanyInfo): void {
-  const root = document.documentElement.style;
   const { colors, typography, rounded, spacing } = info.styleGuide;
 
-  root.setProperty("--bg", colors.bg);
-  root.setProperty("--bg-alt", colors.bgAlt);
-  root.setProperty("--border", colors.border);
-  root.setProperty("--text", colors.text);
-  root.setProperty("--muted", colors.muted);
-  root.setProperty("--accent", colors.accent);
-  root.setProperty("--accent-soft", colors.accentSoft);
-  root.setProperty("--accent-secondary", colors.accentSecondary);
-  root.setProperty("--accent-tertiary", colors.accentTertiary);
-  root.setProperty("--error", colors.error);
-  root.setProperty("--dark-bg", colors.darkBg);
-  root.setProperty("--dark-bg-alt", colors.darkBgAlt);
-  root.setProperty("--dark-border", colors.darkBorder);
-  root.setProperty("--dark-text", colors.darkText);
-  root.setProperty("--dark-muted", colors.darkMuted);
-  root.setProperty("--dark-accent", colors.darkAccent);
-  root.setProperty("--dark-accent-soft", colors.darkAccentSoft);
-  root.setProperty("--dark-accent-secondary", colors.darkAccentSecondary);
-  root.setProperty("--dark-accent-tertiary", colors.darkAccentTertiary);
-  root.setProperty("--dark-error", colors.darkError);
+  const vars: Record<string, string> = {
+    "--bg": colors.bg,
+    "--bg-alt": colors.bgAlt,
+    "--border": colors.border,
+    "--text": colors.text,
+    "--muted": colors.muted,
+    "--accent": colors.accent,
+    "--accent-soft": colors.accentSoft,
+    "--accent-secondary": colors.accentSecondary,
+    "--accent-tertiary": colors.accentTertiary,
+    "--error": colors.error,
+    "--dark-bg": colors.darkBg,
+    "--dark-bg-alt": colors.darkBgAlt,
+    "--dark-border": colors.darkBorder,
+    "--dark-text": colors.darkText,
+    "--dark-muted": colors.darkMuted,
+    "--dark-accent": colors.darkAccent,
+    "--dark-accent-soft": colors.darkAccentSoft,
+    "--dark-accent-secondary": colors.darkAccentSecondary,
+    "--dark-accent-tertiary": colors.darkAccentTertiary,
+    "--dark-error": colors.darkError,
+    "--font-display": typography.display.fontFamily,
+    "--font-weight-display": String(typography.display.fontWeight),
+    "--font-heading": typography.heading.fontFamily,
+    "--font-weight-heading": String(typography.heading.fontWeight),
+    "--font-body": typography.body.fontFamily,
+    "--font-weight-body": String(typography.body.fontWeight),
+    "--rounded-sm": rounded.sm,
+    "--rounded-md": rounded.md,
+    "--rounded-lg": rounded.lg,
+    "--spacing-xs": spacing.xs,
+    "--spacing-sm": spacing.sm,
+    "--spacing-md": spacing.md,
+    "--spacing-lg": spacing.lg,
+    "--spacing-xl": spacing.xl,
+  };
 
-  root.setProperty("--font-display", typography.display.fontFamily);
-  root.setProperty("--font-weight-display", String(typography.display.fontWeight));
-  root.setProperty("--font-heading", typography.heading.fontFamily);
-  root.setProperty("--font-weight-heading", String(typography.heading.fontWeight));
-  root.setProperty("--font-body", typography.body.fontFamily);
-  root.setProperty("--font-weight-body", String(typography.body.fontWeight));
+  const body = Object.entries(vars)
+    .map(([k, v]) => `  ${k}: ${v};`)
+    .join("\n");
 
-  root.setProperty("--rounded-sm", rounded.sm);
-  root.setProperty("--rounded-md", rounded.md);
-  root.setProperty("--rounded-lg", rounded.lg);
-
-  root.setProperty("--spacing-xs", spacing.xs);
-  root.setProperty("--spacing-sm", spacing.sm);
-  root.setProperty("--spacing-md", spacing.md);
-  root.setProperty("--spacing-lg", spacing.lg);
-  root.setProperty("--spacing-xl", spacing.xl);
+  let el = document.getElementById(TENANT_THEME_STYLE_ID) as HTMLStyleElement | null;
+  if (!el) {
+    el = document.createElement("style");
+    el.id = TENANT_THEME_STYLE_ID;
+    document.head.appendChild(el);
+  }
+  el.textContent = `:root {\n${body}\n}`;
 }

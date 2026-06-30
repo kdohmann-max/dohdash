@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dohdash</title>
+    <!-- Anti-flash: set the resolved theme before first paint, before the
+         module bundle loads. Mirrors the logic in src/theme.ts; the React
+         ThemeProvider becomes the source of truth once mounted. -->
+    <script>
+      try {
+        var p = localStorage.getItem('dohdash-theme') || 'system';
+        var dark = p === 'dark' || (p === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

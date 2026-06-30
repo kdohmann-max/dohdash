@@ -1,10 +1,21 @@
 .landing {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, var(--bg-alt) 0%, var(--border) 100%);
   color: var(--text);
+}
+
+[data-theme="dark"] .landing {
+  background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-bg-alt) 100%);
+}
+
+.landing-theme-toggle {
+  position: absolute;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
 }
 
 .landing-hero {

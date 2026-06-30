@@ -276,7 +276,7 @@
 }
 
 .time-tracker-app .tt-btn--secondary:hover {
-  background: rgba(30, 64, 175, 0.08);
+  background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
 }
 
 /* ---- History section ---- */

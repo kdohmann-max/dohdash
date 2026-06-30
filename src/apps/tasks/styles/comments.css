@@ -80,7 +80,7 @@
 }
 
 .tasks-app .editor-save-error {
-  background: rgba(220, 38, 38, 0.08);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
   border-bottom-color: var(--error);
   color: var(--error);
 }

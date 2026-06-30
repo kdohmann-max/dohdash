@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCompanyInfo } from "../company/CompanyInfoContext";
 import { useAuth } from "../auth/AuthContext";
+import { ThemeToggle } from "./ThemeToggle";
 import "./LandingPage.css";
 
 export function LandingPage() {
@@ -11,6 +12,9 @@ export function LandingPage() {
 
   return (
     <div className="landing">
+      <div className="landing-theme-toggle">
+        <ThemeToggle />
+      </div>
       <div className="landing-hero">
         <h1>{companyInfo?.dashboardName}</h1>
         <Link to="/dashboard" className="landing-cta">

@@ -1,0 +1,38 @@
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-md);
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--rounded-sm);
+  background: transparent;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
+}
+
+.theme-toggle-btn--active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.theme-toggle-btn--active:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
