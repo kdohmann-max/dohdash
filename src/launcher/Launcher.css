@@ -1,8 +1,10 @@
 .launcher-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-lg);
   padding: var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
   animation: fadeIn 0.5s ease-out;
 }
 

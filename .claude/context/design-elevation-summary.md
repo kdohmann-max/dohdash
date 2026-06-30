@@ -50,11 +50,14 @@ DohDash has been elevated from a clean-but-generic corporate design to a **Const
 - Increased font size (18px → 20px) and adjusted letter-spacing for strength
 - Better visual hierarchy in the header
 
-### App Tiles (launcher grid)
-- **New Accent Bar:** Left 3px border in blue (`--accent-secondary`) provides visual structure
-- **Enhanced Hover State:** Improved box-shadow (0 4px 12px) with color-matched shadow
-- **Animation:** `slideUp` entrance animation (400ms) for delight on page load
-- **Better Visual Feedback:** Subtle shadow on hover suggests interactivity
+### App Tiles (launcher grid) — redesigned 2026-06
+- **Horizontal layout:** 64px icon on the left, app name + description stacked vertically to its right (was a vertical card). Icons are sized via the `size` prop — `React.cloneElement(app.icon, { size: 64 })` in `AppTile.tsx` — **not** CSS; the SVGs render `width`/`height` from that prop, so CSS dimensions on the container don't scale them.
+- **No accent bar:** the former left 3px blue (`--accent-secondary`) border was removed.
+- **Rounded 16px corners** and a resting `box-shadow` (0 2px 6px); hover lifts (`translateY(-4px)`) with a brass-tinted shadow + `--accent-soft` background.
+- **"Coming soon…" hover badge:** stub apps (`data-stub="true"`) fade their icon/content out and reveal a centered heading-typography badge on hover.
+- **4-column centered grid** (`Launcher.css`: `repeat(4, 1fr)`, `max-width: 1400px`, centered).
+- **Tuned typography:** title `line-height: 1.1` (tightens two-line names), description `line-height: 1.45`, `--spacing-sm` gap between them.
+- **Animation:** `slideUp` entrance animation (400ms) retained.
 
 ### Buttons (Auth, Actions)
 - **Primary Button:** Brass accent with shadow (0 2px 8px) → hover shadow (0 4px 12px)
@@ -137,7 +140,7 @@ All changes maintain full dark mode compatibility:
 
 | Element | Before | After | Impact |
 |---------|--------|-------|--------|
-| **App Tiles** | Flat cards | Colored accent bar + shadow | More visual depth, better scanability |
+| **App Tiles** | Flat cards | Horizontal layout, 64px icon, rounded, hover lift + "Coming soon" badge | More visual depth, better scanability |
 | **Buttons** | Simple borders | Shadows + color-coded | Better hierarchy, tactile feel |
 | **Typography** | Uniform Comfortaa | IBM Plex + Comfortaa + Mono | Strong visual hierarchy |
 | **Color Palette** | Generic orange | Brass + blue + gold | Construction-focused personality |
@@ -153,7 +156,7 @@ All changes maintain full dark mode compatibility:
 - `public/CompanyInfo.md` — Runtime style configuration
 - `.claude/context/styleguide.md` — Design documentation
 - `src/components/Shell.css` — Header styling
-- `src/launcher/AppTile.css` — Tile accent bar and animations
+- `src/launcher/AppTile.tsx` / `AppTile.css` — Tile layout, icon sizing, hover badge, animations
 - `src/launcher/Launcher.css` — Grid layout
 - `src/auth/auth.css` — Button improvements
 - `src/components/LandingPage.css` — Landing page aesthetic

@@ -199,26 +199,22 @@ export function FractionCalculatorIcon({ size }: { size?: number } = {}) {
   return (
     <svg {...svgProps(size)}>
       {/* Calculator body */}
-      <rect x="3" y="2" width="18" height="20" rx="2" ry="2" />
+      <rect x="4" y="2" width="16" height="20" rx="2" />
       {/* Display screen */}
-      <rect x="5" y="4" width="14" height="4" rx="0.5" />
-      {/* Button grid: 3 columns x 4 rows */}
+      <rect x="6" y="4.5" width="12" height="3.5" rx="0.5" />
+      {/* Button grid: 3 columns x 3 rows, symmetric and balanced */}
       {/* Row 1 */}
-      <rect x="5.5" y="9" width="3.5" height="1.8" rx="0.3" />
-      <rect x="10" y="9" width="3.5" height="1.8" rx="0.3" />
-      <rect x="14.5" y="9" width="3.5" height="1.8" rx="0.3" />
+      <line x1="7" y1="12" x2="9" y2="12" />
+      <line x1="11" y1="12" x2="13" y2="12" />
+      <line x1="15" y1="12" x2="17" y2="12" />
       {/* Row 2 */}
-      <rect x="5.5" y="11.2" width="3.5" height="1.8" rx="0.3" />
-      <rect x="10" y="11.2" width="3.5" height="1.8" rx="0.3" />
-      <rect x="14.5" y="11.2" width="3.5" height="1.8" rx="0.3" />
+      <line x1="7" y1="15" x2="9" y2="15" />
+      <line x1="11" y1="15" x2="13" y2="15" />
+      <line x1="15" y1="15" x2="17" y2="15" />
       {/* Row 3 */}
-      <rect x="5.5" y="13.4" width="3.5" height="1.8" rx="0.3" />
-      <rect x="10" y="13.4" width="3.5" height="1.8" rx="0.3" />
-      <rect x="14.5" y="13.4" width="3.5" height="1.8" rx="0.3" />
-      {/* Row 4 */}
-      <rect x="5.5" y="15.6" width="3.5" height="1.8" rx="0.3" />
-      <rect x="10" y="15.6" width="3.5" height="1.8" rx="0.3" />
-      <rect x="14.5" y="15.6" width="3.5" height="1.8" rx="0.3" />
+      <line x1="7" y1="18" x2="9" y2="18" />
+      <line x1="11" y1="18" x2="13" y2="18" />
+      <line x1="15" y1="18" x2="17" y2="18" />
     </svg>
   );
 }

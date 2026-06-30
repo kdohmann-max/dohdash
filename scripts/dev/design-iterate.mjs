@@ -8,6 +8,13 @@ console.log(`Opening ${DEV_SERVER_ORIGIN}/dashboard\n`);
 
 const browser = await chromium.launch({ headless: false });
 
+// Graceful shutdown on Ctrl+C
+process.on("SIGINT", async () => {
+  console.log("\nShutting down...");
+  await browser.close();
+  process.exit(0);
+});
+
 try {
   const context = await browser.newContext({ storageState: STORAGE_STATE });
   const page = await context.newPage();
@@ -16,12 +23,14 @@ try {
   await page.waitForLoadState("networkidle");
 
   console.log("✅ Browser open. Edit CSS files — changes auto-reload in the browser.");
-  console.log("💡 Tip: Press F12 for DevTools to inspect elements\n");
+  console.log("💡 Tip: Press F12 for DevTools to inspect elements");
+  console.log("📝 Close the browser window or press Ctrl+C to stop.\n");
 
-  // Keep the browser open until the user closes it
-  await page.waitForEvent("close");
+  // Keep the browser open until the user closes it or stops the process
+  await new Promise(() => {});
 } catch (error) {
   console.error("Error launching browser:", error);
+  process.exit(1);
 } finally {
   await browser.close();
 }
