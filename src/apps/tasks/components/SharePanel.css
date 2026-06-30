@@ -25,7 +25,7 @@
 .share-panel-title {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-heading);
-  font-size: 1rem;
+  font-size: var(--text-lg);
   margin: 0;
   color: var(--text);
 }
@@ -35,13 +35,13 @@
   border: none;
   cursor: pointer;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: var(--text-lg);
   padding: 4px;
 }
 
 .share-panel-error {
   color: var(--error);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   padding: 0 var(--spacing-lg);
 }
 
@@ -54,14 +54,14 @@
 }
 
 .share-panel-owner-label {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .share-panel-owner-name {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text);
   font-weight: var(--font-weight-heading);
 }
@@ -80,7 +80,7 @@
   border-radius: var(--rounded-sm);
   background: var(--bg);
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   padding: 2px 4px;
 }
 
@@ -88,14 +88,14 @@
 
 .share-perm-row { display: flex; align-items: center; gap: var(--spacing-sm); }
 
-.share-perm-label { font-size: 0.8rem; color: var(--muted); flex-shrink: 0; }
+.share-perm-label { font-size: var(--text-sm); color: var(--muted); flex-shrink: 0; }
 
 .share-search-input {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--rounded-sm);
   padding: var(--spacing-sm);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   background: var(--bg);
   color: var(--text);
   box-sizing: border-box;
@@ -112,7 +112,7 @@
 
 .share-roster-empty {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   padding: var(--spacing-md) 0;
   text-align: center;
 }
@@ -152,4 +152,4 @@
   font-size: 0.7rem; font-weight: var(--font-weight-heading);
 }
 
-.share-result-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; color: var(--text); }
+.share-result-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-base); color: var(--text); }

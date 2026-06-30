@@ -13,7 +13,7 @@
 .fraction-calculator h1 {
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   margin: var(--spacing-md) 0 0 0;
   letter-spacing: -0.5px;
 }

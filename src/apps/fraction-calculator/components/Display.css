@@ -16,14 +16,14 @@
 
 .fc-display-pending {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: var(--font-weight-mono);
   min-height: 1.4em;
   letter-spacing: 0.5px;
 }
 
 .fc-display-current {
-  font-size: 2.8rem;
+  font-size: var(--text-display);
   font-weight: var(--font-weight-mono);
   font-family: var(--font-mono);
   word-break: break-all;
@@ -34,7 +34,7 @@
 
 .fc-display-current--error {
   color: var(--error);
-  font-size: 1.8rem;
+  font-size: var(--text-3xl);
   letter-spacing: normal;
 }
 
@@ -44,7 +44,7 @@
   gap: var(--spacing-xs);
   padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted);
   opacity: 0.65;
   width: 100%;
@@ -57,7 +57,7 @@
 }
 
 .fc-display-history-result {
-  font-size: 1rem;
+  font-size: var(--text-lg);
   font-weight: var(--font-weight-mono);
   letter-spacing: 0.5px;
   color: var(--accent-secondary);

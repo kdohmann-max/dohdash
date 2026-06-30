@@ -51,10 +51,10 @@ DohDash has been elevated from a clean-but-generic corporate design to a **Const
 - Better visual hierarchy in the header
 
 ### App Tiles (launcher grid) — redesigned 2026-06
-- **Horizontal layout:** 64px icon on the left, app name + description stacked vertically to its right (was a vertical card). Icons are sized via the `size` prop — `React.cloneElement(app.icon, { size: 64 })` in `AppTile.tsx` — **not** CSS; the SVGs render `width`/`height` from that prop, so CSS dimensions on the container don't scale them.
+- **Horizontal layout:** 64px icon on the left, app name + description stacked vertically to its right (was a vertical card). Icons are sized via the `size` prop — `React.cloneElement(app.icon, { size: 64 })` in `AppTile.tsx` — **not** CSS; the SVGs render `width`/`height` from that prop, so CSS dimensions on the container don't scale them. (`AppDef.icon` is therefore typed `ReactElement<{ size?: number }>`, not `ReactNode`, so `cloneElement` typechecks.) `.app-tile-icon` sets no fixed dimensions — the 64px SVG is the single source of size.
 - **No accent bar:** the former left 3px blue (`--accent-secondary`) border was removed.
-- **Rounded 16px corners** and a resting `box-shadow` (0 2px 6px); hover lifts (`translateY(-4px)`) with a brass-tinted shadow + `--accent-soft` background.
-- **"Coming soon…" hover badge:** stub apps (`data-stub="true"`) fade their icon/content out and reveal a centered heading-typography badge on hover.
+- **Rounded corners via `--rounded-xl`** (16px — a token added to `index.css` for this; see styleguide radius table) and a resting `box-shadow` (0 2px 6px); hover lifts (`translateY(-4px)`) with a brass-tinted shadow + `--accent-soft` background.
+- **"Coming soon…" badge for stub apps** (`data-stub="true"`): on desktop **hover**, the icon/content fade out and a centered heading-typography badge fades in. On **touch** (no hover), tapping a stub tile is intercepted in `AppTile.tsx` (`preventDefault` + a `data-flash` flag held ~1.4s) to show the same fade-in/out state instead of navigating to an empty stub. CSS drives both off `:hover, [data-flash="true"]`.
 - **4-column centered grid** (`Launcher.css`: `repeat(4, 1fr)`, `max-width: 1400px`, centered).
 - **Tuned typography:** title `line-height: 1.1` (tightens two-line names), description `line-height: 1.45`, `--spacing-sm` gap between them.
 - **Animation:** `slideUp` entrance animation (400ms) retained.

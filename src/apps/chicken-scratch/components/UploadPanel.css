@@ -27,7 +27,7 @@
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-sm);
   cursor: pointer;
   transition: border-color 0.12s ease;
 }
@@ -60,7 +60,7 @@
 .upload-zone p {
   color: var(--muted);
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   max-width: 28ch;
 }
 
@@ -81,7 +81,7 @@
   border: 1px solid var(--border);
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   cursor: pointer;
   min-width: 120px;
 }
@@ -96,7 +96,7 @@
   border: 1px solid var(--border);
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   cursor: pointer;
   min-width: 120px;
 }

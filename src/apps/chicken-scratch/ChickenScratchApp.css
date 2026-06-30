@@ -13,7 +13,7 @@
 .chicken-scratch h1 {
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   margin: 0 0 var(--spacing-lg) 0;
   letter-spacing: -0.5px;
 }
@@ -26,7 +26,7 @@
   gap: var(--spacing-md);
   min-height: 200px;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .cs-spinner {
@@ -65,15 +65,15 @@
   border: none;
   border-radius: var(--rounded-md);
   padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: var(--font-weight-heading);
   cursor: pointer;
   transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
-  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.2), 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-accent), 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .cs-error button:hover {
   opacity: 0.95;
-  box-shadow: 0 6px 16px rgba(200, 108, 46, 0.3), 0 3px 6px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent), 0 3px 6px rgba(0,0,0,0.12);
   transform: translateY(-2px);
 }

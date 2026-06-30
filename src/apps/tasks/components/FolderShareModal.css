@@ -32,17 +32,17 @@
 .fsm-title {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-heading);
-  font-size: 1rem;
+  font-size: var(--text-lg);
   margin: 0;
   color: var(--text);
 }
 
 .fsm-close {
   background: transparent; border: none; cursor: pointer;
-  color: var(--muted); font-size: 1rem; padding: 4px;
+  color: var(--muted); font-size: var(--text-lg); padding: 4px;
 }
 
-.fsm-error { color: var(--error); font-size: 0.85rem; padding: 0 var(--spacing-lg); }
+.fsm-error { color: var(--error); font-size: var(--text-md); padding: 0 var(--spacing-lg); }
 
 .fsm-type-badge {
   font-size: 0.7rem; background: var(--bg-alt); border-radius: var(--rounded-sm);
@@ -51,16 +51,16 @@
 
 .fsm-perm-select {
   border: 1px solid var(--border); border-radius: var(--rounded-sm);
-  background: var(--bg); color: var(--text); font-size: 0.8rem; padding: 2px 4px;
+  background: var(--bg); color: var(--text); font-size: var(--text-sm); padding: 2px 4px;
 }
 
 .fsm-add-section { padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-md); }
 .fsm-perm-row { display: flex; align-items: center; gap: var(--spacing-sm); }
-.fsm-perm-label { font-size: 0.8rem; color: var(--muted); flex-shrink: 0; }
+.fsm-perm-label { font-size: var(--text-sm); color: var(--muted); flex-shrink: 0; }
 
 .fsm-search-input {
   width: 100%; border: 1px solid var(--border); border-radius: var(--rounded-sm);
-  padding: var(--spacing-sm); font-size: 0.9rem; background: var(--bg); color: var(--text); box-sizing: border-box;
+  padding: var(--spacing-sm); font-size: var(--text-base); background: var(--bg); color: var(--text); box-sizing: border-box;
 }
 .fsm-search-input:focus { outline: none; border-color: var(--accent); }
 
@@ -72,7 +72,7 @@
   overflow-y: auto;
 }
 
-.fsm-roster-empty { color: var(--muted); font-size: 0.85rem; padding: var(--spacing-md) 0; text-align: center; }
+.fsm-roster-empty { color: var(--muted); font-size: var(--text-md); padding: var(--spacing-md) 0; text-align: center; }
 
 .fsm-roster-row {
   display: flex; align-items: center; gap: var(--spacing-sm);
@@ -98,4 +98,4 @@
   font-size: 0.7rem; font-weight: var(--font-weight-heading);
 }
 
-.fsm-result-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; color: var(--text); }
+.fsm-result-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-base); color: var(--text); }

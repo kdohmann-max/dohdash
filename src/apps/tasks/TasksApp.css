@@ -35,7 +35,7 @@
 .tasks-app .brand {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--text-xl);
   color: var(--text);
 }
 
@@ -61,7 +61,7 @@
   gap: 2px;
   width: auto;
   padding: 0 6px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   border: 1px solid var(--border);
   border-radius: var(--rounded-sm);
   background: var(--bg);
@@ -75,7 +75,7 @@
 .tasks-app .select-toggle {
   width: auto;
   padding: 0 8px;
-  font-size: 12px;
+  font-size: var(--text-xs);
   border: 1px solid var(--border);
   border-radius: var(--rounded-sm);
   background: var(--bg);
@@ -92,7 +92,7 @@
 }
 
 .tasks-app .select-count {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--muted);
   margin-right: auto;
 }
@@ -103,7 +103,7 @@
   border-radius: var(--rounded-sm);
   background: var(--bg);
   color: var(--text);
-  font-size: 12px;
+  font-size: var(--text-xs);
   padding: 4px 10px;
 }
 
@@ -141,7 +141,7 @@
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 
 .tasks-app .sort-control {
@@ -165,7 +165,7 @@
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 
 .tasks-app .doc-list {
@@ -180,14 +180,14 @@
   display: flex;
   align-items: center;
   border-radius: var(--rounded-sm);
-  font-size: 14px;
+  font-size: var(--text-base);
   color: var(--text);
   list-style: none;
 }
 
 .tasks-app .doc-list .empty {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-sm);
   padding: 12px 10px;
 }
 
@@ -225,7 +225,7 @@
   border: none;
   background: transparent;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-base);
   padding: 0 4px;
   line-height: 1;
 }
@@ -256,7 +256,7 @@
   display: flex;
   align-items: center;
   flex: 1;
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text);
   overflow: hidden;
@@ -279,7 +279,7 @@
   border: none;
   background: transparent;
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-base);
   padding: 0 4px;
   line-height: 1;
 }
@@ -308,7 +308,7 @@
   color: var(--text);
   text-align: left;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 
 .tasks-app .folder-menu button:hover,
@@ -345,7 +345,7 @@
   border-radius: var(--rounded-sm);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-sm);
   padding: 4px 8px;
   outline: none;
   min-width: 0;
@@ -398,7 +398,7 @@
   background: var(--bg);
   border-radius: var(--rounded-sm);
   padding: 4px 10px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--muted);
 }
 
@@ -436,7 +436,7 @@
 .tasks-app .save-status {
   flex-shrink: 0;
   align-self: center;
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--muted);
   white-space: nowrap;
   animation: fadeIn 0.2s ease-out;
@@ -502,7 +502,7 @@
   resize: none;
   padding: 32px 16px 96px;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 14px;
+  font-size: var(--text-base);
   line-height: 1.6;
   background: var(--bg);
   color: var(--text);
@@ -574,7 +574,7 @@
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-sm);
   cursor: pointer;
   transition: border-color 0.12s ease;
 }
@@ -652,7 +652,7 @@
 
 .tasks-app .archive-btn {
   padding: 0 12px;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 
 .tasks-app .f-button { font-style: normal; }
@@ -677,7 +677,7 @@
 .tasks-app .tag-user-title {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-heading);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text);
 }
 
@@ -686,7 +686,7 @@
   border: none;
   cursor: pointer;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   padding: 2px 4px;
 }
 
@@ -694,7 +694,7 @@
   border: 1px solid var(--border);
   border-radius: var(--rounded-sm);
   padding: var(--spacing-sm);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   background: var(--bg);
   color: var(--text);
   box-sizing: border-box;
@@ -721,7 +721,7 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 .tasks-app .tag-user-label:hover { background: var(--accent-soft); }
 
@@ -742,7 +742,7 @@
 
 .tasks-app .tag-user-email {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   margin-left: auto;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -878,7 +878,7 @@
   border: 1px solid var(--border);
   background: var(--bg);
   border-radius: 4px;
-  font-size: 12px;
+  font-size: var(--text-xs);
   padding: 0 6px;
   margin-right: 6px;
   color: var(--accent);
@@ -980,7 +980,7 @@
   background: transparent;
   border-radius: var(--rounded-sm);
   padding: 4px 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--muted);
   cursor: pointer;
   transition: background 0.1s, color 0.1s;
@@ -1003,7 +1003,7 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-md);
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: var(--font-weight-heading);
 }
 
@@ -1016,12 +1016,12 @@
   font-size: 0.7rem; font-weight: var(--font-weight-heading);
 }
 
-.tasks-app .shared-owner-name { font-size: 0.8rem; color: var(--muted); }
+.tasks-app .shared-owner-name { font-size: var(--text-sm); color: var(--muted); }
 
 .tasks-app .shared-docs-list { list-style: none; padding: 0; margin: 0; }
 
 .tasks-app .shared-section-divider {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--muted);
   font-weight: var(--font-weight-heading);
   text-transform: uppercase;

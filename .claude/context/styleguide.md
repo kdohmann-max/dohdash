@@ -38,6 +38,16 @@ Fonts come from `public/CompanyInfo.md` as CSS vars — **never set `font-family
 - `--font-body` / `--font-weight-body` — body text, content (Comfortaa 400)
 - `--font-mono` / `--font-weight-mono` — measurements, technical display, code (IBM Plex Mono 500)
 
+**Type scale** — use these `--text-*` tokens for `font-size`, **never raw rem/px**. `--text-base` (0.9rem) is the default app body size. (Static design-system constants in `index.css`, not per-tenant — same rationale as spacing/radius.)
+
+| Token | Value | Use |  | Token | Value | Use |
+|-------|-------|-----|--|-------|-------|-----|
+| `--text-xs` | 0.75rem | Badges, captions, fine print |  | `--text-xl` | 1.1rem | Small headings, emphasis |
+| `--text-sm` | 0.8rem | Dense labels, table cells |  | `--text-2xl` | 1.4rem | Section / app-tile headings |
+| `--text-md` | 0.85rem | Secondary body |  | `--text-3xl` | 1.8rem | Page / hero headings |
+| `--text-base` | 0.9rem | Default app body |  | `--text-display` | 2.8rem | Numeric readouts (calculator) |
+| `--text-lg` | 1rem | Emphasized body |  | | | |
+
 ## Spacing
 
 Five-step scale only, no magic numbers. Standard pattern: card padding `--spacing-lg`; item gap `--spacing-sm`/`--spacing-md`; section separation `--spacing-xl`.
@@ -58,6 +68,20 @@ Five-step scale only, no magic numbers. Standard pattern: card padding `--spacin
 | `--rounded-xl` | 16px | Large, friendly tiles (launcher app tiles) |
 
 > `--rounded-xl` is a static global constant in `index.css` (a fixed design-system value, **not** plumbed through per-tenant `CompanyInfo.rounded` — radius is design identity, not branding).
+
+## Elevation (shadows)
+
+Use the `--shadow-*` tokens — **never hardcode a `box-shadow` rgba**, especially not `rgba(200,108,46,…)` (that's the brass `--accent` baked in, so it won't rebrand per-tenant or swap in dark mode).
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `--shadow-sm` | `0 2px 6px rgba(0,0,0,.08)` | Resting cards/tiles |
+| `--shadow-md` | `0 4px 12px rgba(0,0,0,.12)` | Raised panels, dropdowns |
+| `--shadow-lg` | `0 8px 24px rgba(0,0,0,.18)` | Modals, popovers |
+| `--shadow-accent` | `0 4px 12px color-mix(--accent 20%)` | Accent hover glow (small) |
+| `--shadow-accent-lg` | `0 8px 20px color-mix(--accent 25%)` | Accent hover glow (tile lift) |
+
+The `--shadow-accent*` tokens tint with `var(--accent)` via `color-mix`, so they **follow the tenant palette and the dark-mode swap automatically**. Neutral `--shadow-sm/md/lg` are theme-independent (black works on both surfaces).
 
 ## Icons
 

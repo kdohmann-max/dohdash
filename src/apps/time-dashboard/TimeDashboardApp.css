@@ -35,7 +35,7 @@
 .time-dashboard-app .td-app-title {
   font-family: var(--font-display);
   font-weight: var(--font-weight-display);
-  font-size: 1.75rem;
+  font-size: var(--text-3xl);
   color: var(--text);
   margin: 0;
   letter-spacing: -0.5px;
@@ -73,7 +73,7 @@
 .time-dashboard-app .td-action-error p {
   margin: 0;
   flex: 1;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 /* ---- Buttons ---- */
@@ -86,7 +86,7 @@
   border-radius: var(--rounded-md);
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   cursor: pointer;
   border: none;
   transition: opacity 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s;
@@ -100,7 +100,7 @@
 .time-dashboard-app .td-btn--sm {
   min-height: 32px;
   padding: var(--spacing-xs) var(--spacing-md);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .time-dashboard-app .td-btn--primary {
@@ -110,7 +110,7 @@
 
 .time-dashboard-app .td-btn--primary:not(:disabled):hover {
   opacity: 0.9;
-  box-shadow: 0 4px 12px rgba(200, 108, 46, 0.2);
+  box-shadow: var(--shadow-accent);
 }
 
 .time-dashboard-app .td-btn--secondary {
@@ -159,7 +159,7 @@
 /* ---- Inputs ---- */
 .time-dashboard-app .td-input {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
@@ -206,7 +206,7 @@
 
 .time-dashboard-app .td-filter-label {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -232,7 +232,7 @@
   cursor: pointer;
   font-family: var(--font-heading);
   font-weight: var(--font-weight-heading);
-  font-size: 1rem;
+  font-size: var(--text-lg);
   color: var(--text);
   transition: background 0.15s;
   border-radius: var(--rounded-lg);
@@ -249,7 +249,7 @@
 
 .time-dashboard-app .td-job-manager-toggle-icon {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
 }
 
 .time-dashboard-app .td-job-manager-body {
@@ -272,14 +272,14 @@
 .time-dashboard-app .td-job-error {
   color: var(--error);
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   margin: 0;
 }
 
 .time-dashboard-app .td-job-empty {
   color: var(--muted);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   margin: 0;
   padding: var(--spacing-md) 0;
 }
@@ -318,7 +318,7 @@
 
 .time-dashboard-app .td-job-name {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   color: var(--text);
   flex: 1;
   min-width: 0;
@@ -346,13 +346,13 @@
 .time-dashboard-app .td-job-confirm-text {
   flex: 1;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text);
 }
 
 .time-dashboard-app .td-job-archived-label {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -411,7 +411,7 @@
 .time-dashboard-app .td-employee-name {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-heading);
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
   color: var(--text);
   flex: 1;
   min-width: 160px;
@@ -427,7 +427,7 @@
 .time-dashboard-app .td-totals-hours {
   font-family: var(--font-mono);
   font-weight: var(--font-weight-mono);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   color: var(--text);
   white-space: nowrap;
 }
@@ -435,7 +435,7 @@
 .time-dashboard-app .td-totals-pay {
   font-family: var(--font-mono);
   font-weight: var(--font-weight-mono);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   color: var(--accent-secondary);
   white-space: nowrap;
 }
@@ -450,7 +450,7 @@
 
 .time-dashboard-app .td-rate-label {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--muted);
 }
@@ -463,7 +463,7 @@
 
 .time-dashboard-app .td-rate-prefix {
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   color: var(--muted);
   user-select: none;
 }
@@ -495,7 +495,7 @@
   background: var(--bg-alt);
   border-bottom: 1px solid var(--border);
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -526,7 +526,7 @@
 
 .time-dashboard-app .td-cell {
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -535,7 +535,7 @@
 
 .time-dashboard-app .td-cell--date {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted);
 }
 
@@ -548,14 +548,14 @@
 
 .time-dashboard-app .td-cell--time {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted);
 }
 
 .time-dashboard-app .td-cell--net,
 .time-dashboard-app .td-cell--pay {
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   text-align: right;
 }
 
@@ -565,7 +565,7 @@
 
 .time-dashboard-app .td-cell--break {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--muted);
   text-align: right;
 }
@@ -588,7 +588,7 @@
   text-align: center;
   color: var(--muted);
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 /* ---- Responsive: collapse table to stacked cards on narrow screens ---- */

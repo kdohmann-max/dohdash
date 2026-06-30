@@ -55,6 +55,28 @@
   --spacing-lg: 16px;
   --spacing-xl: 32px;
 
+  /* Type scale (rem). `--text-base` (0.9rem) is the default app body size; most
+     UI text sits between sm and lg, with headings/display above. These are
+     design-system identity constants (not per-tenant), like spacing/radius. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8rem;
+  --text-md: 0.85rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.1rem;
+  --text-2xl: 1.4rem;
+  --text-3xl: 1.8rem;
+  --text-display: 2.8rem;
+
+  /* Elevation. Neutral shadows are theme-independent. The accent-glow shadows
+     tint with --accent via color-mix, so they rebrand with the tenant palette
+     and auto-swap in dark mode instead of baking in the brass hex. */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --shadow-accent: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+  --shadow-accent-lg: 0 8px 20px color-mix(in srgb, var(--accent) 25%, transparent);
+
   font-family: var(--font-body);
   font-weight: var(--font-weight-body);
   color: var(--text);
