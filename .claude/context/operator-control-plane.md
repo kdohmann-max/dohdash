@@ -169,37 +169,46 @@ one click, shows ✓ / "Already registered" / error.
 authorized JavaScript origins on OAuth 2.0 Web Application clients. The checklist now shows
 one-click **Copy** buttons for both the origin URL and the Supabase callback URL to minimize friction.
 
+## Two-gate app model (shipped)
+
+Per-tenant enabled-apps gate on top of per-user `app_access` — the feature that makes "some
+customers get only some apps" real. Both gates must pass for a user to see an app.
+
+- **Gate 1 (per-user):** `app_access` table — admin grants per user.
+- **Gate 2 (per-tenant):** `enabledApps` in `tenant.config` — operator toggles which apps are
+  available for the entire tenant.
+
+Implementation: `isTenantAppEnabled()` in `registry.tsx` checks both; `Launcher` filters by both;
+`App.tsx` route guard enforces it; `EnabledAppsEditor` (in `OperatorDashboard.tsx` Edit pane) is
+the operator UI. Backward compat: tenants without an explicit `enabledApps` key default to all
+apps enabled. Admin's app-access panel (`AppAccessPanel`) hides disabled apps and shows a note.
+
 ## Next steps (prioritized)
 
 **High value:**
-1. **Two-gate app model** (deferred tenancy-spec item #2) — per-tenant enabled-apps
-   gate on top of per-user `app_access`. Prereqs (registry-owns-app + route guard)
-   are done; the panel's config editor has a `// TODO(two-gate)` seam for the
-   per-tenant "enabled apps" checklist. This is what makes "some customers get only
-   some apps" real.
-
-**Medium:**
-2. **`dohdash.app` domain registration** — buy domain → Vercel `dohdash.app` +
+1. **`dohdash.app` domain registration** — buy domain → Vercel `dohdash.app` +
    `*.dohdash.app` → DNS (A `@ → 76.76.21.21`, CNAME `* → cname.vercel-dns.com`) →
    Supabase redirect `https://*.dohdash.app/**` → Google origins → set `built`
    `custom_domain` to `built.dohdash.app` (remove the `dohdash.vercel.app` mapping).
    Then every tenant gets a clean `<slug>.dohdash.app` automatically.
-3. **Tenant branding editor (self-service)** — distinct from operator editing: a UI
+
+**Medium:**
+2. **Tenant branding editor (self-service)** — distinct from operator editing: a UI
    for a tenant's *own* admin to edit their `config` (colors/logo/name) without SQL
    or operator involvement.
-4. **Multi-tenant account support** — let one Google account legitimately belong to
+3. **Multi-tenant account support** — let one Google account legitimately belong to
    more than one tenant (workspace-switcher), removing the "first sign-in only"
    limitation. Today it's "rare, not designed around."
 
 **Lower / hardening:**
-5. **Operator audit log** — operator actions are currently unlogged (the provision
+4. **Operator audit log** — operator actions are currently unlogged (the provision
    RPC skips `log_admin_action` to avoid mis-stamping). A dedicated operator-audit
    table would record create/edit/provision across tenants.
-6. **Super-admin management UI** — granting `super_admin` to another account is
+5. **Super-admin management UI** — granting `super_admin` to another account is
    SQL-only today.
-7. **Tenant deletion** — intentionally absent (cascades across 14 tables); add only
+6. **Tenant deletion** — intentionally absent (cascades across 14 tables); add only
    behind a hard confirmation + required backup gate.
-8. **Run the isolation suite for 0024** — `scripts/dev/verify-tenant-isolation.mjs`
+7. **Run the isolation suite for 0024** — `scripts/dev/verify-tenant-isolation.mjs`
    has assertions (non-super-admin can't read `tenants`/call the RPC; provisioning
    stamps the target tenant) but needs a local Supabase to run; it was not a gate for
    the straight-to-prod push.
