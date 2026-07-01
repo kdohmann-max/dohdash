@@ -27,7 +27,9 @@ import "./OperatorAssistant.css";
 const AGENT_ONLINE_MS = 10 * 60 * 1000;
 
 const MODEL_OPTIONS = [
-  { id: "claude-opus-4-8", label: "Opus 4.8 — default" },
+  { id: "claude-sonnet-4-6", label: "Sonnet 4.6 — default" },
+  { id: "claude-haiku-4-5-20251001", label: "Haiku 4.5 — fast & cheap" },
+  { id: "claude-opus-4-8", label: "Opus 4.8 — most capable" },
   { id: "claude-fable-5", label: "Fable 5 — hard mode (2× cost)" },
 ];
 const EFFORT_OPTIONS = ["high", "xhigh", "max", "medium", "low"];
