@@ -889,6 +889,11 @@
   display: none;
 }
 
+/* ---- Mobile format bar: hidden on desktop, revealed by the media query below ---- */
+.tasks-app .mobile-format-bar {
+  display: none;
+}
+
 /* ---- Responsive: phones / tablets ---- */
 @media (max-width: 720px) {
   .tasks-app .sidebar {
@@ -1079,7 +1084,6 @@
    Hidden on desktop; shown at ≤720px. `bottom` set via inline style by
    useKeyboardHeight so it rides just above the software keyboard. */
 .tasks-app .mobile-format-bar {
-  display: none;
   position: fixed;
   left: 0;
   right: 0;
