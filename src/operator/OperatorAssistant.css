@@ -407,6 +407,71 @@
   opacity: 0.9;
 }
 
+/* ---- Voice input: mic button ---- */
+
+.opa-mic-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  overflow: visible;
+}
+.opa-mic-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.opa-mic-btn.recording {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+/* Expanding pulse rings emitted from the mic button while recording */
+@keyframes opaMicPulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.opa-mic-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  animation: opaMicPulse 1.5s ease-out infinite;
+  pointer-events: none;
+}
+.opa-mic-pulse--delay {
+  animation-delay: 0.75s;
+}
+
+/* ---- Voice input: waveform bars ---- */
+
+.opa-waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 32px;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.opa-wave-bar {
+  width: 3px;
+  min-height: 4px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: height 0.06s ease-out;
+}
+
 /* ---- Mobile: sidebar becomes a compact horizontal strip at the top ---- */
 @media (max-width: 720px) {
   .op-assistant {

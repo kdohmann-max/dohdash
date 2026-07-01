@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { MicIcon, MicOffIcon } from "../icons";
+import { useVoiceInput } from "./useVoiceInput";
 import {
   listRemoteProjects,
   listOperatorConversations,
@@ -68,6 +70,10 @@ export function OperatorAssistant() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
+
+  const { voiceState, volumeBands, toggle: toggleVoice, isSupported: voiceSupported } = useVoiceInput(
+    (text) => setInput(text),
+  );
 
   // Initial load: projects + conversations.
   useEffect(() => {
@@ -326,12 +332,52 @@ export function OperatorAssistant() {
                 </option>
               ))}
             </select>
+            {voiceSupported ? (
+              <>
+                <button
+                  className={`opa-mic-btn${voiceState === "recording" ? " recording" : ""}`}
+                  onClick={toggleVoice}
+                  title={voiceState === "recording" ? "Stop recording" : "Speak your task"}
+                  aria-label={voiceState === "recording" ? "Stop recording" : "Start voice input"}
+                >
+                  {voiceState === "recording" ? <MicOffIcon size={16} /> : <MicIcon size={16} />}
+                  {voiceState === "recording" && (
+                    <>
+                      <span className="opa-mic-pulse" aria-hidden="true" />
+                      <span className="opa-mic-pulse opa-mic-pulse--delay" aria-hidden="true" />
+                    </>
+                  )}
+                </button>
+                {voiceState === "recording" && <VoiceWaveform volumeBands={volumeBands} />}
+              </>
+            ) : null}
             <button className="opa-send-btn" disabled={sending || !input.trim()} onClick={() => void send()}>
               {sending ? "Sending…" : "Send"}
             </button>
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+// 5-bar waveform driven by live audio frequency bands (0–1 each).
+// Bar heights are JS-driven during recording; CSS idle animation is applied via class.
+const BAR_SCALES = [0.65, 1.0, 0.8, 0.95, 0.6]; // per-bar amplitude weighting
+
+function VoiceWaveform({ volumeBands }: { volumeBands: number[] }) {
+  return (
+    <div className="opa-waveform" aria-hidden="true">
+      {BAR_SCALES.map((scale, i) => {
+        const h = Math.max(4, volumeBands[i] * scale * 28);
+        return (
+          <span
+            key={i}
+            className="opa-wave-bar"
+            style={{ height: `${h}px` }}
+          />
+        );
+      })}
     </div>
   );
 }

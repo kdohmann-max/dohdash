@@ -204,6 +204,31 @@ export function RemoteClaudeIcon({ size }: { size?: number } = {}) {
   );
 }
 
+export function MicIcon({ size }: { size?: number } = {}) {
+  return (
+    <svg {...svgProps(size)}>
+      <rect x="9" y="2" width="6" height="11" rx="3" />
+      <path d="M19 10a7 7 0 0 1-14 0" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+      <line x1="8" y1="22" x2="16" y2="22" />
+    </svg>
+  );
+}
+
+export function MicOffIcon({ size }: { size?: number } = {}) {
+  return (
+    <svg {...svgProps(size)}>
+      <line x1="2" y1="2" x2="22" y2="22" />
+      <path d="M18.89 13.23A7 7 0 0 0 19 12" />
+      <path d="M5 10a7 7 0 0 0 12.29 4.71" />
+      <path d="M15 9.34V5a3 3 0 0 0-5.94-.6" />
+      <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+      <line x1="8" y1="22" x2="16" y2="22" />
+    </svg>
+  );
+}
+
 export function FractionCalculatorIcon({ size }: { size?: number } = {}) {
   return (
     <svg {...svgProps(size)}>
