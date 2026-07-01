@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dohdash</title>
+
+    <!-- Home Screen / standalone. Launching from the Home Screen icon instead of
+         the Safari tab drops Safari's chrome — and on iOS avoids the keyboard
+         form-navigation accessory bar. The apple-touch-icon href and
+         apple-mobile-web-app-title are overwritten per-tenant at runtime by
+         applyPwaMetadata() (src/company/companyInfo.ts); these are just the
+         Doh Built defaults. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" href="/company-logo.png" />
     <!-- Anti-flash: set the resolved theme before first paint, before the
          module bundle loads. Mirrors the logic in src/theme.ts; the React
          ThemeProvider becomes the source of truth once mounted. -->

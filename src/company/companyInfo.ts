@@ -78,3 +78,25 @@ export function applyCompanyTheme(info: CompanyInfo): void {
   }
   el.textContent = `:root {\n${body}\n}`;
 }
+
+// Points the Home Screen metadata at the active tenant's branding so an installed
+// icon shows the right name and logo (not the Doh Built defaults baked into
+// index.html). iOS reads these apple-* tags — not the Web App Manifest — for the
+// Home Screen icon and title. The static apple-mobile-web-app-capable tag in
+// index.html is what enables standalone launch; this just personalizes it per host.
+export function applyPwaMetadata(info: CompanyInfo): void {
+  // Home Screen icon
+  const icon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+  if (icon && info.logo) icon.href = info.logo;
+
+  // Home Screen app title
+  let title = document.querySelector<HTMLMetaElement>(
+    'meta[name="apple-mobile-web-app-title"]'
+  );
+  if (!title) {
+    title = document.createElement("meta");
+    title.name = "apple-mobile-web-app-title";
+    document.head.appendChild(title);
+  }
+  title.content = info.dashboardName;
+}

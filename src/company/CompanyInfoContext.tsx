@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { applyCompanyTheme, loadCompanyInfo } from "./companyInfo";
+import { applyCompanyTheme, applyPwaMetadata, loadCompanyInfo } from "./companyInfo";
 import { TENANT_NOT_FOUND } from "../storage/db";
 import type { CompanyInfo } from "./types";
 
@@ -37,6 +37,7 @@ export function CompanyInfoProvider({ children }: { children: React.ReactNode })
       .then((info) => {
         if (cancelled) return;
         applyCompanyTheme(info);
+        applyPwaMetadata(info);
         document.title = info.dashboardName;
         setState({ companyInfo: info, loading: false, error: null, notFound: false });
       })
