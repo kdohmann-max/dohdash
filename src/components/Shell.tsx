@@ -76,13 +76,10 @@ export function Shell() {
           </>
         ) : (
           <>
-            <Link to="/dashboard" className="shell-crumb-home" title="Back to launcher">
-              {companyInfo?.logo && (
-                <img src={companyInfo.logo} alt="Logo" className="shell-logo shell-logo--sm" />
-              )}
-              <span className="shell-crumb-brand">{companyInfo?.dashboardName}</span>
+            <Link to="/dashboard" className="shell-back-btn">
+              <span aria-hidden="true">←</span>
+              <span>Back to Launcher</span>
             </Link>
-            <span className="shell-crumb-sep" aria-hidden="true">/</span>
             <span className="shell-crumb-app">{appName}</span>
             <div className="shell-crumb-actions">
               <ThemeToggle />

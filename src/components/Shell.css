@@ -85,36 +85,27 @@
   background: var(--accent-soft);
 }
 
-/* Compact breadcrumb bar shown when inside an app (not on the launcher) */
-.shell-crumb-home {
+/* Back to Launcher button shown when inside an app (not on the launcher) */
+.shell-back-btn {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1.5px solid var(--accent-secondary);
+  border-radius: var(--rounded-md);
+  background: transparent;
+  color: var(--accent-secondary);
   text-decoration: none;
-  color: var(--muted);
-  transition: color 0.15s;
-}
-
-.shell-crumb-home:hover {
-  color: var(--accent);
-}
-
-.shell-logo--sm {
-  height: 20px;
-}
-
-.shell-crumb-brand {
-  font-family: var(--font-display);
-  font-weight: var(--font-weight-display);
-  font-size: 14px;
-  letter-spacing: -0.3px;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
+  font-size: var(--text-sm);
   white-space: nowrap;
+  transition: all 0.15s;
+  cursor: pointer;
 }
 
-.shell-crumb-sep {
-  color: var(--border);
-  font-size: 16px;
-  user-select: none;
+.shell-back-btn:hover {
+  background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
 }
 
 .shell-crumb-app {
@@ -178,8 +169,13 @@
     display: none;
   }
 
-  /* Breadcrumb mode: drop the brand text to save space — logo alone is enough */
-  .shell-crumb-brand {
+  /* Back button: shorten the text on mobile to fit better */
+  .shell-back-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--text-xs);
+  }
+
+  .shell-back-btn span:last-child {
     display: none;
   }
 }
