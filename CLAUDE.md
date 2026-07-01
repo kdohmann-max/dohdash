@@ -107,3 +107,5 @@ agents by name). Two cross-cutting rules that aren't visible in any single file:
 @.claude/context/fraction-calculator.md
 @.claude/context/remote-claude.md
 @.claude/context/time-tracking.md
+@.claude/context/operator-assistant.md
+@.claude/context/operator-journal.md

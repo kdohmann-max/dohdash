@@ -12,6 +12,7 @@ import { getAppDef, isTenantAppEnabled, resolveAppName } from "./apps/registry";
 import { listAppAccessForUser } from "./storage/db";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { OperatorDashboard } from "./operator/OperatorDashboard";
+import { OperatorAssistant } from "./operator/OperatorAssistant";
 import "./App.css";
 
 // AuthGate guarantees "authenticated" before this can mount.
@@ -29,6 +30,15 @@ function OperatorRoute() {
   if (state.status !== "authenticated") return null;
   if (!state.profile.superAdmin) return <Navigate to="/dashboard" replace />;
   return <OperatorDashboard />;
+}
+
+// The operator's in-dashboard coding assistant — super-admin only, same gate as
+// the operator control plane above.
+function OperatorAssistantRoute() {
+  const { state } = useAuth();
+  if (state.status !== "authenticated") return null;
+  if (!state.profile.superAdmin) return <Navigate to="/dashboard" replace />;
+  return <OperatorAssistant />;
 }
 
 // Coarse "open-this-app" gate (app_access). RLS still protects data, but this
@@ -109,6 +119,7 @@ function AppInner() {
             <Route index element={<Launcher />} />
             <Route path="admin" element={<AdminRoute />} />
             <Route path="operator" element={<OperatorRoute />} />
+            <Route path="operator/assistant" element={<OperatorAssistantRoute />} />
             <Route path="app/:appId" element={<AppRoute />} />
           </Route>
         </Route>

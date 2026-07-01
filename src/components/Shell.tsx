@@ -15,8 +15,9 @@ export function Shell() {
   const appMatch = useMatch("/dashboard/app/:appId");
   const adminMatch = useMatch("/dashboard/admin");
   const operatorMatch = useMatch("/dashboard/operator");
+  const operatorAssistantMatch = useMatch("/dashboard/operator/assistant");
 
-  const isLauncher = !appMatch && !adminMatch && !operatorMatch;
+  const isLauncher = !appMatch && !adminMatch && !operatorMatch && !operatorAssistantMatch;
 
   let appName: string | null = null;
   if (appMatch?.params.appId) {
@@ -24,6 +25,8 @@ export function Shell() {
     appName = appDef ? resolveAppName(appDef, companyInfo ?? null) : appMatch.params.appId;
   } else if (adminMatch) {
     appName = "Admin";
+  } else if (operatorAssistantMatch) {
+    appName = "Assistant";
   } else if (operatorMatch) {
     appName = "Operator";
   }
@@ -55,6 +58,11 @@ export function Shell() {
               {profile.superAdmin ? (
                 <NavLink to="/dashboard/operator" className={navLinkClass}>
                   Operator
+                </NavLink>
+              ) : null}
+              {profile.superAdmin ? (
+                <NavLink to="/dashboard/operator/assistant" className={navLinkClass}>
+                  Assistant
                 </NavLink>
               ) : null}
             </nav>
