@@ -947,7 +947,8 @@
   }
 
   .tasks-app .editor-surface {
-    padding: 16px 12px 80px;
+    /* Extra padding-bottom = format bar height (~52px) + original room (80px) */
+    padding: 16px 12px 140px;
   }
 
   /* Ribbons stay one short row and scroll sideways (swipe) instead of
@@ -960,6 +961,31 @@
   .tasks-app .archive-btn {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Show the keyboard-docked format bar */
+  .tasks-app .mobile-format-bar {
+    display: flex;
+  }
+
+  /* Slim ribbon-1 to meta-only: hide formatting controls that moved to the
+     bottom bar (heading select, list select, TAG, image, comment, archive,
+     share). Keeps: menu btn, presence, spacer, save-status, comments toggle,
+     print, export, mode-toggle. */
+  .tasks-app .ribbon-1 .ribbon-sep,
+  .tasks-app .ribbon-1 .control,
+  .tasks-app .ribbon-1 .f-button,
+  .tasks-app .ribbon-1 .image-btn,
+  .tasks-app .ribbon-1 .archive-btn,
+  .tasks-app .ribbon-1 .toolbar-btn {
+    display: none;
+  }
+
+  /* Hide Toolbar's ribbon-3 format palette on mobile — the bottom bar renders
+     its own inline palette above itself; only the user-picker panel from
+     Toolbar.tsx is still needed on mobile. */
+  .tasks-app .ribbon-2.ribbon-3 {
+    display: none;
   }
 }
 
@@ -1047,3 +1073,125 @@
 .tasks-app .doc-perm-badge--comment { background: var(--bg-alt); color: var(--muted); }
 
 .tasks-app .folder-shared-icon { margin-left: 4px; opacity: 0.5; vertical-align: middle; }
+
+/* ---- Mobile format bar (keyboard-docked, Obsidian-style) ---- */
+/* Column container: palette row (optional) stacks above main row.
+   Hidden on desktop; shown at ≤720px. `bottom` set via inline style by
+   useKeyboardHeight so it rides just above the software keyboard. */
+.tasks-app .mobile-format-bar {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 40; /* below sidebar (50) and backdrop (49) */
+  flex-direction: column;
+  transition: bottom 0.18s ease-out;
+}
+
+/* Palette: format-selector buttons (P1/P2/P3/Comment/TAG-with-user + Clear).
+   Appears above the main bar when TAG is active. */
+.tasks-app .mfb-palette {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.tasks-app .mfb-palette-btn {
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--muted);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  min-height: 36px;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+
+.tasks-app .mfb-palette-btn:active,
+.tasks-app .mfb-palette-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tasks-app .mfb-palette-clear {
+  border-style: dashed;
+}
+
+/* Main bar: always-visible formatting row. */
+.tasks-app .mfb-main {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  /* Upward equivalent of --shadow-sm — same rgba formula, negative Y offset. */
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  padding-bottom: calc(var(--spacing-xs) + env(safe-area-inset-bottom, 0px));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tasks-app .mfb-main::-webkit-scrollbar { display: none; }
+
+.tasks-app .mfb-btn {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  padding: 0 var(--spacing-sm);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+
+.tasks-app .mfb-btn:active,
+.tasks-app .mfb-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Bold label */
+.tasks-app .mfb-btn strong {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-md);
+  font-style: normal;
+}
+
+/* Italic label */
+.tasks-app .mfb-btn em {
+  font-style: italic;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+}
+
+/* Heading cycle button */
+.tasks-app .mfb-heading {
+  font-weight: 600;
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+}
+
+.tasks-app .mfb-sep {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 2px;
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
 import type { Dispatch, SetStateAction } from "react";
 import {
@@ -7,13 +7,20 @@ import {
 } from "../data/formattingSelectors";
 import { listProfiles, type Profile } from "../../../storage/db";
 
+export interface ToolbarHandle {
+  openUserPicker: () => void;
+}
+
 interface Props {
   editor: Editor | null;
   showFormat: boolean;
   setShowFormat: Dispatch<SetStateAction<boolean>>;
 }
 
-export function Toolbar({ editor, showFormat, setShowFormat }: Props) {
+export const Toolbar = forwardRef<ToolbarHandle, Props>(function Toolbar(
+  { editor, showFormat, setShowFormat },
+  ref
+) {
   const [userPickerOpen, setUserPickerOpen] = useState(false);
   const [people, setPeople] = useState<Profile[]>([]);
   const [userFilter, setUserFilter] = useState("");
@@ -26,19 +33,7 @@ export function Toolbar({ editor, showFormat, setShowFormat }: Props) {
     }
   }, [userPickerOpen, people.length]);
 
-  if (!editor) return null;
-  if (!showFormat && !userPickerOpen) return null;
-
-  function applySelector(sel: FormattingSelector) {
-    if (!editor) return;
-    if (sel.kind === "user") {
-      openUserPicker();
-      return;
-    }
-    editor.chain().focus().toggleFormatSelector(sel.id).run();
-    setShowFormat(false);
-  }
-
+  // Defined before early returns so useImperativeHandle can reference it.
   function openUserPicker() {
     if (!editor) return;
     const { from, to } = editor.state.selection;
@@ -50,6 +45,21 @@ export function Toolbar({ editor, showFormat, setShowFormat }: Props) {
     setSelectedUsers(new Set());
     setUserFilter("");
     setUserPickerOpen(true);
+  }
+
+  useImperativeHandle(ref, () => ({ openUserPicker }), [editor]);
+
+  if (!editor) return null;
+  if (!showFormat && !userPickerOpen) return null;
+
+  function applySelector(sel: FormattingSelector) {
+    if (!editor) return;
+    if (sel.kind === "user") {
+      openUserPicker();
+      return;
+    }
+    editor.chain().focus().toggleFormatSelector(sel.id).run();
+    setShowFormat(false);
   }
 
   function toggleUser(id: string) {
@@ -152,4 +162,4 @@ export function Toolbar({ editor, showFormat, setShowFormat }: Props) {
       )}
     </div>
   );
-}
+});

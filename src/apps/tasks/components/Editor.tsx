@@ -2,13 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor as TiptapEditor } from "@tiptap/react";
 import { buildExtensions } from "../editor/extensions";
 import { RESOLVED_META } from "../editor/CommentMark";
-import { Toolbar } from "./Toolbar";
+import { Toolbar, type ToolbarHandle } from "./Toolbar";
 import { CommentsPanel, type ThreadView } from "./CommentsPanel";
 import { SharePanel } from "./SharePanel";
 import { PresenceBar } from "./PresenceBar";
 import { exportPdf, copyRichText } from "../share";
 import { CommentIcon } from "../../../icons";
 import { archiveDone } from "../editor/archive";
+import { MobileFormatBar } from "./MobileFormatBar";
+import { useKeyboardHeight } from "../hooks/useKeyboardHeight";
 import { uploadImage } from "../../../storage/db";
 import { useAuth } from "../../../auth/AuthContext";
 import {
@@ -111,6 +113,8 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
   const [sharePanelOpen, setSharePanelOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [showFormat, setShowFormat] = useState(false);
+  const keyboardHeight = useKeyboardHeight();
+  const toolbarRef = useRef<ToolbarHandle>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   // Always call the latest onChange (TasksApp recreates it as `active`
@@ -640,6 +644,7 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
       ) : (
         <>
           <Toolbar
+            ref={toolbarRef}
             editor={editor}
             showFormat={showFormat}
             setShowFormat={setShowFormat}
@@ -678,6 +683,18 @@ export function Editor({ note, onChange, onRemoteUpdate, onOpenSidebar }: Props)
               />
             )}
           </div>
+          <MobileFormatBar
+            editor={editor}
+            keyboardHeight={keyboardHeight}
+            showFormat={showFormat}
+            setShowFormat={setShowFormat}
+            fileInputRef={fileInput}
+            onAddComment={handleAddComment}
+            onShare={() => setSharePanelOpen(true)}
+            onTagWithUser={() => toolbarRef.current?.openUserPicker()}
+            isOwner={isOwner}
+            isCommentOnly={isCommentOnly}
+          />
         </>
       )}
     </div>
