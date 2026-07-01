@@ -1089,7 +1089,6 @@
   right: 0;
   z-index: 40; /* below sidebar (50) and backdrop (49) */
   flex-direction: column;
-  transition: bottom 0.18s ease-out;
 }
 
 /* Palette: format-selector buttons (P1/P2/P3/Comment/TAG-with-user + Clear).

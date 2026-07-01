@@ -11,7 +11,10 @@ export function useKeyboardHeight(): number {
     if (!vv) return;
 
     function update() {
-      setKh(Math.max(0, window.innerHeight - vv!.height - vv!.offsetTop));
+      // Don't subtract offsetTop — it varies with scroll and causes the bar to
+      // jump while the user scrolls. window.innerHeight is stable; vv.height
+      // shrinks only when the keyboard is actually open.
+      setKh(Math.max(0, window.innerHeight - vv!.height));
     }
 
     vv.addEventListener("resize", update);
