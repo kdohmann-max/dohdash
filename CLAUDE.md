@@ -7,6 +7,18 @@ When things change relevant to claude context reccomend updating the claude.md w
 - **Strict Context Limitation:** Do not execute global repository searches (`grep`, `find`) or read files outside the explicitly targeted paths unless absolutely critical to resolve a compilation dependency.
 - **Console Output Discipline:** When running build or test terminal commands, only output lines containing errors or warnings. Suppress verbose success logs.
 
+## Model selection
+
+**Proactively recommend a model switch at the start of your response when the task clearly fits.** One sentence, e.g. "This is a good candidate for Opus — complex RLS + multi-file refactor." or "Haiku would handle this fine and save tokens." Don't recommend switching for ambiguous tasks; only flag clear fits.
+
+| Switch to… | When the task is… |
+|---|---|
+| **Opus 4.8** (`claude-opus-4-8`) | New DB schema + RLS design; multi-file architectural refactor (5+ interdependent files); auth/tenancy correctness reasoning; debugging non-deterministic/race-condition bugs; any task where a wrong answer causes data loss or a security hole |
+| **Haiku 4.5** (`claude-haiku-4-5-20251001`) | Generating boilerplate from an established pattern; large read-only research sessions |
+| **Sonnet 4.6** (stay) | Everything else — everyday feature work, adding a field, writing a storage function, standard 1–3 file bug fixes |
+
+To switch mid-conversation: type `/model claude-opus-4-8` (or the target model id) in the chat. Context carries over.
+
 ## Project overview
 
 DohDash is a "company OS" dashboard: employees sign in (Google OAuth via Supabase Auth) to a launcher of company apps, gated by admin-controlled per-app permissions. Also serves a public landing page. **Portable to another company** by swapping `public/CompanyInfo.md` (+ logo + Supabase credentials) — no source edits, no rebuild.
