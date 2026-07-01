@@ -18,11 +18,17 @@ decision per entry, newest at the top, with the date and the *why*, not just the
 
 ## Decisions
 
-### 2026-06-30 — Operator coding assistant, first slice
-- Built as an evolution of Remote Claude, not a new agent: the local `agent.js`
-  gained a headless run loop that drives the `claude` CLI (`-p --output-format
-  stream-json`, `--permission-mode acceptEdits`) so it can edit files but cannot
-  push — only the agent commits/pushes, and only on operator approval.
+### 2026-06-30 — Operator coding assistant, first slice (shipped)
+- Built as an evolution of Remote Claude: `agent.js` gained a headless run loop driving
+  the `claude` CLI (`-p --output-format stream-json`, `--permission-mode bypassPermissions`)
+  so the subprocess has full bash for build/test verification.
+- **Safety model (three layers):** (1) git shim in a temp dir prepended to subprocess PATH
+  blocks `push`/`commit`/`clean`/`reset --hard`/`checkout --` at process level; (2) `OP_GUARDRAILS`
+  system prompt explicitly instructs Claude not to run git; (3) `deployOperatorRun` recomputes
+  `git diff --cached` and verifies it matches `run.diff` before committing. Human approval is
+  the fourth gate. Nothing deploys without a click.
+- Array-form `spawn` (`shell: false`) avoids all Windows cmd.exe quoting issues; commit
+  message written to a temp file (`git commit -F`) for the same reason.
 - Data lives in super-admin-gated tables (`operator_conversations`/`_runs`/`_messages`,
   migration 0025), no `tenant_id` — zero tenant crossover.
 - Model default `claude-opus-4-8` at `high` effort; `claude-fable-5` available as

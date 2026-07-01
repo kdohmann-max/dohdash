@@ -406,3 +406,113 @@
 .opa-send-btn:not(:disabled):hover {
   opacity: 0.9;
 }
+
+/* ---- Mobile: sidebar becomes a compact horizontal strip at the top ---- */
+@media (max-width: 720px) {
+  .op-assistant {
+    flex-direction: column;
+  }
+
+  /* Flip the sidebar from a vertical column to a horizontal strip */
+  .opa-sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-shrink: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .opa-sidebar-head {
+    flex-direction: row;
+    flex-shrink: 0;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    padding: var(--spacing-sm);
+    gap: var(--spacing-xs);
+    align-items: center;
+  }
+
+  /* Title text takes too much horizontal space; the "New" button is enough */
+  .opa-sidebar-title {
+    display: none;
+  }
+
+  .opa-back {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+
+  /* Conversations scroll horizontally */
+  .opa-conv-list {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  .opa-conv-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .opa-conv-empty {
+    white-space: nowrap;
+    font-size: var(--text-xs);
+    padding: var(--spacing-xs) 0;
+  }
+
+  .opa-conv-item {
+    flex-shrink: 0;
+    min-width: 90px;
+    max-width: 130px;
+    gap: 1px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .opa-conv-title {
+    font-size: var(--text-xs);
+  }
+
+  .opa-conv-project {
+    font-size: 0.6rem;
+  }
+
+  /* Compact main area */
+  .opa-main-head {
+    padding: var(--spacing-sm) var(--spacing-md);
+    flex-wrap: wrap;
+  }
+
+  .opa-transcript {
+    padding: var(--spacing-md);
+  }
+
+  .opa-msg {
+    max-width: 95%;
+  }
+
+  .opa-composer {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  /* Wrap model + effort selects so they don't squeeze the Send button */
+  .opa-composer-controls {
+    flex-wrap: wrap;
+  }
+
+  .opa-mini-select {
+    flex: 1;
+    min-width: 0;
+  }
+}

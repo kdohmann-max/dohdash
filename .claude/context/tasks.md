@@ -19,6 +19,16 @@ App id `tasks`; displayed as "DohDocs" via `CompanyInfo.md` `appNames`.
 - **Auto-save: 400 ms debounce per keystroke** → `saveDoc()`. No manual save button.
 - **Save-state indicator** (`saveStatus: "idle"|"saving"|"saved"|"error"`): shown in the `.view-toggle` bar ("Saving…" → "Saved" → "Offline — will retry"). On failure, the latest markdown is stashed to `localStorage` key `dohdash-doc-backup:<docId>` (`{markdown, updatedAt}`) and retried with exponential backoff (1s→30s cap); `pendingMarkdownRef` guards stale retries. On open, a backup newer than the server `updatedAt` is restored and re-flushed; otherwise dropped.
 - Images: base64 data URLs, no Storage bucket — `uploadImage()` in `db.ts` just encodes.
+- Holds a `toolbarRef: RefObject<ToolbarHandle>` passed to `<Toolbar ref={toolbarRef}>` so `MobileFormatBar` can trigger the user-picker imperatively via `toolbarRef.current?.openUserPicker()`.
+
+## Mobile format bar (Obsidian-style keyboard-docked toolbar)
+
+Phones only (`@media (max-width: 720px)`). Pins a formatting bar just above the software keyboard so formatting is always at thumb reach without scrolling back to the ribbon.
+
+- **`src/apps/tasks/components/MobileFormatBar.tsx`** — fixed bottom bar with two rows: an optional `mfb-palette` (TAG format selectors, P1/P2/P3/Comment/TAG-with-user/Clear — appears above when TAG is active) and an always-visible `mfb-main` (B / I / heading-cycle / • / 1. / ☐ / TAG / image / comment / Archive / Share). All buttons use `onPointerDown + e.preventDefault()` to prevent editor blur. Hidden (returns null) when `isCommentOnly`. Share button only rendered for owners.
+- **`src/apps/tasks/hooks/useKeyboardHeight.ts`** — measures software keyboard height via `window.visualViewport`. Formula: `Math.max(0, window.innerHeight - vv.height)` — does NOT subtract `vv.offsetTop` (that changes during scroll and causes jumping). Returns 0 when keyboard is hidden. The hook result is passed as `keyboardHeight` to `MobileFormatBar`, which sets it as an inline `bottom` style on the fixed container.
+- **Toolbar is `forwardRef<ToolbarHandle>`** — exposes `{ openUserPicker() }` via `useImperativeHandle` so `MobileFormatBar`'s "TAG with user" button can open the desktop user-picker panel without duplicating that state. `openUserPicker` is defined before early returns so the handle is always registered.
+- **Desktop unchanged** — all mobile-specific styles are inside the `@media (max-width: 720px)` block; `ribbon-1` formatting controls are hidden on mobile (moved to the bottom bar); `ribbon-2.ribbon-3` TAG palette is hidden on mobile (the bottom bar renders its own inline palette).
 
 ## Custom TipTap extensions
 
@@ -88,3 +98,4 @@ Share functions: `listNoteShares(noteId)`, `addNoteShare(...)`, `updateNoteShare
 - **`as unknown as NoteRow[]` cast in `listDocs`**: Supabase's join return type doesn't match the manually typed `NoteRow` with nested `owner` profile — the cast is intentional (same pattern as `listDocComments`).
 - **Share grantee name resolution**: PostgREST can't FK-join polymorphic `grantee_id` (references either profiles or groups). `SharePanel` and `FolderShareModal` load `listProfiles()` + `listGroups()` on mount; the roster rows already carry display names, and existing shares are matched by `granteeId` against that combined list.
 - **`searchShareTargets` is currently unused by the UI** — the share components moved to a full checkbox roster, so the type-ahead search RPC has no caller. Kept in `db.ts` as a reusable export.
+- **Mobile format bar `bottom` formula** — uses `window.innerHeight - vv.height`, NOT `- vv.offsetTop`. `offsetTop` changes during scroll (iOS scrolls the visual viewport independently) and causes the bar to jump. No CSS `transition: bottom` either — it caused the bar to lag behind the keyboard and appear hidden.

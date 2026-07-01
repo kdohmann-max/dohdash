@@ -141,3 +141,45 @@
   overflow: auto;
   padding: 0;
 }
+
+/* ---- Mobile: launcher header wraps to two rows ---- */
+@media (max-width: 640px) {
+  .shell-header {
+    flex-wrap: wrap;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+
+  .shell-brand {
+    font-size: 16px;
+    flex: 1;
+  }
+
+  /* Hide the display name — keep theme toggle + sign-out compact */
+  .shell-user-name {
+    display: none;
+  }
+
+  /* Nav moves to its own row and scrolls horizontally like the format ribbon */
+  .shell-nav {
+    order: 3;
+    width: 100%;
+    flex: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    gap: var(--spacing-xs);
+    padding-bottom: 2px;
+    border-top: 1px solid var(--border);
+    padding-top: var(--spacing-xs);
+  }
+  .shell-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Breadcrumb mode: drop the brand text to save space — logo alone is enough */
+  .shell-crumb-brand {
+    display: none;
+  }
+}

@@ -36,6 +36,7 @@ Apps (`APP_REGISTRY`, `src/apps/registry.tsx`): Job Files, Tasks (a.k.a. DohDocs
 - **Plain language, short labels.** Avoid jargon ("provision", "RLS", "grantee"). Say what the button does.
 - **Forgiving + obvious state.** Confirm destructive actions, show what's selected/checked, and make the next step clear. Empty states should say what to do, not just "nothing here".
 - **Sensible defaults.** Pre-fill and pre-select the common choice so the happy path is one or two clicks.
+- **Mobile layout required.** DohDash is used heavily on phones. Every new app and feature MUST include `@media (max-width: 720px)` breakpoints in its co-located CSS. Fixed-width two-column layouts (sidebar + content) must stack to single-column on mobile. Horizontal scrolling (like the shell nav or format ribbon) is acceptable for navigation strips; content areas must be full-width. Not adding mobile CSS is a bug, not a "later" task.
 
 When a flow feels like it needs a tutorial, redesign it. If unsure whether something is friendly enough, assume the user has never used a similar app. Visual/token rules live in `styleguide.md`; this section is about interaction design.
 
@@ -107,5 +108,6 @@ agents by name). Two cross-cutting rules that aren't visible in any single file:
 @.claude/context/fraction-calculator.md
 @.claude/context/remote-claude.md
 @.claude/context/time-tracking.md
+@.claude/context/personal-assistant.md
 @.claude/context/operator-assistant.md
 @.claude/context/operator-journal.md

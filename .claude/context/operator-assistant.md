@@ -66,16 +66,18 @@ Key functions:
 | `opMessage(run, kind, content)` | Inserts into `operator_messages` (service role) |
 | `opRunUpdate(runId, patch)` | Updates `operator_runs` (service role) |
 | `handleClaudeEvent(run, evt)` | Forwards `assistant`-type stream events to DB transcript |
-| `runClaudeHeadless(run, projectPath)` | Spawns `claude -p --output-format stream-json --verbose --model <m> --effort <e> --permission-mode acceptEdits --append-system-prompt <guardrails>`, writes prompt to stdin, parses NDJSON |
+| `runClaudeHeadless(run, projectPath)` | Creates a git shim dir, spawns `claude -p --output-format stream-json --verbose --model <m> --effort <e> --permission-mode bypassPermissions --append-system-prompt <guardrails>` (array-form, `shell:false`), writes prompt to stdin, parses NDJSON, cleans up shim on exit |
 | `startOperatorRun(run)` | Pre-flight: requires clean `git status --porcelain`; runs headless Claude; captures `git diff --cached`; → `awaiting_approval` |
 | `deployOperatorRun(run)` | On approval: `git add -A`, `git commit`, `git push` |
 | `discardOperatorRun(run)` | `git reset --hard HEAD` + `git clean -fd` |
 | `pollOperatorRuns()` | Queries `status in ('pending','approved','discarded')` every 4s |
 
-**Safety model:** `--permission-mode acceptEdits` means the Claude subprocess can edit
-files but **cannot run shell/git commands**. Only `agent.js` code calls git, and only
-on the `approved` status transition. The agent also requires a clean working tree before
-starting any run — dirty tree → `error` status, no work done.
+**Safety model (three layers):**
+1. **`bypassPermissions`** — Claude subprocess has full bash access (needed for `npm run build`, `tsc`, tests).
+2. **Git shim** (`createGitShim()`) — temp dir prepended to subprocess PATH; Node.js shim blocks `push`, `commit`, `clean`, `reset --hard`, `checkout --`; passes safe commands to real `git.exe`. Cleaned up after each run.
+3. **Staged diff verification** — `deployOperatorRun` recomputes `git diff --cached` and compares to `run.diff` before committing; aborts on mismatch.
+
+Operator approval is the fourth gate — the human reviews the diff before git ever runs. Agent also requires a clean working tree before starting — dirty tree → `error` status, no work done.
 
 ## UI — `src/operator/OperatorAssistant.tsx`
 
@@ -109,9 +111,7 @@ goals or constraints you want the agent to always know.
 
 - **Clean tree required.** The agent checks `git status --porcelain` before starting.
   Any uncommitted changes → `error` status. Commit or stash first.
-- **`acceptEdits` only.** The headless Claude subprocess cannot run bash, git, or any
-  shell command. It can only read and edit files. If a task needs `npm install` or a DB
-  migration, do it yourself before/after approving.
+- **`bypassPermissions` + git shim.** Claude subprocess has full bash (can run `npm run build`, `tsc`, tests). Git commands are blocked at process level by a Node.js shim injected into the subprocess PATH — not by Claude's permission mode. If a task needs `npm install` or a DB migration, the subprocess can run it; if it needs a new Supabase migration applied, do that yourself before/after approving.
 - **stream-json event shape unverified at runtime.** Parsed defensively (guard on
   `type === 'assistant'`, content block types), but the exact Claude CLI output format
   should be confirmed on the first real run and corrected if needed.
