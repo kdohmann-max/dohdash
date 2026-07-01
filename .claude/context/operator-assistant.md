@@ -88,15 +88,19 @@ same pattern as DohDocs, not flow-scroll).
 - **Header**: project name, online dot (green if `remote_projects.last_seen` < 10min), run status badge, agent-offline warning banner.
 - **Transcript**: per-kind CSS classes (`--user` right-aligned blue, `--assistant` left-aligned card, `--tool` mono muted, `--status` centered italic, `--error` red). Auto-scrolls on new messages.
 - **Review panel** (appears when `run.status === 'awaiting_approval'`): summary text, `DiffView` sub-component (add/del/hunk/meta line classes), **Approve & deploy** (accent primary) + **Discard** (error outline). Warning note: "Approving commits and pushes — this deploys live to Vercel."
-- **Composer**: project `<select>` (new conversations only), `<textarea>` (Cmd+Enter submits), model select, effort select, Send button.
+- **Composer**: project `<select>` (new conversations only), `<textarea>` (Cmd+Enter submits), model select, effort select, mic button, Send button.
+- **Voice input** (`src/operator/useVoiceInput.ts`): mic toggle uses browser `SpeechRecognition` (Chrome/Edge only — hidden on unsupported browsers). Interim transcript updates the textarea live; final phrases accumulate. `AudioContext` + `AnalyserNode` (`fftSize=64`) samples 5 speech-frequency bands via `requestAnimationFrame` for the live waveform. Chrome imposes a ~60s hard limit on `continuous` mode — `rec.onend` handles the auto-stop cleanly. Starting a new voice session resets `finalTranscriptRef`, so manual textarea edits made before hitting mic will be overwritten by the new voice transcript.
+- **Recording feedback**: expanding CSS pulse rings on the mic button (`opa-mic-pulse` / `--delay` at 0s / 0.75s) + a 5-bar `VoiceWaveform` component with per-bar amplitude weighting (`[0.65, 1.0, 0.8, 0.95, 0.6]`), JS-driven heights (`transition: height 0.06s ease-out`), visible only while recording.
 - `upsertById<T>()` helper merges Realtime events into sorted lists.
 
 ## Models & effort
 
 | Model | When |
 |---|---|
-| `claude-opus-4-8` (default) | Standard work — `high` effort |
-| `claude-fable-5` | Opt-in hard mode — 2× cost, max reasoning |
+| `claude-sonnet-4-6` (default) | Standard work — `high` effort |
+| `claude-opus-4-8` | Heavier tasks |
+| `claude-haiku-4-5-20251001` | Fast/cheap tasks |
+| `claude-fable-5` | Opt-in hard mode — max reasoning |
 
 Effort options: `low` / `medium` / `high` / `xhigh` / `max`
 
